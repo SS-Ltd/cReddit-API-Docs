@@ -1058,6 +1058,14 @@ paths:
         explode: false
         schema:
           type: string
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: false
+        schema:
+          type: string
+          example: new
       responses:
         "200":
           description: list of posts sorted by HOT method
@@ -1130,121 +1138,13 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/{subreddit}/new:
-    get:
-      tags:
-      - subreddit
-      summary: Check if username is available
-      description: Retrieve the post in this subreddit "NEW".
-      operationId: getSubredditPosts(NEW)
-      parameters:
-      - name: subreddit
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: list of posts sorted by NEW method
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Feed'
-        "401":
-          description: No such subreddit is found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Subreddit
-  /subreddit/{subreddit}/top:
-    get:
-      tags:
-      - subreddit
-      summary: Check if username is available
-      description: Retrieve the post in this subreddit "TOP".
-      operationId: getSubredditPosts(TOP)
-      parameters:
-      - name: subreddit
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: list of posts sorted by TOP method
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Feed'
-        "401":
-          description: No such subreddit is found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Subreddit
-  /subreddit/{subreddit}/rising:
-    get:
-      tags:
-      - subreddit
-      summary: Check if username is available
-      description: Retrieve the post in this subreddit "RISING".
-      operationId: getSubredditPosts(RISING)
-      parameters:
-      - name: subreddit
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: list of posts sorted by RISING method
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Feed'
-        "401":
-          description: No such subreddit is found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Subreddit
-  /subreddit/{subreddit}/hot:
-    get:
-      tags:
-      - subreddit
-      summary: Check if username is available
-      description: Retrieve the post in this subreddit "HOT".
-      operationId: getSubredditPosts(HOT)
-      parameters:
-      - name: subreddit
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: list of posts sorted by RISING method
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Feed'
-        "401":
-          description: No such subreddit is found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Subreddit
   /subreddit/about/edited/{subreddit}:
     get:
       tags:
       - subreddit
       summary: Retrieve edited posts for a subreddit
       description: Retrieve the post in this subreddit "HOT".
-      operationId: getEditedPosts(subreddit)
+      operationId: getEditedPosts
       parameters:
       - name: subreddit
         in: path
@@ -1271,7 +1171,7 @@ paths:
       - subreddit
       summary: Retrieve subreddits that user is a moderator
       description: Retrieve subreddits that user is a moderator
-      operationId: getSubredditMod()
+      operationId: getSubredditMod
       responses:
         "200":
           description: list of subreddits
@@ -1292,7 +1192,7 @@ paths:
       - subreddit
       summary: Retrieve banned users
       description: Retrieve banned users
-      operationId: getBanned(subreddit)
+      operationId: getBanned
       parameters:
       - name: subreddit
         in: path
@@ -1322,7 +1222,7 @@ paths:
       - subreddit
       summary: Retrieve muted users
       description: Retrieve muted users
-      operationId: getMuted(subreddit)
+      operationId: getMuted
       parameters:
       - name: subreddit
         in: path
@@ -1352,7 +1252,7 @@ paths:
       - subreddit
       summary: Retrieve moderator users
       description: Retrieve moderator users
-      operationId: getModerators(subreddit)
+      operationId: getModerators
       parameters:
       - name: subreddit
         in: path
@@ -1382,7 +1282,7 @@ paths:
       - subreddit
       summary: Retrieve reported posts
       description: Retrieve reported posts
-      operationId: getReportedPosts(subreddit)
+      operationId: getReportedPosts
       parameters:
       - name: subreddit
         in: path
@@ -1409,7 +1309,7 @@ paths:
       - subreddit
       summary: Retrieve spam posts
       description: Retrieve spam posts
-      operationId: getSpammedPosts(subreddit)
+      operationId: getSpammedPosts
       parameters:
       - name: subreddit
         in: path
@@ -1436,7 +1336,7 @@ paths:
       - subreddit
       summary: Retrieve modqueue posts
       description: Retrieve modqueue posts
-      operationId: getModQueuePosts(subreddit)
+      operationId: getModQueuePosts
       parameters:
       - name: subreddit
         in: path
@@ -1463,7 +1363,7 @@ paths:
       - subreddit
       summary: Retrieve unmoderated posts
       description: Retrieve unmoderated posts
-      operationId: getUnmoderatedPosts(subreddit)
+      operationId: getUnmoderatedPosts
       parameters:
       - name: subreddit
         in: path
@@ -1490,7 +1390,7 @@ paths:
       - notification
       summary: Get all notifications for a user
       description: Get all notifications for a user
-      operationId: getAllNotifications(HOT)
+      operationId: getAllNotifications
       responses:
         "200":
           description: list of all notifications
@@ -1507,7 +1407,7 @@ paths:
       - notification
       summary: Mark all notifications as read
       description: Mark all notifications as read
-      operationId: markAllNotificationsAsRead(HOT)
+      operationId: markAllNotificationsAsRead
       responses:
         "200":
           description: All notifications marked as read successfully
@@ -1524,7 +1424,7 @@ paths:
       - notification
       summary: Get 5 recent notifications
       description: Get 5 recent notifications
-      operationId: getRecentNotifications(HOT)
+      operationId: getRecentNotifications
       responses:
         "200":
           description: Recent notifications
@@ -1540,7 +1440,7 @@ paths:
       - notification
       summary: Create notification
       description: Create notification
-      operationId: createNotification(HOT)
+      operationId: createNotification
       requestBody:
         description: Follow resource
         content:
@@ -1753,13 +1653,22 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Message
-  /mod/approve-post:
+  /mod/approve-post/{postId}:
     patch:
       tags:
       - mod
       summary: Approve a post
       description: Approve a post.
-      operationId: approvePost(postId)
+      operationId: approvePost
+      parameters:
+      - name: postId
+        in: path
+        description: ID of the post to be approved
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
       requestBody:
         description: Approve post object
         content:
@@ -1777,13 +1686,22 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Mod
-  /mod/invite:
+  /mod/invite/{subredditId}:
     post:
       tags:
       - mod
       summary: invite a moderator
       description: invite a moderator
-      operationId: inviteMod(postId)
+      operationId: inviteMod
+      parameters:
+      - name: subredditId
+        in: path
+        description: ID of the subreddit to be moderated
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
       requestBody:
         description: Add moderator object
         content:
@@ -1808,7 +1726,7 @@ paths:
       - mod
       summary: Accept moderation invite
       description: Accept moderation invite
-      operationId: acceptModInvite(postId)
+      operationId: acceptModInvite
       requestBody:
         description: Accept moderator object
         content:
@@ -1826,21 +1744,13 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Mod
-  /mod/reject-invite/{communityId}:
+  /mod/reject-invite:
     delete:
       tags:
       - mod
       summary: reject moderation invite
       description: reject moderation invite
-      operationId: rejectModInvite(postId)
-      parameters:
-      - name: communityId
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+      operationId: rejectModInvite
       responses:
         "200":
           description: Mod invite rejected successfully
@@ -1851,15 +1761,15 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Mod
-  /mod/leave/{communityId}:
+  /mod/leave/{subredditId}:
     delete:
       tags:
       - mod
       summary: Leave community moderation
       description: Leave community moderation
-      operationId: leaveCommunityMod(communityID)
+      operationId: leaveCommunityMod
       parameters:
-      - name: communityId
+      - name: subredditId
         in: path
         required: true
         style: simple
@@ -1876,13 +1786,22 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Mod
-  /mod/mute:
+  /mod/mute/{subredditId}:
     patch:
       tags:
       - mod
       summary: mute user in community
       description: mute user in community
-      operationId: muteUser(communityID)
+      operationId: muteUser
+      parameters:
+      - name: subredditId
+        in: path
+        description: ID of the subreddit which the user should be muted
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
       requestBody:
         description: community & user to be muted
         content:
@@ -1901,13 +1820,22 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Mod
-  /mod/unmute:
+  /mod/unmute/{subredditId}:
     patch:
       tags:
       - mod
       summary: unmute user in community
       description: unmute user in community
-      operationId: unmuteUser(communityID)
+      operationId: unmuteUser
+      parameters:
+      - name: subredditId
+        in: path
+        description: ID of the subreddit which the user should be unmuted
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
       requestBody:
         description: community & user to be unmuted
         content:
@@ -1932,7 +1860,7 @@ paths:
       - chat
       summary: create chat group
       description: create chat group
-      operationId: createGroup(userIDs)
+      operationId: createGroup
       requestBody:
         description: name & invited users
         content:
@@ -1960,7 +1888,7 @@ paths:
       - chat
       summary: invite users to chat group
       description: invite users to chat group
-      operationId: "inviteUsers(userIDs, groupID)"
+      operationId: inviteUsers
       requestBody:
         description: invite users
         content:
@@ -1988,7 +1916,7 @@ paths:
       - chat
       summary: leave chat group
       description: leave chat group
-      operationId: leaveGroup(groupID)
+      operationId: leaveGroup
       requestBody:
         description: group to exit
         content:

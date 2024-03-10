@@ -7,7 +7,7 @@
  *
  * no response value expected for this operation
  **/
-exports.createGroup(userIDs) = function() {
+exports.createGroup = function() {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -20,7 +20,7 @@ exports.createGroup(userIDs) = function() {
  *
  * no response value expected for this operation
  **/
-exports.inviteUsers(userIDs, groupID) = function() {
+exports.inviteUsers = function() {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -33,7 +33,7 @@ exports.inviteUsers(userIDs, groupID) = function() {
  *
  * no response value expected for this operation
  **/
-exports.leaveGroup(groupID) = function() {
+exports.leaveGroup = function() {
   return new Promise(function(resolve, reject) {
     resolve();
   });

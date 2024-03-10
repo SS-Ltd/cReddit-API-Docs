@@ -3,8 +3,8 @@
 var utils = require('../utils/writer.js');
 var Chat = require('../service/ChatService');
 
-module.exports.createGroup(userIDs) = function createGroup(userIDs) (req, res, next) {
-  Chat.createGroup(userIDs)()
+module.exports.createGroup = function createGroup (req, res, next) {
+  Chat.createGroup()
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -13,8 +13,8 @@ module.exports.createGroup(userIDs) = function createGroup(userIDs) (req, res, n
     });
 };
 
-module.exports.inviteUsers(userIDs, groupID) = function inviteUsers(userIDs, groupID) (req, res, next) {
-  Chat.inviteUsers(userIDs, groupID)()
+module.exports.inviteUsers = function inviteUsers (req, res, next) {
+  Chat.inviteUsers()
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -23,8 +23,8 @@ module.exports.inviteUsers(userIDs, groupID) = function inviteUsers(userIDs, gro
     });
 };
 
-module.exports.leaveGroup(groupID) = function leaveGroup(groupID) (req, res, next) {
-  Chat.leaveGroup(groupID)()
+module.exports.leaveGroup = function leaveGroup (req, res, next) {
+  Chat.leaveGroup()
     .then(function (response) {
       utils.writeJson(res, response);
     })

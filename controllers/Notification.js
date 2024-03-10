@@ -3,8 +3,8 @@
 var utils = require('../utils/writer.js');
 var Notification = require('../service/NotificationService');
 
-module.exports.createNotification(HOT) = function createNotification(HOT) (req, res, next) {
-  Notification.createNotification(HOT)()
+module.exports.createNotification = function createNotification (req, res, next) {
+  Notification.createNotification()
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -13,8 +13,8 @@ module.exports.createNotification(HOT) = function createNotification(HOT) (req, 
     });
 };
 
-module.exports.getAllNotifications(HOT) = function getAllNotifications(HOT) (req, res, next) {
-  Notification.getAllNotifications(HOT)()
+module.exports.getAllNotifications = function getAllNotifications (req, res, next) {
+  Notification.getAllNotifications()
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -23,8 +23,8 @@ module.exports.getAllNotifications(HOT) = function getAllNotifications(HOT) (req
     });
 };
 
-module.exports.getRecentNotifications(HOT) = function getRecentNotifications(HOT) (req, res, next) {
-  Notification.getRecentNotifications(HOT)()
+module.exports.getRecentNotifications = function getRecentNotifications (req, res, next) {
+  Notification.getRecentNotifications()
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -33,8 +33,8 @@ module.exports.getRecentNotifications(HOT) = function getRecentNotifications(HOT
     });
 };
 
-module.exports.markAllNotificationsAsRead(HOT) = function markAllNotificationsAsRead(HOT) (req, res, next) {
-  Notification.markAllNotificationsAsRead(HOT)()
+module.exports.markAllNotificationsAsRead = function markAllNotificationsAsRead (req, res, next) {
+  Notification.markAllNotificationsAsRead()
     .then(function (response) {
       utils.writeJson(res, response);
     })

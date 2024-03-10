@@ -7,7 +7,7 @@
  *
  * no response value expected for this operation
  **/
-exports.createNotification(HOT) = function() {
+exports.createNotification = function() {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -20,7 +20,7 @@ exports.createNotification(HOT) = function() {
  *
  * returns Notification
  **/
-exports.getAllNotifications(HOT) = function() {
+exports.getAllNotifications = function() {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = {
@@ -45,7 +45,7 @@ exports.getAllNotifications(HOT) = function() {
  *
  * no response value expected for this operation
  **/
-exports.getRecentNotifications(HOT) = function() {
+exports.getRecentNotifications = function() {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -58,7 +58,7 @@ exports.getRecentNotifications(HOT) = function() {
  *
  * no response value expected for this operation
  **/
-exports.markAllNotificationsAsRead(HOT) = function() {
+exports.markAllNotificationsAsRead = function() {
   return new Promise(function(resolve, reject) {
     resolve();
   });

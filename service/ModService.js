@@ -7,7 +7,7 @@
  *
  * no response value expected for this operation
  **/
-exports.acceptModInvite(postId) = function() {
+exports.acceptModInvite = function() {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -18,9 +18,10 @@ exports.acceptModInvite(postId) = function() {
  * Approve a post
  * Approve a post.
  *
+ * postId String ID of the post to be approved
  * no response value expected for this operation
  **/
-exports.approvePost(postId) = function() {
+exports.approvePost = function(postId) {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -31,9 +32,10 @@ exports.approvePost(postId) = function() {
  * invite a moderator
  * invite a moderator
  *
+ * subredditId String ID of the subreddit to be moderated
  * no response value expected for this operation
  **/
-exports.inviteMod(postId) = function() {
+exports.inviteMod = function(subredditId) {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -44,10 +46,10 @@ exports.inviteMod(postId) = function() {
  * Leave community moderation
  * Leave community moderation
  *
- * communityId String 
+ * subredditId String 
  * no response value expected for this operation
  **/
-exports.leaveCommunityMod(communityID) = function(communityId) {
+exports.leaveCommunityMod = function(subredditId) {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -58,9 +60,10 @@ exports.leaveCommunityMod(communityID) = function(communityId) {
  * mute user in community
  * mute user in community
  *
+ * subredditId String ID of the subreddit which the user should be muted
  * no response value expected for this operation
  **/
-exports.muteUser(communityID) = function() {
+exports.muteUser = function(subredditId) {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -71,10 +74,9 @@ exports.muteUser(communityID) = function() {
  * reject moderation invite
  * reject moderation invite
  *
- * communityId String 
  * no response value expected for this operation
  **/
-exports.rejectModInvite(postId) = function(communityId) {
+exports.rejectModInvite = function() {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -85,9 +87,10 @@ exports.rejectModInvite(postId) = function(communityId) {
  * unmute user in community
  * unmute user in community
  *
+ * subredditId String ID of the subreddit which the user should be unmuted
  * no response value expected for this operation
  **/
-exports.unmuteUser(communityID) = function() {
+exports.unmuteUser = function(subredditId) {
   return new Promise(function(resolve, reject) {
     resolve();
   });

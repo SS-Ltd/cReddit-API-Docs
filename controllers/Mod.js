@@ -3,8 +3,8 @@
 var utils = require('../utils/writer.js');
 var Mod = require('../service/ModService');
 
-module.exports.acceptModInvite(postId) = function acceptModInvite(postId) (req, res, next) {
-  Mod.acceptModInvite(postId)()
+module.exports.acceptModInvite = function acceptModInvite (req, res, next) {
+  Mod.acceptModInvite()
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -13,8 +13,8 @@ module.exports.acceptModInvite(postId) = function acceptModInvite(postId) (req, 
     });
 };
 
-module.exports.approvePost(postId) = function approvePost(postId) (req, res, next) {
-  Mod.approvePost(postId)()
+module.exports.approvePost = function approvePost (req, res, next, postId) {
+  Mod.approvePost(postId)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -23,8 +23,8 @@ module.exports.approvePost(postId) = function approvePost(postId) (req, res, nex
     });
 };
 
-module.exports.inviteMod(postId) = function inviteMod(postId) (req, res, next) {
-  Mod.inviteMod(postId)()
+module.exports.inviteMod = function inviteMod (req, res, next, subredditId) {
+  Mod.inviteMod(subredditId)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -33,8 +33,8 @@ module.exports.inviteMod(postId) = function inviteMod(postId) (req, res, next) {
     });
 };
 
-module.exports.leaveCommunityMod(communityID) = function leaveCommunityMod(communityID) (req, res, next, communityId) {
-  Mod.leaveCommunityMod(communityID)(communityId)
+module.exports.leaveCommunityMod = function leaveCommunityMod (req, res, next, subredditId) {
+  Mod.leaveCommunityMod(subredditId)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -43,8 +43,8 @@ module.exports.leaveCommunityMod(communityID) = function leaveCommunityMod(commu
     });
 };
 
-module.exports.muteUser(communityID) = function muteUser(communityID) (req, res, next) {
-  Mod.muteUser(communityID)()
+module.exports.muteUser = function muteUser (req, res, next, subredditId) {
+  Mod.muteUser(subredditId)
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -53,8 +53,8 @@ module.exports.muteUser(communityID) = function muteUser(communityID) (req, res,
     });
 };
 
-module.exports.rejectModInvite(postId) = function rejectModInvite(postId) (req, res, next, communityId) {
-  Mod.rejectModInvite(postId)(communityId)
+module.exports.rejectModInvite = function rejectModInvite (req, res, next) {
+  Mod.rejectModInvite()
     .then(function (response) {
       utils.writeJson(res, response);
     })
@@ -63,8 +63,8 @@ module.exports.rejectModInvite(postId) = function rejectModInvite(postId) (req, 
     });
 };
 
-module.exports.unmuteUser(communityID) = function unmuteUser(communityID) (req, res, next) {
-  Mod.unmuteUser(communityID)()
+module.exports.unmuteUser = function unmuteUser (req, res, next, subredditId) {
+  Mod.unmuteUser(subredditId)
     .then(function (response) {
       utils.writeJson(res, response);
     })

@@ -51,7 +51,7 @@ exports.editSubredditSettings = function(body,subreddit) {
  * subreddit String 
  * no response value expected for this operation
  **/
-exports.getBanned(subreddit) = function(subreddit) {
+exports.getBanned = function(subreddit) {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -65,7 +65,7 @@ exports.getBanned(subreddit) = function(subreddit) {
  * subreddit String 
  * returns Feed
  **/
-exports.getEditedPosts(subreddit) = function(subreddit) {
+exports.getEditedPosts = function(subreddit) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ "", "" ];
@@ -85,7 +85,7 @@ exports.getEditedPosts(subreddit) = function(subreddit) {
  * subreddit String 
  * returns Feed
  **/
-exports.getModQueuePosts(subreddit) = function(subreddit) {
+exports.getModQueuePosts = function(subreddit) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ "", "" ];
@@ -105,7 +105,7 @@ exports.getModQueuePosts(subreddit) = function(subreddit) {
  * subreddit String 
  * no response value expected for this operation
  **/
-exports.getModerators(subreddit) = function(subreddit) {
+exports.getModerators = function(subreddit) {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -119,7 +119,7 @@ exports.getModerators(subreddit) = function(subreddit) {
  * subreddit String 
  * no response value expected for this operation
  **/
-exports.getMuted(subreddit) = function(subreddit) {
+exports.getMuted = function(subreddit) {
   return new Promise(function(resolve, reject) {
     resolve();
   });
@@ -133,7 +133,7 @@ exports.getMuted(subreddit) = function(subreddit) {
  * subreddit String 
  * returns Feed
  **/
-exports.getReportedPosts(subreddit) = function(subreddit) {
+exports.getReportedPosts = function(subreddit) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ "", "" ];
@@ -153,7 +153,7 @@ exports.getReportedPosts(subreddit) = function(subreddit) {
  * subreddit String 
  * returns Feed
  **/
-exports.getSpammedPosts(subreddit) = function(subreddit) {
+exports.getSpammedPosts = function(subreddit) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ "", "" ];
@@ -171,9 +171,10 @@ exports.getSpammedPosts(subreddit) = function(subreddit) {
  * Called when user navigates to subreddit
  *
  * subreddit String 
+ * sort String  (optional)
  * returns Community
  **/
-exports.getSubreddit = function(subreddit) {
+exports.getSubreddit = function(subreddit,sort) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = {
@@ -199,89 +200,9 @@ exports.getSubreddit = function(subreddit) {
  *
  * no response value expected for this operation
  **/
-exports.getSubredditMod() = function() {
+exports.getSubredditMod = function() {
   return new Promise(function(resolve, reject) {
     resolve();
-  });
-}
-
-
-/**
- * Check if username is available
- * Retrieve the post in this subreddit \"HOT\".
- *
- * subreddit String 
- * returns Feed
- **/
-exports.getSubredditPosts(HOT) = function(subreddit) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ "", "" ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
-}
-
-
-/**
- * Check if username is available
- * Retrieve the post in this subreddit \"NEW\".
- *
- * subreddit String 
- * returns Feed
- **/
-exports.getSubredditPosts(NEW) = function(subreddit) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ "", "" ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
-}
-
-
-/**
- * Check if username is available
- * Retrieve the post in this subreddit \"RISING\".
- *
- * subreddit String 
- * returns Feed
- **/
-exports.getSubredditPosts(RISING) = function(subreddit) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ "", "" ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
-}
-
-
-/**
- * Check if username is available
- * Retrieve the post in this subreddit \"TOP\".
- *
- * subreddit String 
- * returns Feed
- **/
-exports.getSubredditPosts(TOP) = function(subreddit) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ "", "" ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
   });
 }
 
@@ -323,7 +244,7 @@ exports.getSubredditSettings = function(subreddit) {
  * subreddit String 
  * returns Feed
  **/
-exports.getUnmoderatedPosts(subreddit) = function(subreddit) {
+exports.getUnmoderatedPosts = function(subreddit) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = [ "", "" ];
