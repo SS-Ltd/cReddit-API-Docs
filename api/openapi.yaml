@@ -28,7 +28,7 @@ paths:
       tags:
       - user
       summary: Create user (Signup)
-      description: Register a new user.
+      description: Register a new user. DONE
       operationId: createUser
       requestBody:
         description: Created user object
@@ -38,19 +38,23 @@ paths:
               $ref: '#/components/schemas/User'
         required: true
       responses:
-        "200":
+        "201":
           description: User created successfully
           content:
             application/json:
               example:
                 message: User created successfully
-        "500":
+        "400":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Error creating user
       x-swagger-router-controller: User
     delete:
       tags:
       - user
-      summary: Delete a user
+      summary: Delete a user DONE
       operationId: deleteUser
       responses:
         "200":
@@ -59,20 +63,25 @@ paths:
             application/json:
               example:
                 message: User deleted successfully
-        "400":
-          description: Bad request
-        "401":
-          description: "Unauthorized, user must be logged in"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              example:
+                message: User not found
         "500":
           description: Internal Server Error
-      x-swagger-router-controller: User
+          content:
+            application/json:
+              example:
+                message: Error deleting user
   /user/login:
     post:
       tags:
       - user
-      summary: Logs user into the system using
+      summary: Logs user into the system using DONE
       description: Log in with username and password.
-      operationId: loginUser
+      operationId: login
       requestBody:
         content:
           application/json:
@@ -85,12 +94,13 @@ paths:
           content:
             application/json:
               example:
-                token: <JWT_TOKEN_HERE>
-        "401":
-          description: "Unauthorized, invalid credentials"
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: User
+                message: User logged in successfully
+        "400":
+          description: "Error logging in"
+          content:
+            application/json:
+              example:
+                message: Error logging in
   /user/auth/google:
     get:
       tags:
@@ -114,8 +124,8 @@ paths:
     get:
       tags:
       - user
-      summary: Logs out current logged in user session
-      operationId: logoutUser
+      summary: Logs out current logged in user session DONE
+      operationId: logout
       responses:
         "200":
           description: User logged out successfully
@@ -123,18 +133,18 @@ paths:
             application/json:
               example:
                 message: User logged out successfully
-        "500":
-          description: Internal Server Error
+        "400":
+          description: Error logging out
       x-swagger-router-controller: User
-  /user/verify/{refreshToken}:
+  /user/verify/{verificationToken}:
     patch:
       tags:
       - user
       summary: Email Verification
-      description: Verify user email
+      description: Verify user email DONE
       operationId: verifyUser
       parameters:
-      - name: refreshToken
+      - name: verificationToken
         in: path
         required: true
         style: simple
@@ -143,16 +153,13 @@ paths:
           type: string
       responses:
         "200":
-          description: Email verified successfully
+          description: User verified successfully
           content:
             application/json:
               example:
                 message: Email verified successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: User
+        "400":
+          description: "Error verifying user"
   /user/u/{username}:
     get:
       tags:
