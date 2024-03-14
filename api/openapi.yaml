@@ -490,7 +490,7 @@ paths:
       - user
       summary: Block User
       description: Block a specific user.
-      operationId: blockUser
+      operationId: block
       parameters:
       - name: username
         in: path
@@ -506,17 +506,52 @@ paths:
           content:
             application/json:
               example:
-                message: User blocked successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
+                status: OK
+                message: User blocked
+        "400":
+          description: Bad requests for blocking user
+          content:
+            application/json:
+              examples:
+                UsernameIsRequired:
+                  value:
+                    status: Bad Request
+                    message: Username is required
+                UserCannotBlockThemselves:
+                  value:
+                    status: Bad Request
+                    message: User cannot block themselves
+                UserAlreadyBlocksUser:
+                  value:
+                    status: Bad Request
+                    message: User already blocks the user
+        "404":
+          description: For nonexistent user
+          content:
+            application/json:
+              examples:
+                UserDoesNotExist:
+                  value:
+                    status: Not Found
+                    message: User does not exist
+                UserToBeBlockedDoesNotExist:
+                  value:
+                    status: Not found
+                    message: User to be blocked does not exist
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while blocking the user
       x-swagger-router-controller: User
     delete:
       tags:
       - user
-      summary: Unblock
-      operationId: unblockUser
+      summary: Unblock user
+      description: Unblock a specific user.
+      operationId: unblock
       parameters:
       - name: username
         in: path
@@ -532,11 +567,41 @@ paths:
           content:
             application/json:
               example:
-                message: User unblocked successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
+                status: OK
+                message: User unblocked
+        "400":
+          description: Bad requests for unblocking user
+          content:
+            application/json:
+              examples:
+                UsernameIsRequired:
+                  value:
+                    status: Bad Request
+                    message: Username is required
+                UserCannotUnblockThemselves:
+                  value:
+                    status: Bad Request
+                    message: User cannot unblock themselves
+        "404":
+          description: For nonexistent user
+          content:
+            application/json:
+              examples:
+                UserDoesNotExist:
+                  value:
+                    status: Not Found
+                    message: User does not exist
+                UserToBeUnblockedDoesNotExist:
+                  value:
+                    status: Not found
+                    message: User to be unblocked does not exist
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while unblocking the user
       x-swagger-router-controller: User
   /user/follow/{username}:
     post:
@@ -544,7 +609,7 @@ paths:
       - user
       summary: Follow User
       description: Follow a specific user.
-      operationId: followUser
+      operationId: follow
       parameters:
       - name: username
         in: path
@@ -560,23 +625,59 @@ paths:
           content:
             application/json:
               example:
-                message: User followed successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
+                status: OK
+                message: User followed
+        "400":
+          description: Bad requests for blocking user
+          content:
+            application/json:
+              examples:
+                UsernameIsRequired:
+                  value:
+                    status: Bad Request
+                    message: Username is required
+                UserCannotFollowThemselves:
+                  value:
+                    status: Bad Request
+                    message: User cannot follow themselves
+                UserAlreadyFollowsUser:
+                  value:
+                    status: Bad Request
+                    message: User already follows the user
+                UserAlreadyBeingFollowedByUser:
+                  value:
+                    status: Bad Request
+                    message: User already is being followed by the user
         "404":
-          description: User not found
+          description: For nonexistent user
+          content:
+            application/json:
+              examples:
+                UserDoesNotExist:
+                  value:
+                    status: Not Found
+                    message: User does not exist
+                UserToBeFollowedDoesNotExist:
+                  value:
+                    status: Not found
+                    message: User to be followed does not exist
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while blocking the user
       x-swagger-router-controller: User
     delete:
       tags:
       - user
       summary: Unfollow
-      operationId: unfollowUser
+      operationId: unfollow
       parameters:
       - name: username
         in: path
-        description: Username of the user to follow
+        description: Username of the user to unfollow
         required: true
         style: simple
         explode: false
@@ -588,13 +689,42 @@ paths:
           content:
             application/json:
               example:
-                message: User unfollowed successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
+                status: OK
+                message: User unfollowed
+        "400":
+          description: Bad requests for blocking user
+          content:
+            application/json:
+              examples:
+                UsernameIsRequired:
+                  value:
+                    status: Bad Request
+                    message: Username is required
+                UserAlreadyUnfollowsUser:
+                  value:
+                    status: Bad Request
+                    message: User already unfollows the user
         "404":
-          description: User not found
+          description: For nonexistent user
+          content:
+            application/json:
+              example:
+                examples:
+                UserDoesNotExist:
+                  value:
+                    status: Not Found
+                    message: User does not exist
+                UserToBeFollowedDoesNotExist:
+                  value:
+                    status: Not found
+                    message: User to be followed does not exist
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while blocking the user
       x-swagger-router-controller: User
   /user/is-available/{username}:
     get:
@@ -617,11 +747,31 @@ paths:
           content:
             application/json:
               example:
+                status: OK
+                message: Username is available
                 available: true
-        "401":
-          description: "Unauthorized, user must be logged in"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              example:
+                status: Bad Request
+                message: Username is required
+        "409":
+          description: "Username is not available"
+          content:
+            application/json:
+              example:
+                status: Conflict
+                message: Username is not available
+                available: false
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while checking username availability
       x-swagger-router-controller: User
   /user/clear-history:
     delete:
