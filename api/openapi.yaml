@@ -29,8 +29,8 @@ paths:
     post:
       tags:
       - user
-      summary: Create user (Signup)
-      description: Register a new user. DONE
+      summary: Create user (Signup) DONE
+      description: Register a new user.
       operationId: createUser
       requestBody:
         description: Created user object
@@ -53,27 +53,21 @@ paths:
               examples:
                 UsernamePasswordEmailGenderRequired:
                   value:
-                    status: Bad Request
                     message: Username, password, email, and gender are required
                 UsernameOrEmailAlreadyExist:
                   value:
-                    status: Bad Request
                     message: Username or email already exists
                 InvalidEmail:
                   value:
-                    status: Bad Request
                     message: Invalid email
                 InvalidGender:
                   value:
-                    status: Bad Request
                     message: Invalid gender
                 PasswordMinimumLength:
                   value:
-                    status: Bad Request
                     message: Password must be at least 8 characters long
                 ErrorCreatingUser:
                   value:
-                    status: Bad Request
                     message: Error creating user
     delete:
       tags:
@@ -103,7 +97,7 @@ paths:
     post:
       tags:
       - user
-      summary: Logs user into the system using DONE
+      summary: Logs user into the system DONE
       description: Log in with username and password.
       operationId: login
       requestBody:
@@ -126,19 +120,15 @@ paths:
               examples:
                 UsernamePasswordRequired:
                   value:
-                    status: Bad Request
                     message: Username and password are required
                 InvalidUsername:
                   value:
-                    status: Bad Request
                     message: Invalid username
                 InvalidPassword:
                   value:
-                    status: Bad Request
                     message: Invalid password
                 ErrorLoggingUser:
                   value:
-                    status: Bad Request
                     message: Error logging in
   /user/auth/google:
     get:
@@ -174,11 +164,11 @@ paths:
                 message: User logged out successfully
         "400":
           description: Error logging out
-  /user/refresh:
+  /user/refreshToken:
     get:
       tags:
       - user
-      summary: Refreshes the user token
+      summary: Refreshes the user token DONE
       description: Refreshes the user token
       operationId: refresh
       responses:
@@ -187,17 +177,27 @@ paths:
           content:
             application/json:
               example:
-                token: <JWT_TOKEN_HERE>
+                message: 'Token refreshed successfully'
         "401":
-          description: "Unauthorized, invalid credentials"
+          description: "Unauthorized"
+          content:
+            application/json:
+              example:
+                message: 'Unauthorized'
+        "404":
+          description: "Invalid credentials"
+          content:
+            application/json:
+              example:
+                message: 'User not found'
         "500":
           description: Internal Server Error
   /user/verify/{verificationToken}:
-    patch:
+    get:
       tags:
       - user
-      summary: Email Verification
-      description: Verify user email DONE
+      summary: Email Verification DONE
+      description: Verify user email
       operationId: verifyUser
       parameters:
       - name: verificationToken
@@ -213,7 +213,7 @@ paths:
           content:
             application/json:
               example:
-                message: Email verified successfully
+                message: User verified successfully
         "400":
           description: "Error verifying user"
   /user/u/{username}:
