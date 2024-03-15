@@ -172,6 +172,24 @@ paths:
                 message: User logged out successfully
         "400":
           description: Error logging out
+  /user/refresh:
+    get:
+      tags:
+      - user
+      summary: Refreshes the user token
+      description: Refreshes the user token
+      operationId: refresh
+      responses:
+        "200":
+          description: Token refreshed successfully
+          content:
+            application/json:
+              example:
+                token: <JWT_TOKEN_HERE>
+        "401":
+          description: "Unauthorized, invalid credentials"
+        "500":
+          description: Internal Server Error
   /user/verify/{verificationToken}:
     patch:
       tags:
