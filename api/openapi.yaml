@@ -10,7 +10,7 @@ servers:
 - url: https://virtserver.swaggerhub.com/cReddit/cReddit/1.0.0
   description: SwaggerHub API Auto Mocking
 security:
-- cookie_auth: []
+- jwt_auth: []
 tags:
 - name: user
   description: User Management
@@ -22,6 +22,8 @@ tags:
   description: Notifications Management
 - name: mod
   description: Moderation
+- name: search
+  description: Search
 paths:
   /user:
     post:
@@ -551,7 +553,7 @@ paths:
       - user
       summary: Block User
       description: Block a specific user.
-      operationId: blockUser
+      operationId: block
       parameters:
       - name: username
         in: path
@@ -567,17 +569,52 @@ paths:
           content:
             application/json:
               example:
-                message: User blocked successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
+                status: OK
+                message: User blocked
+        "400":
+          description: Bad requests for blocking user
+          content:
+            application/json:
+              examples:
+                UsernameIsRequired:
+                  value:
+                    status: Bad Request
+                    message: Username is required
+                UserCannotBlockThemselves:
+                  value:
+                    status: Bad Request
+                    message: User cannot block themselves
+                UserAlreadyBlocksUser:
+                  value:
+                    status: Bad Request
+                    message: User already blocks the user
+        "404":
+          description: For nonexistent user
+          content:
+            application/json:
+              examples:
+                UserDoesNotExist:
+                  value:
+                    status: Not Found
+                    message: User does not exist
+                UserToBeBlockedDoesNotExist:
+                  value:
+                    status: Not found
+                    message: User to be blocked does not exist
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while blocking the user
       x-swagger-router-controller: User
     delete:
       tags:
       - user
-      summary: Unblock
-      operationId: unblockUser
+      summary: Unblock user
+      description: Unblock a specific user.
+      operationId: unblock
       parameters:
       - name: username
         in: path
@@ -593,11 +630,41 @@ paths:
           content:
             application/json:
               example:
-                message: User unblocked successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
+                status: OK
+                message: User unblocked
+        "400":
+          description: Bad requests for unblocking user
+          content:
+            application/json:
+              examples:
+                UsernameIsRequired:
+                  value:
+                    status: Bad Request
+                    message: Username is required
+                UserCannotUnblockThemselves:
+                  value:
+                    status: Bad Request
+                    message: User cannot unblock themselves
+        "404":
+          description: For nonexistent user
+          content:
+            application/json:
+              examples:
+                UserDoesNotExist:
+                  value:
+                    status: Not Found
+                    message: User does not exist
+                UserToBeUnblockedDoesNotExist:
+                  value:
+                    status: Not found
+                    message: User to be unblocked does not exist
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while unblocking the user
       x-swagger-router-controller: User
   /user/follow/{username}:
     post:
@@ -605,7 +672,7 @@ paths:
       - user
       summary: Follow User
       description: Follow a specific user.
-      operationId: followUser
+      operationId: follow
       parameters:
       - name: username
         in: path
@@ -621,23 +688,59 @@ paths:
           content:
             application/json:
               example:
-                message: User followed successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
+                status: OK
+                message: User followed
+        "400":
+          description: Bad requests for blocking user
+          content:
+            application/json:
+              examples:
+                UsernameIsRequired:
+                  value:
+                    status: Bad Request
+                    message: Username is required
+                UserCannotFollowThemselves:
+                  value:
+                    status: Bad Request
+                    message: User cannot follow themselves
+                UserAlreadyFollowsUser:
+                  value:
+                    status: Bad Request
+                    message: User already follows the user
+                UserAlreadyBeingFollowedByUser:
+                  value:
+                    status: Bad Request
+                    message: User already is being followed by the user
         "404":
-          description: User not found
+          description: For nonexistent user
+          content:
+            application/json:
+              examples:
+                UserDoesNotExist:
+                  value:
+                    status: Not Found
+                    message: User does not exist
+                UserToBeFollowedDoesNotExist:
+                  value:
+                    status: Not found
+                    message: User to be followed does not exist
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while following the user
       x-swagger-router-controller: User
     delete:
       tags:
       - user
       summary: Unfollow
-      operationId: unfollowUser
+      operationId: unfollow
       parameters:
       - name: username
         in: path
-        description: Username of the user to follow
+        description: Username of the user to unfollow
         required: true
         style: simple
         explode: false
@@ -649,13 +752,42 @@ paths:
           content:
             application/json:
               example:
-                message: User unfollowed successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
+                status: OK
+                message: User unfollowed
+        "400":
+          description: Bad requests for blocking user
+          content:
+            application/json:
+              examples:
+                UsernameIsRequired:
+                  value:
+                    status: Bad Request
+                    message: Username is required
+                UserAlreadyUnfollowsUser:
+                  value:
+                    status: Bad Request
+                    message: User already unfollows the user
         "404":
-          description: User not found
+          description: For nonexistent user
+          content:
+            application/json:
+              example:
+                examples:
+                UserDoesNotExist:
+                  value:
+                    status: Not Found
+                    message: User does not exist
+                UserToBeFollowedDoesNotExist:
+                  value:
+                    status: Not found
+                    message: User to be followed does not exist
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while unfollowing the user
       x-swagger-router-controller: User
   /user/is-available/{username}:
     get:
@@ -678,11 +810,31 @@ paths:
           content:
             application/json:
               example:
+                status: OK
+                message: Username is available
                 available: true
-        "401":
-          description: "Unauthorized, user must be logged in"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              example:
+                status: Bad Request
+                message: Username is required
+        "409":
+          description: "Username is not available"
+          content:
+            application/json:
+              example:
+                status: Conflict
+                message: Username is not available
+                available: false
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while checking if the username is available
       x-swagger-router-controller: User
   /user/clear-history:
     delete:
@@ -761,6 +913,68 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: User
+  /user/history:
+    get:
+      tags:
+      - user
+      summary: Get user history
+      description: Retrieve user history.
+      operationId: getHistory
+      responses:
+        "200":
+          description: User history retrieved successfully
+          content:
+            application/json:
+              schema:
+                status: OK
+                message: User history retrieved successfully
+                $ref: '#/components/schemas/Post'
+        "401":
+          description: Unauthorized, user must be logged in
+          content:
+            application/json:
+              example:
+                status: Unauthorized
+                message: User must be logged in
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while retrieving the user history
+      x-swagger-router-controller: User
+  /user/saved-posts:
+    get:
+      tags:
+      - user
+      summary: Get user saved posts
+      description: Retrieve user's saved posts.
+      operationId: getSavedPosts
+      responses:
+        "200":
+          description: User saved posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                status: OK
+                message: User saved posts retrieved successfully
+                $ref: '#/components/schemas/Post'
+        "401":
+          description: Unauthorized, user must be logged in
+          content:
+            application/json:
+              example:
+                status: Unauthorized
+                message: User must be logged in
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while retrieving the user saved posts
+      x-swagger-router-controller: User
   /post:
     post:
       tags:
@@ -809,6 +1023,51 @@ paths:
           description: Internal Server Error
       x-swagger-router-controller: Post
   /post/{postId}:
+    get:
+      tags:
+      - post
+      summary: Get post details
+      description: Retrieve information about a specific post.
+      operationId: getPost
+      parameters:
+      - name: postId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Post data retrieved successfully
+          content:
+            application/json:
+              schema:
+                status: OK
+                message: Post data retrieved successfully
+                $ref: '#/components/schemas/Post'
+        "401":
+          description: "Unauthorized, user must be logged in"
+          content:
+            application/json:
+              example:
+                status: Unauthorized
+                message: User must be logged in
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              example:
+                status: Not Found
+                message: Post not found
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while retrieving the post
+      x-swagger-router-controller: Post
     delete:
       tags:
       - post
@@ -1445,6 +1704,30 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
+  /subreddit/top:
+    get:
+      tags:
+      - subreddit
+      summary: Get top subreddits
+      description: Retrieve top subreddits to display
+      operationId: getTopCommunities
+      responses:
+        "200":
+          description: Top Subreddits retrieved successfully
+          content:
+            application/json:
+              schema:
+                status: OK
+                message: Top Subreddits retrieved successfully
+                $ref: '#/components/schemas/Community'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while retrieving top subreddits
+      x-swagger-router-controller: Subreddit
   /notification/all:
     get:
       tags:
@@ -1995,6 +2278,171 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Chat
+  /search/comments:
+    get:
+      tags:
+      - search
+      summary: Search comments
+      description: Search comments
+      operationId: searchComments
+      parameters:
+      - name: query
+        in: query
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: string
+          example: "Hello"
+      responses:
+        "200":
+          description: list of comments
+          content:
+            application/json:
+              schema:
+                status: OK
+                message: list of comments
+                $ref: '#/components/schemas/Feed'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while retrieving comments
+      x-swagger-router-controller: Search
+  /search/posts:
+    get:
+      tags:
+      - search
+      summary: Search posts
+      description: Search posts
+      operationId: searchPosts
+      parameters:
+      - name: query
+        in: query
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: string
+          example: "Hello"
+      responses:
+        "200":
+          description: list of posts
+          content:
+            application/json:
+              schema:
+                status: OK
+                message: list of posts
+                $ref: '#/components/schemas/Feed'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while retrieving posts
+      x-swagger-router-controller: Search
+  /search/subreddits:
+    get:
+      tags:
+      - search
+      summary: Search subreddits
+      description: Search subreddits
+      operationId: searchSubreddits
+      parameters:
+      - name: query
+        in: query
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: string
+          example: "Egypt"
+      responses:
+        "200":
+          description: list of subreddits
+          content:
+            application/json:
+              schema:
+                status: OK
+                message: list of subreddits
+                $ref: '#/components/schemas/Community'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while retrieving subreddits
+      x-swagger-router-controller: Search
+  /search/users:
+    get:
+      tags:
+      - search
+      summary: Search users
+      description: Search users
+      operationId: searchUsers
+      parameters:
+      - name: query
+        in: query
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: string
+          example: "John"
+      responses:
+        "200":
+          description: list of users
+          content:
+            application/json:
+              schema:
+                status: OK
+                message: list of users
+                $ref: '#/components/schemas/User'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while retrieving users
+      x-swagger-router-controller: Search
+  /search/hashtags:
+    get:
+      tags:
+      - search
+      summary: Search hashtags
+      description: Search hashtags
+      operationId: searchHashtags
+      parameters:
+      - name: query
+        in: query
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: string
+          example: "#lol"
+      responses:
+        "200":
+          description: list of hashtags
+          content:
+            application/json:
+              schema:
+                status: OK
+                message: list of hashtags
+                $ref: '#/components/schemas/Feed'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while retrieving hashtags
+      x-swagger-router-controller: Search
 components:
   schemas:
     User:
