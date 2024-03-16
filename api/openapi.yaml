@@ -432,21 +432,30 @@ paths:
             application/json:
               example:
                 message: Password reset email sent successfully
-        "404":
-          description: Username or email does not exist
+        "400":
+          description: Username and Email are required
           content:
             application/json:
               example:
-                message: Username or email does not exist
+                message: Username and Email are required
+        "404":
+          description: Username or Email not found
+          content:
+            application/json:
+              example:
+                message: Username or Email not found
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: There was an error sending the email. Try again later
       x-swagger-router-controller: User
   /user/change-password:
     patch:
       tags:
       - user
-      summary: Change password (for when user doesn't remember password and follows
-        link in email)
+      summary: Change password for the user when he is logged in
       operationId: changePassword
       requestBody:
         content:
@@ -456,21 +465,36 @@ paths:
         required: true
       responses:
         "200":
-          description: Password changed successfully
+          description: Password has been changed successfully
           content:
             application/json:
               example:
                 message: Password changed successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                OldPassword-NewPassword-ConfirmPasswordRequired:
+                  value:
+                    message: Old password, new password and confirm password are required
+                Incorrect old password:
+                  value:
+                    message: Old password is incorrect
+                PasswordMismatch:
+                  value:
+                    message: Passwords do not match
+                PasswordRequirments:
+                  value:
+                    message: Password must contain at least one lower and upper case letters and at least one digit and must be at least 8 characters
         "500":
           description: Internal Server Error
       x-swagger-router-controller: User
-  /user/reset-password:
+  /user/reset-password/{token}:
     patch:
       tags:
       - user
-      summary: Send an email to the user to reset password
+      summary: Take user's new password providing the token created from forgot-password
       operationId: resetPassword
       requestBody:
         description: Send reset link
@@ -479,6 +503,14 @@ paths:
             schema:
               $ref: '#/components/schemas/ResetPassword'
         required: true
+      parameters:
+      - name: token
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
       responses:
         "200":
           description: Password reset email sent successfully
@@ -486,8 +518,26 @@ paths:
             application/json:
               example:
                 message: Password reset email sent successfully
-        "401":
-          description: User must be logged in
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Token-Password-ConfirmPasswordRequired:
+                  value:
+                    message: Token, password, and confirm password are required
+                TokenExpired:
+                  value:
+                    message: Token has expired
+                InvalidToken:
+                  value:
+                    message: Token is invalid
+                PasswordMismatch:
+                  value:
+                    message: Passwords do not match
+                PasswordRequirments:
+                  value:
+                    message: Password must contain at least one lower and upper case letters and at least one digit and must be at least 8 characters
         "500":
           description: Internal Server Error
       x-swagger-router-controller: User
@@ -511,8 +561,14 @@ paths:
             application/json:
               example:
                 message: Username reminder email sent successfully
+        "400":
+          description: Email is required
+          content:
+            application/json:
+              example:
+                message: Email is required
         "404":
-          description: Email does not exist
+          description: Email not found
           content:
             application/json:
               example:
@@ -535,15 +591,27 @@ paths:
         required: true
       responses:
         "200":
-          description: Email changed successfully
+          description: Email has been changed successfully
           content:
             application/json:
               example:
                 message: Email changed successfully
         "400":
-          description: Invalid Email
-        "401":
-          description: "Unauthorized, user must be logged in"
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Password-NewEmailRequired:
+                  value:
+                    message: Password and new email are required
+                IncorrectPassword:
+                  value:
+                    message: Password is incorrect
+                InvalidEmail:
+                  value:
+                    message: Email is invalid
+
+        
         "500":
           description: Internal Server Error
       x-swagger-router-controller: User
@@ -2554,7 +2622,7 @@ components:
       properties:
         newPassword:
           type: string
-          example: ABC123
+          example: ABCa123456
     ForgotUsername:
       type: object
       properties:
