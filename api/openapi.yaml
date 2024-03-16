@@ -29,7 +29,7 @@ paths:
     post:
       tags:
       - user
-      summary: Create user (Signup)
+      summary: Create user (Signup) DONE
       description: Register a new user.
       operationId: createUser
       requestBody:
@@ -40,19 +40,39 @@ paths:
               $ref: '#/components/schemas/User'
         required: true
       responses:
-        "200":
+        "201":
           description: User created successfully
           content:
             application/json:
               example:
                 message: User created successfully
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: User
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                UsernamePasswordEmailGenderRequired:
+                  value:
+                    message: Username, password, email, and gender are required
+                UsernameOrEmailAlreadyExist:
+                  value:
+                    message: Username or email already exists
+                InvalidEmail:
+                  value:
+                    message: Invalid email
+                InvalidGender:
+                  value:
+                    message: Invalid gender
+                PasswordMinimumLength:
+                  value:
+                    message: Password must be at least 8 characters long
+                ErrorCreatingUser:
+                  value:
+                    message: Error creating user
     delete:
       tags:
       - user
-      summary: Delete a user
+      summary: Delete a user DONE
       operationId: deleteUser
       responses:
         "200":
@@ -61,20 +81,25 @@ paths:
             application/json:
               example:
                 message: User deleted successfully
-        "400":
-          description: Bad request
-        "401":
-          description: "Unauthorized, user must be logged in"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              example:
+                message: User not found
         "500":
           description: Internal Server Error
-      x-swagger-router-controller: User
+          content:
+            application/json:
+              example:
+                message: Error deleting user
   /user/login:
     post:
       tags:
       - user
-      summary: Logs user into the system using
+      summary: Logs user into the system DONE
       description: Log in with username and password.
-      operationId: loginUser
+      operationId: login
       requestBody:
         content:
           application/json:
@@ -87,12 +112,24 @@ paths:
           content:
             application/json:
               example:
-                token: <JWT_TOKEN_HERE>
-        "401":
-          description: "Unauthorized, invalid credentials"
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: User
+                message: User logged in successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                UsernamePasswordRequired:
+                  value:
+                    message: Username and password are required
+                InvalidUsername:
+                  value:
+                    message: Invalid username
+                InvalidPassword:
+                  value:
+                    message: Invalid password
+                ErrorLoggingUser:
+                  value:
+                    message: Error logging in
   /user/auth/google:
     get:
       tags:
@@ -116,8 +153,8 @@ paths:
     get:
       tags:
       - user
-      summary: Logs out current logged in user session
-      operationId: logoutUser
+      summary: Logs out current logged in user session DONE
+      operationId: logout
       responses:
         "200":
           description: User logged out successfully
@@ -125,18 +162,45 @@ paths:
             application/json:
               example:
                 message: User logged out successfully
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: User
-  /user/verify/{refreshToken}:
-    patch:
+        "400":
+          description: Error logging out
+  /user/refreshToken:
+    get:
       tags:
       - user
-      summary: Email Verification
+      summary: Refreshes the user token DONE
+      description: Refreshes the user token
+      operationId: refresh
+      responses:
+        "200":
+          description: Token refreshed successfully
+          content:
+            application/json:
+              example:
+                message: 'Token refreshed successfully'
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              example:
+                message: 'Unauthorized'
+        "404":
+          description: "Invalid credentials"
+          content:
+            application/json:
+              example:
+                message: 'User not found'
+        "500":
+          description: Internal Server Error
+  /user/verify/{verificationToken}:
+    get:
+      tags:
+      - user
+      summary: Email Verification DONE
       description: Verify user email
       operationId: verifyUser
       parameters:
-      - name: refreshToken
+      - name: verificationToken
         in: path
         required: true
         style: simple
@@ -145,16 +209,13 @@ paths:
           type: string
       responses:
         "200":
-          description: Email verified successfully
+          description: User verified successfully
           content:
             application/json:
               example:
-                message: Email verified successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: User
+                message: User verified successfully
+        "400":
+          description: "Error verifying user"
   /user/u/{username}:
     get:
       tags:
@@ -2970,12 +3031,14 @@ components:
         rule: Mahmoud
         appliesTo: Posts & comments
   securitySchemes:
-    jwt_auth:
+    cookie_auth:
       type: apiKey
       description: |
-        JWT token should be provided in the header as follows:
+        Use HTTP-only cookies to manage authentication. 
+        Access and refresh tokens are stored in cookies. 
+        The refresh token is only sent when the endpoint `/user/refresh` is called.
         ```
-        Authorization: Bearer <JWT_TOKEN_HERE>
+        access_token=<access_token_value>; refresh_token=<refresh_token_value>
         ```
-      name: Authorization
-      in: header
+      name: Cookie
+      in: cookie
