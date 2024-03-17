@@ -131,23 +131,43 @@ paths:
                   value:
                     message: Error logging in
   /user/auth/google:
-    get:
+    post:
       tags:
       - user
-      summary: Logs user into the system using google services
+      summary: Logs user into the system using google services if no user exists with the email, a new user is created DONE
       description: Log in with google OAuth token
-      operationId: loginUserGoogle
+      operationId: loginGoogle
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginGoogle'
+        required: true
       responses:
         "200":
           description: User logged in successfully
           content:
             application/json:
               example:
-                token: <JWT_TOKEN_HERE>
+                message: User logged in successfully
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              example:
+                message: User created successfully
+        "400":
+          description: Error creating user
+          content:
+            application/json:
+              example:
+                message: Error creating user
         "401":
-          description: "Unauthorized, invalid credentials"
-        "500":
-          description: Internal Server Error
+          description: "Invalid token"
+          content:
+            application/json:
+              example:
+                message: Invalid token
       x-swagger-router-controller: User
   /user/logout:
     get:
@@ -1016,32 +1036,8 @@ paths:
         description: Created post object
         content:
           application/json:
-            example:
-              communityId: 350651awd651awd
-              title: Hello World
-              content: This is my content
-              isNSFW: false
-              isSpoiler: false
-              pollOptions:
-              - Option 1
-              - Option 2
-              - Option 3
-              child:
-                postId: 350651awd651awd
-                ownerId: 350651awd651awd
-                communityId: 350651awd651awd
-                communityProfilePicture: drive.creddit.com/test
-                ownerProfilePicture: drive.creddit.com/test
-                uploadDate: 06/03/2024 22:10:03
-                title: Hello World
-                content: This is my content
-                comments: 50
-                upvotes: 1500
-                downvotes: 100
-                isUpvoted: true
-                isDownvoted: false
-                isNSFW: false
-                isSpoiler: false
+            schema:
+              $ref: '#/components/schemas/Post'
         required: true
       responses:
         "200":
@@ -1140,10 +1136,8 @@ paths:
         description: Edit post object
         content:
           application/json:
-            example:
-              content: This is my content
-              isNSFW: false
-              isSpoiler: false
+            schema:
+              $ref: '#/components/schemas/EditPost'
         required: true
       responses:
         "200":
@@ -2495,6 +2489,12 @@ components:
         - $ref: '#/components/schemas/Post'
         - $ref: '#/components/schemas/Post'
         - $ref: '#/components/schemas/Post'
+    UserLoginGoogle:
+      type: object
+      properties:
+        googleToken:
+          type: string
+          example: "<GOOGLE_ACCESS_TOKEN>"
     UserSettings:
       type: object
       properties:
@@ -3013,6 +3013,18 @@ components:
         isLocked: true
         communityProfilePicture: drive.creddit.com/test
         communityId: 350651awd651awd
+    EditPost:
+      type: object
+      properties:
+        content:
+          type: string
+          example: This is my content
+        isNSFW:
+          type: boolean
+          example: false
+        isSpoiler:
+          type: boolean
+          example: false
     Community:
       type: object
       properties:
