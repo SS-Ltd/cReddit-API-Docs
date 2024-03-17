@@ -29,8 +29,8 @@ paths:
     post:
       tags:
       - user
-      summary: Create user (Signup)
-      description: Register a new user. DONE
+      summary: Create user (Signup) DONE
+      description: Register a new user.
       operationId: createUser
       requestBody:
         description: Created user object
@@ -53,27 +53,21 @@ paths:
               examples:
                 UsernamePasswordEmailGenderRequired:
                   value:
-                    status: Bad Request
                     message: Username, password, email, and gender are required
                 UsernameOrEmailAlreadyExist:
                   value:
-                    status: Bad Request
                     message: Username or email already exists
                 InvalidEmail:
                   value:
-                    status: Bad Request
                     message: Invalid email
                 InvalidGender:
                   value:
-                    status: Bad Request
                     message: Invalid gender
                 PasswordMinimumLength:
                   value:
-                    status: Bad Request
                     message: Password must be at least 8 characters long
                 ErrorCreatingUser:
                   value:
-                    status: Bad Request
                     message: Error creating user
     delete:
       tags:
@@ -103,7 +97,7 @@ paths:
     post:
       tags:
       - user
-      summary: Logs user into the system using DONE
+      summary: Logs user into the system DONE
       description: Log in with username and password.
       operationId: login
       requestBody:
@@ -126,19 +120,15 @@ paths:
               examples:
                 UsernamePasswordRequired:
                   value:
-                    status: Bad Request
                     message: Username and password are required
                 InvalidUsername:
                   value:
-                    status: Bad Request
                     message: Invalid username
                 InvalidPassword:
                   value:
-                    status: Bad Request
                     message: Invalid password
                 ErrorLoggingUser:
                   value:
-                    status: Bad Request
                     message: Error logging in
   /user/auth/google:
     get:
@@ -174,11 +164,11 @@ paths:
                 message: User logged out successfully
         "400":
           description: Error logging out
-  /user/refresh:
+  /user/refreshToken:
     get:
       tags:
       - user
-      summary: Refreshes the user token
+      summary: Refreshes the user token DONE
       description: Refreshes the user token
       operationId: refresh
       responses:
@@ -187,17 +177,27 @@ paths:
           content:
             application/json:
               example:
-                token: <JWT_TOKEN_HERE>
+                message: 'Token refreshed successfully'
         "401":
-          description: "Unauthorized, invalid credentials"
+          description: "Unauthorized"
+          content:
+            application/json:
+              example:
+                message: 'Unauthorized'
+        "404":
+          description: "Invalid credentials"
+          content:
+            application/json:
+              example:
+                message: 'User not found'
         "500":
           description: Internal Server Error
   /user/verify/{verificationToken}:
-    patch:
+    get:
       tags:
       - user
-      summary: Email Verification
-      description: Verify user email DONE
+      summary: Email Verification DONE
+      description: Verify user email
       operationId: verifyUser
       parameters:
       - name: verificationToken
@@ -213,7 +213,7 @@ paths:
           content:
             application/json:
               example:
-                message: Email verified successfully
+                message: User verified successfully
         "400":
           description: "Error verifying user"
   /user/u/{username}:
@@ -398,7 +398,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserSettings'
+              $ref: '#/components/schemas/UserSettingsPut'
         required: true
       responses:
         "200":
@@ -432,21 +432,30 @@ paths:
             application/json:
               example:
                 message: Password reset email sent successfully
-        "404":
-          description: Username or email does not exist
+        "400":
+          description: Username and Email are required
           content:
             application/json:
               example:
-                message: Username or email does not exist
+                message: Username and Email are required
+        "404":
+          description: Username or Email not found
+          content:
+            application/json:
+              example:
+                message: Username or Email not found
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: There was an error sending the email. Try again later
       x-swagger-router-controller: User
   /user/change-password:
     patch:
       tags:
       - user
-      summary: Change password (for when user doesn't remember password and follows
-        link in email)
+      summary: Change password for the user when he is logged in
       operationId: changePassword
       requestBody:
         content:
@@ -456,21 +465,36 @@ paths:
         required: true
       responses:
         "200":
-          description: Password changed successfully
+          description: Password has been changed successfully
           content:
             application/json:
               example:
                 message: Password changed successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                OldPassword-NewPassword-ConfirmPasswordRequired:
+                  value:
+                    message: Old password, new password and confirm password are required
+                Incorrect old password:
+                  value:
+                    message: Old password is incorrect
+                PasswordMismatch:
+                  value:
+                    message: Passwords do not match
+                PasswordRequirments:
+                  value:
+                    message: Password must contain at least one lower and upper case letters and at least one digit and must be at least 8 characters
         "500":
           description: Internal Server Error
       x-swagger-router-controller: User
-  /user/reset-password:
+  /user/reset-password/{token}:
     patch:
       tags:
       - user
-      summary: Send an email to the user to reset password
+      summary: Take user's new password providing the token created from forgot-password
       operationId: resetPassword
       requestBody:
         description: Send reset link
@@ -479,6 +503,14 @@ paths:
             schema:
               $ref: '#/components/schemas/ResetPassword'
         required: true
+      parameters:
+      - name: token
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
       responses:
         "200":
           description: Password reset email sent successfully
@@ -486,8 +518,26 @@ paths:
             application/json:
               example:
                 message: Password reset email sent successfully
-        "401":
-          description: User must be logged in
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Token-Password-ConfirmPasswordRequired:
+                  value:
+                    message: Token, password, and confirm password are required
+                TokenExpired:
+                  value:
+                    message: Token has expired
+                InvalidToken:
+                  value:
+                    message: Token is invalid
+                PasswordMismatch:
+                  value:
+                    message: Passwords do not match
+                PasswordRequirments:
+                  value:
+                    message: Password must contain at least one lower and upper case letters and at least one digit and must be at least 8 characters
         "500":
           description: Internal Server Error
       x-swagger-router-controller: User
@@ -511,8 +561,14 @@ paths:
             application/json:
               example:
                 message: Username reminder email sent successfully
+        "400":
+          description: Email is required
+          content:
+            application/json:
+              example:
+                message: Email is required
         "404":
-          description: Email does not exist
+          description: Email not found
           content:
             application/json:
               example:
@@ -535,15 +591,27 @@ paths:
         required: true
       responses:
         "200":
-          description: Email changed successfully
+          description: Email has been changed successfully
           content:
             application/json:
               example:
                 message: Email changed successfully
         "400":
-          description: Invalid Email
-        "401":
-          description: "Unauthorized, user must be logged in"
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Password-NewEmailRequired:
+                  value:
+                    message: Password and new email are required
+                IncorrectPassword:
+                  value:
+                    message: Password is incorrect
+                InvalidEmail:
+                  value:
+                    message: Email is invalid
+
+        
         "500":
           description: Internal Server Error
       x-swagger-router-controller: User
@@ -569,7 +637,6 @@ paths:
           content:
             application/json:
               example:
-                status: OK
                 message: User blocked
         "400":
           description: Bad requests for blocking user
@@ -578,15 +645,12 @@ paths:
               examples:
                 UsernameIsRequired:
                   value:
-                    status: Bad Request
                     message: Username is required
                 UserCannotBlockThemselves:
                   value:
-                    status: Bad Request
                     message: User cannot block themselves
                 UserAlreadyBlocksUser:
                   value:
-                    status: Bad Request
                     message: User already blocks the user
         "404":
           description: For nonexistent user
@@ -595,18 +659,15 @@ paths:
               examples:
                 UserDoesNotExist:
                   value:
-                    status: Not Found
                     message: User does not exist
                 UserToBeBlockedDoesNotExist:
                   value:
-                    status: Not found
                     message: User to be blocked does not exist
         "500":
           description: Internal Server Error
           content:
             application/json:
               example:
-                status: Internal server error
                 message: An error occurred while blocking the user
       x-swagger-router-controller: User
     delete:
@@ -630,7 +691,6 @@ paths:
           content:
             application/json:
               example:
-                status: OK
                 message: User unblocked
         "400":
           description: Bad requests for unblocking user
@@ -639,11 +699,9 @@ paths:
               examples:
                 UsernameIsRequired:
                   value:
-                    status: Bad Request
                     message: Username is required
                 UserCannotUnblockThemselves:
                   value:
-                    status: Bad Request
                     message: User cannot unblock themselves
         "404":
           description: For nonexistent user
@@ -652,18 +710,15 @@ paths:
               examples:
                 UserDoesNotExist:
                   value:
-                    status: Not Found
                     message: User does not exist
                 UserToBeUnblockedDoesNotExist:
                   value:
-                    status: Not found
                     message: User to be unblocked does not exist
         "500":
           description: Internal Server Error
           content:
             application/json:
               example:
-                status: Internal server error
                 message: An error occurred while unblocking the user
       x-swagger-router-controller: User
   /user/follow/{username}:
@@ -688,7 +743,6 @@ paths:
           content:
             application/json:
               example:
-                status: OK
                 message: User followed
         "400":
           description: Bad requests for blocking user
@@ -697,19 +751,15 @@ paths:
               examples:
                 UsernameIsRequired:
                   value:
-                    status: Bad Request
                     message: Username is required
                 UserCannotFollowThemselves:
                   value:
-                    status: Bad Request
                     message: User cannot follow themselves
                 UserAlreadyFollowsUser:
                   value:
-                    status: Bad Request
                     message: User already follows the user
                 UserAlreadyBeingFollowedByUser:
                   value:
-                    status: Bad Request
                     message: User already is being followed by the user
         "404":
           description: For nonexistent user
@@ -718,18 +768,15 @@ paths:
               examples:
                 UserDoesNotExist:
                   value:
-                    status: Not Found
                     message: User does not exist
                 UserToBeFollowedDoesNotExist:
                   value:
-                    status: Not found
                     message: User to be followed does not exist
         "500":
           description: Internal Server Error
           content:
             application/json:
               example:
-                status: Internal server error
                 message: An error occurred while following the user
       x-swagger-router-controller: User
     delete:
@@ -752,7 +799,6 @@ paths:
           content:
             application/json:
               example:
-                status: OK
                 message: User unfollowed
         "400":
           description: Bad requests for blocking user
@@ -761,11 +807,9 @@ paths:
               examples:
                 UsernameIsRequired:
                   value:
-                    status: Bad Request
                     message: Username is required
                 UserAlreadyUnfollowsUser:
                   value:
-                    status: Bad Request
                     message: User already unfollows the user
         "404":
           description: For nonexistent user
@@ -775,18 +819,15 @@ paths:
                 examples:
                 UserDoesNotExist:
                   value:
-                    status: Not Found
                     message: User does not exist
                 UserToBeFollowedDoesNotExist:
                   value:
-                    status: Not found
                     message: User to be followed does not exist
         "500":
           description: Internal Server Error
           content:
             application/json:
               example:
-                status: Internal server error
                 message: An error occurred while unfollowing the user
       x-swagger-router-controller: User
   /user/is-available/{username}:
@@ -810,7 +851,6 @@ paths:
           content:
             application/json:
               example:
-                status: OK
                 message: Username is available
                 available: true
         "400":
@@ -818,14 +858,12 @@ paths:
           content:
             application/json:
               example:
-                status: Bad Request
                 message: Username is required
         "409":
           description: "Username is not available"
           content:
             application/json:
               example:
-                status: Conflict
                 message: Username is not available
                 available: false
         "500":
@@ -833,7 +871,6 @@ paths:
           content:
             application/json:
               example:
-                status: Internal server error
                 message: An error occurred while checking if the username is available
       x-swagger-router-controller: User
   /user/clear-history:
@@ -926,7 +963,6 @@ paths:
           content:
             application/json:
               schema:
-                status: OK
                 message: User history retrieved successfully
                 $ref: '#/components/schemas/Post'
         "401":
@@ -934,14 +970,12 @@ paths:
           content:
             application/json:
               example:
-                status: Unauthorized
                 message: User must be logged in
         "500":
           description: Internal Server Error
           content:
             application/json:
               example:
-                status: Internal server error
                 message: An error occurred while retrieving the user history
       x-swagger-router-controller: User
   /user/saved-posts:
@@ -957,7 +991,6 @@ paths:
           content:
             application/json:
               schema:
-                status: OK
                 message: User saved posts retrieved successfully
                 $ref: '#/components/schemas/Post'
         "401":
@@ -965,14 +998,12 @@ paths:
           content:
             application/json:
               example:
-                status: Unauthorized
                 message: User must be logged in
         "500":
           description: Internal Server Error
           content:
             application/json:
               example:
-                status: Internal server error
                 message: An error occurred while retrieving the user saved posts
       x-swagger-router-controller: User
   /post:
@@ -1043,7 +1074,6 @@ paths:
           content:
             application/json:
               schema:
-                status: OK
                 message: Post data retrieved successfully
                 $ref: '#/components/schemas/Post'
         "401":
@@ -1051,21 +1081,18 @@ paths:
           content:
             application/json:
               example:
-                status: Unauthorized
                 message: User must be logged in
         "404":
           description: Post not found
           content:
             application/json:
               example:
-                status: Not Found
                 message: Post not found
         "500":
           description: Internal Server Error
           content:
             application/json:
               example:
-                status: Internal server error
                 message: An error occurred while retrieving the post
       x-swagger-router-controller: Post
     delete:
@@ -1717,7 +1744,6 @@ paths:
           content:
             application/json:
               schema:
-                status: OK
                 message: Top Subreddits retrieved successfully
                 $ref: '#/components/schemas/Community'
         "500":
@@ -1725,7 +1751,6 @@ paths:
           content:
             application/json:
               example:
-                status: Internal server error
                 message: An error occurred while retrieving top subreddits
       x-swagger-router-controller: Subreddit
   /notification/all:
@@ -2300,7 +2325,6 @@ paths:
           content:
             application/json:
               schema:
-                status: OK
                 message: list of comments
                 $ref: '#/components/schemas/Feed'
         "500":
@@ -2308,7 +2332,6 @@ paths:
           content:
             application/json:
               example:
-                status: Internal server error
                 message: An error occurred while retrieving comments
       x-swagger-router-controller: Search
   /search/posts:
@@ -2333,7 +2356,6 @@ paths:
           content:
             application/json:
               schema:
-                status: OK
                 message: list of posts
                 $ref: '#/components/schemas/Feed'
         "500":
@@ -2341,7 +2363,6 @@ paths:
           content:
             application/json:
               example:
-                status: Internal server error
                 message: An error occurred while retrieving posts
       x-swagger-router-controller: Search
   /search/subreddits:
@@ -2366,7 +2387,6 @@ paths:
           content:
             application/json:
               schema:
-                status: OK
                 message: list of subreddits
                 $ref: '#/components/schemas/Community'
         "500":
@@ -2374,7 +2394,6 @@ paths:
           content:
             application/json:
               example:
-                status: Internal server error
                 message: An error occurred while retrieving subreddits
       x-swagger-router-controller: Search
   /search/users:
@@ -2399,7 +2418,6 @@ paths:
           content:
             application/json:
               schema:
-                status: OK
                 message: list of users
                 $ref: '#/components/schemas/User'
         "500":
@@ -2407,7 +2425,6 @@ paths:
           content:
             application/json:
               example:
-                status: Internal server error
                 message: An error occurred while retrieving users
       x-swagger-router-controller: Search
   /search/hashtags:
@@ -2432,7 +2449,6 @@ paths:
           content:
             application/json:
               schema:
-                status: OK
                 message: list of hashtags
                 $ref: '#/components/schemas/Feed'
         "500":
@@ -2440,7 +2456,6 @@ paths:
           content:
             application/json:
               example:
-                status: Internal server error
                 message: An error occurred while retrieving hashtags
       x-swagger-router-controller: Search
 components:
@@ -2481,6 +2496,134 @@ components:
         - $ref: '#/components/schemas/Post'
         - $ref: '#/components/schemas/Post'
     UserSettings:
+      type: object
+      properties:
+        account:
+          type: object
+          properties:
+            email:
+              type: string
+              example: user@gmail.com
+            gender:
+              type: string
+              example: Man
+            google:
+              type: boolean
+              example: true
+        profile:
+          type: object
+          properties:
+            displayName:
+              type: string
+              example: "John Doe"
+            about:
+              type: string
+              example: "I am a developer"
+            socialLinks:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserSettings_preferences_socialLinks'
+            avatar:
+              type: string
+              example: drive.creddit.com/test
+            banner:
+              type: string
+              example: drive.creddit.com/test
+            isNSFW:
+              type: boolean
+              example: true
+            allowFollow:
+              type: boolean
+              example: true
+            isContentVisible:
+              type: boolean
+              example: true
+        safetyAndPrivacy:
+          type: object
+          properties:
+            blockedUsers:
+              type: array
+              items:
+                type: string
+                example: "user1"
+            mutedCommunities:
+              type: array
+              items:
+                type: string
+                example: "community1"
+        feedSettings:
+          type: object
+          properties:
+            showAdultContent:
+              type: boolean
+              example: true
+            autoPlayMedia:
+              type: boolean
+              example: true
+            communityThemes:
+              type: boolean
+              example: true
+            communityContentSort:
+              type: string
+              enum:
+              - top
+              - rising
+              - hot
+              - new
+            globalContentView:
+              type: string
+              enum:
+              - card
+              - classic
+              - compact
+            openNewTab:
+              type: boolean
+              example: true
+        notifications:
+          type: object
+          properties:
+            mentionsNotifs:
+              type: boolean
+              example: true
+            commentsNotifs:
+              type: boolean
+              example: true
+            postsUpvotesNotifs:
+              type: boolean
+              example: true
+            repliesNotifs:
+              type: boolean
+              example: true
+            newFollowersNotifs:
+              type: boolean
+              example: true
+            postNotifs:
+              type: boolean
+              example: true
+            cakeDayNotifs:
+              type: boolean
+              example: true
+            modNotifs:
+              type: boolean
+              example: true
+            moderatorInCommunities:
+              type: array
+              items:
+                type: string
+                example: "community1"
+            invitationNotifs:
+              type: boolean
+              example: true
+        email:
+          type: object
+          properties:
+            followEmail:
+              type: boolean
+              example: true
+            chatEmail:
+              type: boolean
+              example: true
+    UserSettingsPut:
       type: object
       properties:
         displayName:
@@ -2554,7 +2697,7 @@ components:
       properties:
         newPassword:
           type: string
-          example: ABC123
+          example: ABCa123456
     ForgotUsername:
       type: object
       properties:
