@@ -893,6 +893,27 @@ paths:
               example:
                 message: An error occurred while checking if the username is available
       x-swagger-router-controller: User
+  /user/generate-username:
+    get:
+      tags:
+      - user
+      summary: Generate a random valid username
+      description: Generate a random valid username for registration.
+      operationId: generateUsername
+      responses:
+        "200":
+          description: Username generated successfully
+          content:
+            application/json:
+              example:
+                message: Username generated
+                username: randomUsername
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while generating the username
   /user/clear-history:
     delete:
       tags:
