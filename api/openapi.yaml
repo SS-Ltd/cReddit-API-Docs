@@ -1054,21 +1054,63 @@ paths:
       summary: Create post
       operationId: createPost
       requestBody:
-        description: Created post object
+        description: post to be created
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Post'
+              oneOf:
+                - $ref: '#/components/schemas/CreatePost'
+                - $ref: '#/components/schemas/CreateLink'
+                - $ref: '#/components/schemas/CreateImage'
+                - $ref: '#/components/schemas/CreatePoll'
+            example:
+              check Schema -> CreatePost, CreateLink, CreateImage, CreatePoll
         required: true
       responses:
         "200":
-          description: Post created successfully
+          description: Post created successfully (while ignoring additional fields)
           content:
             application/json:
               example:
-                message: Post created successfully
+                message: Post created successfully (while ignoring additional fields)
+        "400":
+          description: Missing required fields
+          content:
+            application/json:
+              examples:
+                MissingRequiredFields:
+                  value:
+                    message: Post type, community name, and title are required
+                InvalidPostType:
+                  value:
+                    message: Invalid type
+                MissingImages&Video:
+                  value:
+                    message: Images or video are required
+                MaximumImagesLimit:
+                  value:
+                    message: Maximum of 10 images or videos
+                InvalidURL:
+                  value:
+                    message: Invalid URL
+                InvalidPollOptionsFormat:
+                  value:
+                    message: Poll options must be an array
+                InvalidPollOptionsLength:
+                  value:
+                    message: Poll options must have at least 2 options
+                InvalidExpirationDate:
+                  value:
+                    message: Invalid expiration date
+                InvalidCommunity:
+                  value:
+                    message: Community not found
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Error editing post
       x-swagger-router-controller: Post
   /post/{postId}:
     get:
@@ -1091,6 +1133,7 @@ paths:
           content:
             application/json:
               schema:
+                status: OK
                 message: Post data retrieved successfully
                 $ref: '#/components/schemas/Post'
         "401":
@@ -1098,18 +1141,21 @@ paths:
           content:
             application/json:
               example:
+                status: Unauthorized
                 message: User must be logged in
         "404":
           description: Post not found
           content:
             application/json:
               example:
+                status: Not Found
                 message: Post not found
         "500":
           description: Internal Server Error
           content:
             application/json:
               example:
+                status: Internal server error
                 message: An error occurred while retrieving the post
       x-swagger-router-controller: Post
     delete:
@@ -1133,12 +1179,29 @@ paths:
             application/json:
               example:
                 message: Post deleted successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
-        "404":
+        "400":
           description: Post not found
+          content:
+            application/json:
+              examples:
+                PostNotFound:
+                  value:
+                    message: Post is not found
+                InvalidPostId:
+                  value:
+                    message: Invalid post ID
+        "403":
+          description: You are not authorized to delete this post
+          content:
+            application/json:
+              example:
+                message: You are not authorized to delete this post
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Invalid image or video URLs found in post
       x-swagger-router-controller: Post
     patch:
       tags:
@@ -1154,11 +1217,11 @@ paths:
         schema:
           type: string
       requestBody:
-        description: Edit post object
+        description: ONLY PERMITTED FOR POST & POLL TYPES
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EditPost'
+                $ref: '#/components/schemas/EditPost'
         required: true
       responses:
         "200":
@@ -1167,8 +1230,35 @@ paths:
             application/json:
               example:
                 message: Post edited successfully
+        "400":
+          description: Post edited successfully
+          content:
+            application/json:
+              examples:
+                PostNotFound:
+                  value:
+                    message: Post is not found
+                NoContent:
+                  value:
+                    message: No content to update
+                InvalidPostId:
+                  value:
+                    message: Invalid post ID
+                InvalidPostType:
+                  value:
+                    message: You cannot edit this post type
+        "403":
+          description: You are not authorized to edit this post
+          content:
+            application/json:
+              example:
+                message: You are not authorized to edit this post
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Error editing post
       x-swagger-router-controller: Post
   /post/{postId}/comments:
     get:
@@ -1235,7 +1325,7 @@ paths:
     patch:
       tags:
       - post
-      summary: Save post
+      summary: Save/unsave post
       operationId: savePost
       parameters:
       - name: postId
@@ -1246,20 +1336,47 @@ paths:
         schema:
           type: string
       requestBody:
-        description: Created post object
+        description: action to save/unsave post
         content:
           application/json:
-            example:
-              isSaved: true
+            schema:
+                $ref: '#/components/schemas/SavePost'
       responses:
         "200":
-          description: Post saved successfully
+          description: Post saved/unsaved successfully
           content:
             application/json:
               example:
-                message: Post saved successfully
+                message: Post saved/unsaved successfully
+        "400":
+          description: Post not found
+          content:
+            application/json:
+              examples:
+                MissingRequiredField:
+                  value:
+                    message: isSaved field is required
+                InvalidPostId:
+                  value:
+                    message: Invalid post ID
+                PostNotFound:
+                  value:
+                    message: Post is not found
+                UserNotFound:
+                  value:
+                    message: User is not found
+                PostAlreadySaved:
+                  value:
+                    message: Post is already saved
+                PostNotSaved:
+                  value:
+                    message: Post is not saved
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Error saving post
       x-swagger-router-controller: Post
   /post/{postId}/lock:
     patch:
@@ -1279,17 +1396,38 @@ paths:
         description: Created post object
         content:
           application/json:
-            example:
-              isLocked: true
+            schema:
+              $ref: '#/components/schemas/LockPost'
       responses:
         "200":
-          description: Post lock changed successfully
+          description: Post lock/unlocked successfully
           content:
             application/json:
               example:
                 message: Post lock changed successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                MissingRequiredField:
+                  value:
+                    message: isLocked field is required
+                InvalidPostId:
+                  value:
+                    message: Invalid post ID
+                PostNotFound:
+                  value:
+                    message: Post is not found
+                PostAlreadyLocked/Unlocked:
+                  value:
+                    message: Post is already locked/unlocked
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Error saving post
       x-swagger-router-controller: Post
   /post/{postId}/hidden:
     patch:
@@ -1309,8 +1447,8 @@ paths:
         description: Hides post object
         content:
           application/json:
-            example:
-              isHidden: true
+            schema:
+              $ref: '#/components/schemas/HidePost'
       responses:
         "200":
           description: Post visibility changed successfully
@@ -1318,8 +1456,35 @@ paths:
             application/json:
               example:
                 message: Post visibility changed successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                MissingRequiredField:
+                  value:
+                    message: isHidden field is required
+                InvalidPostId:
+                  value:
+                    message: Invalid post ID
+                PostNotFound:
+                  value:
+                    message: Post is not found
+                UserNotFound:
+                  value:
+                    message: User is not found
+                PostAlreadyHidden:
+                  value:
+                    message: Post is already hidden
+                PostNotHidden:
+                  value:
+                    message: Post is not hidden
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Error hiding post
       x-swagger-router-controller: Post
   /post/{postId}/follow:
     patch:
@@ -2944,6 +3109,119 @@ components:
           example: false
         children:
           type: object
+    CreatePost:
+      type: object
+      properties:
+        type:
+          type: string
+          example: Post
+        commumityName:
+          type: string
+          example: cReddit_SW_Project
+        title:
+          type: string
+          example: Hello World
+        content:
+          type: string
+          example: This is my content
+        isSpoiler:
+          type: boolean
+          example: false
+        isNSFW:
+          type: boolean
+          example: false
+    CreateImage:
+      type: object
+      properties:
+        type:
+          type: string
+          example: Post
+        commumityName:
+          type: string
+          example: cReddit_SW_Project
+        title:
+          type: string
+          example: Hello World
+        isSpoiler:
+          type: boolean
+          example: false
+        isNSFW:
+          type: boolean
+          example: false
+    CreateLink:
+      type: object
+      properties:
+        type:
+          type: string
+          example: Post
+        commumityName:
+          type: string
+          example: cReddit_SW_Project
+        title:
+          type: string
+          example: Hello World
+        content:
+          type: string
+          example: http://www.google.com
+        isSpoiler:
+          type: boolean
+          example: false
+        isNSFW:
+          type: boolean
+          example: false
+    CreatePoll:
+      type: object
+      properties:
+        type:
+          type: string
+          example: Post
+        commumityName:
+          type: string
+          example: cReddit_SW_Project
+        title:
+          type: string
+          example: Hello World
+        content:
+          type: string
+          example: This is my content
+        pollOptions:
+          type: array
+          items:
+            type: string
+            example: Option 1, Option 2, Option 3
+        expirationDate:
+          type: string
+          example: 06/03/2024 22:10:03
+        isSpoiler:
+          type: boolean
+          example: false
+        isNSFW:
+          type: boolean
+          example: false
+    EditPost:
+      type: object
+      properties:
+        content:
+          type: string
+          example: This is my content
+    SavePost:
+      type: object
+      properties:
+        isSaved:
+          type: boolean
+          example: true
+    HidePost:
+      type: object
+      properties:
+        isHidden:
+          type: boolean
+          example: true
+    LockPost:
+      type: object
+      properties:
+        isLocked:
+          type: boolean
+          example: true
     Post:
       type: object
       properties:
@@ -3034,18 +3312,6 @@ components:
         isLocked: true
         communityProfilePicture: drive.creddit.com/test
         communityId: 350651awd651awd
-    EditPost:
-      type: object
-      properties:
-        content:
-          type: string
-          example: This is my content
-        isNSFW:
-          type: boolean
-          example: false
-        isSpoiler:
-          type: boolean
-          example: false
     Community:
       type: object
       properties:
