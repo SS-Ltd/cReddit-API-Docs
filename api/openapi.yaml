@@ -998,13 +998,13 @@ paths:
               example:
                 message: An error occurred while retrieving the user history
       x-swagger-router-controller: User
-  /user/saved-posts:
+  /user/saved:
     get:
       tags:
       - user
-      summary: Get user saved posts
-      description: Retrieve user's saved posts.
-      operationId: getSavedPosts
+      summary: Get user saved posts and comments
+      description: Retrieve user's saved posts and comments.
+      operationId: getSaved
       responses:
         "200":
           description: User saved posts retrieved successfully
@@ -1013,12 +1013,40 @@ paths:
               schema:
                 message: User saved posts retrieved successfully
                 $ref: '#/components/schemas/Post'
-        "401":
-          description: Unauthorized, user must be logged in
+        "404":
+          description: user not found
           content:
             application/json:
               example:
-                message: User must be logged in
+                message: user not found
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while retrieving the user saved posts
+      x-swagger-router-controller: User
+  /user/hidden-posts:
+   get:
+      tags:
+      - user
+      summary: Get user hidden posts
+      description: Retrieve user's hidden posts.
+      operationId: getHiddenPosts
+      responses:
+        "200":
+          description: User hidden posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                message: User saved posts retrieved successfully
+                $ref: '#/components/schemas/Post'
+        "404":
+          description: user not found
+          content:
+            application/json:
+              example:
+                message: user not found
         "500":
           description: Internal Server Error
           content:
@@ -1484,7 +1512,7 @@ paths:
       tags:
       - subreddit
       summary: Retrieve edited posts for a subreddit
-      description: Retrieve the post in this subreddit "HOT".
+      description: Retrieve the edited posts in this subreddit.
       operationId: getEditedPosts
       parameters:
       - name: subreddit
@@ -1500,8 +1528,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Feed'
-        "401":
+                $ref: '#/components/schemas/Post'
+        "404":
           description: No such subreddit is found
         "500":
           description: Internal Server Error
@@ -2924,95 +2952,88 @@ components:
         children:
           type: object
     Post:
-      type: object
-      properties:
-        postId:
-          type: string
-          example: 350651awd651awd
-        ownerId:
-          type: string
-          example: 350651awd651awd
-        communityId:
-          type: string
-          example: 350651awd651awd
-        communityProfilePicture:
-          type: string
-          example: drive.creddit.com/test
-        ownerProfilePicture:
-          type: string
-          example: drive.creddit.com/test
-        uploadDate:
-          type: string
-          example: 06/03/2024 22:10:03
-        title:
-          type: string
-          example: Hello World
-        content:
-          type: string
-          example: This is my content
-        comments:
-          type: integer
-          example: 50
-        upvotes:
-          type: integer
-          example: 1500
-        downvotes:
-          type: integer
-          example: 100
-        isUpvoted:
-          type: boolean
-          example: true
-        isDownvoted:
-          type: boolean
-          example: false
-        isNSFW:
-          type: boolean
-          example: false
-        isSpoiler:
-          type: boolean
-          example: false
-        isSaved:
-          type: boolean
-          example: true
-        isLocked:
-          type: boolean
-          example: true
-        isFollowed:
-          type: boolean
-          example: true
-        pollVotes:
-          $ref: '#/components/schemas/Post_pollVotes'
-        children:
-          type: array
-          items:
-            oneOf:
-            - $ref: '#/components/schemas/SinglePost'
-      example:
-        comments: 50
-        upvotes: 1500
-        pollVotes:
-          option3: 40
-          option1: 10
-          option2: 20
-        isDownvoted: false
-        isNSFW: false
-        isUpvoted: true
-        postId: 350651awd651awd
-        ownerId: 350651awd651awd
-        title: Hello World
-        downvotes: 100
-        content: This is my content
-        isFollowed: true
-        isSpoiler: false
-        ownerProfilePicture: drive.creddit.com/test
-        uploadDate: 06/03/2024 22:10:03
-        children:
-        - ""
-        - ""
-        isSaved: true
-        isLocked: true
-        communityProfilePicture: drive.creddit.com/test
-        communityId: 350651awd651awd
+      type: array
+      items:
+        type: object
+        properties:
+          postId:
+            type: string
+            example: 350651awd651awd
+          username:
+            type: string
+            example: Sayed
+          communityName:
+            type: string
+            example: Watermelon
+          uploadDate:
+            type: string
+            example: 06/03/2024 22:10:03
+          title:
+            type: string
+            example: Hello World
+          content:
+            type: string
+            example: This is my content
+          comments:
+            type: integer
+            example: 50
+          upvotes:
+            type: integer
+            example: 1500
+          downvotes:
+            type: integer
+            example: 100
+          isNSFW:
+            type: boolean
+            example: false
+          isSpoiler:
+            type: boolean
+            example: false
+          isLocked:
+            type: boolean
+            example: true
+          isEdited:
+            type: boolean
+            example: false
+          followers:
+            type: array
+            items: 
+              type: object
+              properties:
+                username: 
+                  type: string
+                  example: Mosaad
+          pollVotes:
+            $ref: '#/components/schemas/Post_pollVotes'
+          children:
+            type: array
+            items:
+              oneOf:
+              - $ref: '#/components/schemas/SinglePost'
+        example:
+          comments: 50
+          upvotes: 1500
+          pollVotes:
+            option3: 40
+            option1: 10
+            option2: 20
+          isNSFW: false
+          postId: 350651awd651awd
+          username: Ya rb n5ls
+          title: Hello World
+          downvotes: 100
+          content: This is my content
+          isSpoiler: false
+          uploadDate: 06/03/2024 22:10:03
+          children:
+          - ""
+          - ""
+          followers:
+          - "Mosaad"
+          - "BeefBurger"
+          communityName: Watermelon
+          profilePic: https://loremflickr.com/640/480?lock=5287558068043776
+          savedAt: 2024-07-13T22:44:11.445Z
     EditPost:
       type: object
       properties:
@@ -3028,39 +3049,51 @@ components:
     Community:
       type: object
       properties:
+        owner:
+          type: string
+          example: Logan
         name:
           type: string
           example: r/cReddit_SW_Project
-        profilePicture:
+        icon:
           type: string
           example: drive.creddit.com/test
+        topic:
+          type: string
+          example: Lorem ipsum
+        isNSFW:
+          type: boolean
+          example: false
         banner:
           type: string
           example: drive.creddit.com/test
         members:
           type: integer
           example: 1000
+        suggestedSort:
+          type: string
+          example: Best
+        bannedUsers:
+          type: array
+          items:
+            type: string
+            example: "[\"user 1\",\"user 2\",\"user 3\"]"
+        mutedUsers:
+          type: array
+          items:
+            type: string
+            example: "[\"user 1\",\"user 2\",\"user 3\"]"
         rules:
           type: array
           items:
             type: string
             example: "[\"Rule 1\",\"Rule 2\",\"Rule 3\"]"
-        mods:
+        moderators:
           type: array
           items:
             type: string
             example: "[\"SlaxSplash\",\"Baroudy 14\",\"No_Animator_8210\"]"
-      example:
-        profilePicture: drive.creddit.com/test
-        mods:
-        - "[\"SlaxSplash\",\"Baroudy 14\",\"No_Animator_8210\"]"
-        - "[\"SlaxSplash\",\"Baroudy 14\",\"No_Animator_8210\"]"
-        members: 1000
-        name: r/cReddit_SW_Project
-        banner: drive.creddit.com/test
-        rules:
-        - "[\"Rule 1\",\"Rule 2\",\"Rule 3\"]"
-        - "[\"Rule 1\",\"Rule 2\",\"Rule 3\"]"
+      
     SubredditSettings:
       type: object
       properties:
