@@ -3318,12 +3318,6 @@ components:
         isNSFW:
           type: boolean
           example: false
-    EditPost:
-      type: object
-      properties:
-        content:
-          type: string
-          example: This is my content
     SavePost:
       type: object
       properties:
@@ -3401,7 +3395,7 @@ components:
             items:
               oneOf:
               - $ref: '#/components/schemas/SinglePost'
-     EditPost:
+    EditPost:
       type: object
       properties:
         content:
