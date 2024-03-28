@@ -9,8 +9,6 @@ info:
 servers:
 - url: https://virtserver.swaggerhub.com/cReddit/cReddit/1.0.0
   description: SwaggerHub API Auto Mocking
-security:
-- jwt_auth: []
 tags:
 - name: user
   description: User Management
@@ -29,7 +27,7 @@ paths:
     post:
       tags:
       - user
-      summary: Create user (Signup) DONE
+      summary: Create user (Signup)
       description: Register a new user.
       operationId: createUser
       requestBody:
@@ -72,7 +70,7 @@ paths:
     delete:
       tags:
       - user
-      summary: Delete a user DONE
+      summary: Delete a user
       operationId: deleteUser
       responses:
         "200":
@@ -97,7 +95,7 @@ paths:
     post:
       tags:
       - user
-      summary: Logs user into the system DONE
+      summary: Logs user into the system
       description: Log in with username and password.
       operationId: login
       requestBody:
@@ -134,7 +132,7 @@ paths:
     post:
       tags:
       - user
-      summary: Logs user into the system using google services if no user exists with the email, a new user is created DONE
+      summary: Logs user into the system using google services if no user exists with the email, a new user is created
       description: Log in with google OAuth token
       operationId: loginGoogle
       requestBody:
@@ -173,7 +171,9 @@ paths:
     get:
       tags:
       - user
-      summary: Logs out current logged in user session DONE
+      summary: Logs out current logged in user session
+      security: 
+        - cookie_auth: []
       operationId: logout
       responses:
         "200":
@@ -188,7 +188,9 @@ paths:
     get:
       tags:
       - user
-      summary: Refreshes the user token DONE
+      summary: Refreshes the user token
+      security: 
+        - cookie_auth: []
       description: Refreshes the user token
       operationId: refresh
       responses:
@@ -216,7 +218,7 @@ paths:
     get:
       tags:
       - user
-      summary: Email Verification DONE
+      summary: Email Verification
       description: Verify user email
       operationId: verifyUser
       parameters:
@@ -257,7 +259,7 @@ paths:
           content:
             application/json:
               example:
-                username: u/theUser
+                username: theUser
                 displayName: theUser
                 about: Hello to my page
                 email: john@email.com
@@ -393,6 +395,8 @@ paths:
       tags:
       - user
       summary: Get user settings
+      security: 
+        - cookie_auth: []
       description: Retrieve user settings to display
       operationId: getUserSettings
       responses:
@@ -411,6 +415,8 @@ paths:
       tags:
       - user
       summary: Edit user settings
+      security: 
+        - cookie_auth: []
       description: Update user settings.
       operationId: editUserSettings
       requestBody:
@@ -476,6 +482,8 @@ paths:
       tags:
       - user
       summary: Change password for the user when he is logged in
+      security: 
+        - cookie_auth: []
       operationId: changePassword
       requestBody:
         content:
@@ -603,6 +611,8 @@ paths:
       summary: Allows user to change email
       description: Change user email address.
       operationId: changeEmail
+      security: 
+        - cookie_auth: []
       requestBody:
         content:
           application/json:
@@ -640,6 +650,8 @@ paths:
       tags:
       - user
       summary: Block User
+      security: 
+        - cookie_auth: []
       description: Block a specific user.
       operationId: block
       parameters:
@@ -748,6 +760,8 @@ paths:
       summary: Follow User
       description: Follow a specific user.
       operationId: follow
+      security: 
+        - cookie_auth: []
       parameters:
       - name: username
         in: path
@@ -919,6 +933,8 @@ paths:
       tags:
       - user
       summary: Clear user history
+      security: 
+        - cookie_auth: []
       description: Clear user browsing history.
       operationId: clearHistory
       responses:
@@ -933,15 +949,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: User
-  /user/block-community/{subreddit}:
+  /user/{subredditName}/block-community:
     post:
       tags:
       - user
       summary: Block Community
       description: Block a specific community.
+      security: 
+        - cookie_auth: []
       operationId: blockCommunity
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         description: Name of the community to block
         required: true
@@ -969,7 +987,7 @@ paths:
       summary: Unblock
       operationId: unblockCommunity
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         description: Name of the community to Unblock
         required: true
@@ -996,6 +1014,8 @@ paths:
       tags:
       - user
       summary: Get user history
+      security: 
+        - cookie_auth: []
       description: Retrieve user history.
       operationId: getHistory
       responses:
@@ -1024,6 +1044,8 @@ paths:
       tags:
       - user
       summary: Get user saved posts
+      security: 
+        - cookie_auth: []
       description: Retrieve user's saved posts.
       operationId: getSavedPosts
       responses:
@@ -1047,24 +1069,45 @@ paths:
               example:
                 message: An error occurred while retrieving the user saved posts
       x-swagger-router-controller: User
+  /user/moderator-in:
+    get:
+      tags:
+      - user
+      summary: Retrieve subreddits that user is a moderator
+      security: 
+        - cookie_auth: []
+      description: Retrieve subreddits that user is a moderator
+      operationId: getSubredditMod
+      responses:
+        "200":
+          description: list of subreddits
+          content:
+            application/json:
+              example:
+                id: "1"
+                name: Egypt
+                noOfMembers: "100"
+        "401":
+          description: No such subreddit is found
+        "500":
+          description: Internal Server Error
+      x-swagger-router-controller: Subreddit
   /post:
     post:
       tags:
-      - post
+        - post
       summary: Create post
+      security: 
+        - cookie_auth: []
       operationId: createPost
       requestBody:
         description: post to be created
         content:
           application/json:
-            schema:
-              oneOf:
-                - $ref: '#/components/schemas/CreatePost'
-                - $ref: '#/components/schemas/CreateLink'
-                - $ref: '#/components/schemas/CreateImage'
-                - $ref: '#/components/schemas/CreatePoll'
-            example:
-              check Schema -> CreatePost, CreateLink, CreateImage, CreatePoll
+            examples:
+              CreatePost:
+                value:
+                  $ref: '#/components/schemas/CreatePost'
         required: true
       responses:
         "200":
@@ -1297,6 +1340,8 @@ paths:
       tags:
       - post
       summary: Vote on a poll
+      security: 
+        - cookie_auth: []
       operationId: votePost
       parameters:
       - name: postId
@@ -1326,6 +1371,8 @@ paths:
       tags:
       - post
       summary: Save/unsave post
+      security: 
+        - cookie_auth: []
       operationId: savePost
       parameters:
       - name: postId
@@ -1383,6 +1430,8 @@ paths:
       tags:
       - post
       summary: Lock post
+      security: 
+        - cookie_auth: []
       operationId: lockPost
       parameters:
       - name: postId
@@ -1429,11 +1478,13 @@ paths:
               example:
                 message: Error saving post
       x-swagger-router-controller: Post
-  /post/{postId}/hidden:
+  /post/{postId}/hide:
     patch:
       tags:
       - post
       summary: Hide post
+      security: 
+        - cookie_auth: []
       operationId: hidePost
       parameters:
       - name: postId
@@ -1492,6 +1543,8 @@ paths:
       - post
       summary: Follow post
       operationId: followPost
+      security: 
+        - cookie_auth: []
       parameters:
       - name: postId
         in: path
@@ -1522,6 +1575,8 @@ paths:
       - post
       summary: Report post
       operationId: reportPost
+      security: 
+        - cookie_auth: []
       parameters:
       - name: postId
         in: path
@@ -1570,7 +1625,7 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/{subreddit}:
+  /subreddit/{subredditName}:
     get:
       tags:
       - subreddit
@@ -1578,7 +1633,7 @@ paths:
       description: Called when user navigates to subreddit
       operationId: getSubreddit
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1605,15 +1660,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/{subreddit}/settings:
+  /subreddit/{subredditName}/settings:
     get:
       tags:
       - subreddit
       summary: Get subreddit settings
+      security: 
+        - cookie_auth: []
       description: Retrieve subreddit settings to display
       operationId: getSubredditSettings
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1639,7 +1696,7 @@ paths:
       description: Update subreddit settings.
       operationId: editSubredditSettings
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1665,15 +1722,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/about/edited/{subreddit}:
+  /subreddit/{subredditName}/edited:
     get:
       tags:
       - subreddit
       summary: Retrieve edited posts for a subreddit
+      security: 
+        - cookie_auth: []
       description: Retrieve the post in this subreddit "HOT".
       operationId: getEditedPosts
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1692,36 +1751,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/mine/moderator:
-    get:
-      tags:
-      - subreddit
-      summary: Retrieve subreddits that user is a moderator
-      description: Retrieve subreddits that user is a moderator
-      operationId: getSubredditMod
-      responses:
-        "200":
-          description: list of subreddits
-          content:
-            application/json:
-              example:
-                id: "1"
-                name: Egypt
-                noOfMembers: "100"
-        "401":
-          description: No such subreddit is found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Subreddit
-  /subreddit/about/banned/{subreddit}:
+  /subreddit/{subredditName}/banned:
     get:
       tags:
       - subreddit
       summary: Retrieve banned users
+      security: 
+        - cookie_auth: []
       description: Retrieve banned users
       operationId: getBanned
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1743,15 +1783,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/about/muted/{subreddit}:
+  /subreddit/{subredditName}/muted:
     get:
       tags:
       - subreddit
       summary: Retrieve muted users
+      security: 
+        - cookie_auth: []
       description: Retrieve muted users
       operationId: getMuted
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1773,15 +1815,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/about/moderator/{subreddit}:
+  /subreddit/{subredditName}/moderators:
     get:
       tags:
       - subreddit
       summary: Retrieve moderator users
+      security: 
+        - cookie_auth: []
       description: Retrieve moderator users
       operationId: getModerators
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1803,15 +1847,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/about/reports/{subreddit}:
+  /subreddit/{subredditName}/reports:
     get:
       tags:
       - subreddit
       summary: Retrieve reported posts
+      security: 
+        - cookie_auth: []
       description: Retrieve reported posts
       operationId: getReportedPosts
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1830,15 +1876,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/about/spam/{subreddit}:
+  /subreddit/{subredditName}/spam:
     get:
       tags:
       - subreddit
       summary: Retrieve spam posts
+      security: 
+        - cookie_auth: []
       description: Retrieve spam posts
       operationId: getSpammedPosts
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1857,15 +1905,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/about/modqueue/{subreddit}:
+  /subreddit/{subredditName}/modqueue:
     get:
       tags:
       - subreddit
       summary: Retrieve modqueue posts
+      security: 
+        - cookie_auth: []
       description: Retrieve modqueue posts
       operationId: getModQueuePosts
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1884,15 +1934,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/about/unmoderated/{subreddit}:
+  /subreddit/{subreddit}/unmoderated:
     get:
       tags:
       - subreddit
       summary: Retrieve unmoderated posts
+      security: 
+        - cookie_auth: []
       description: Retrieve unmoderated posts
       operationId: getUnmoderatedPosts
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1938,6 +1990,8 @@ paths:
       tags:
       - notification
       summary: Get all notifications for a user
+      security: 
+        - cookie_auth: []
       description: Get all notifications for a user
       operationId: getAllNotifications
       responses:
@@ -1955,6 +2009,8 @@ paths:
       tags:
       - notification
       summary: Mark all notifications as read
+      security: 
+        - cookie_auth: []
       description: Mark all notifications as read
       operationId: markAllNotificationsAsRead
       responses:
@@ -1972,6 +2028,8 @@ paths:
       tags:
       - notification
       summary: Get 5 recent notifications
+      security: 
+        - cookie_auth: []
       description: Get 5 recent notifications
       operationId: getRecentNotifications
       responses:
@@ -2014,6 +2072,8 @@ paths:
       tags:
       - message
       summary: Create a message
+      security: 
+        - cookie_auth: []
       description: Create message.
       operationId: createMessage
       requestBody:
@@ -2039,6 +2099,8 @@ paths:
       tags:
       - message
       summary: Delete a message
+      security: 
+        - cookie_auth: []
       description: Delete message.
       operationId: deleteMessage
       parameters:
@@ -2069,6 +2131,8 @@ paths:
       tags:
       - message
       summary: Get user sent messages
+      security: 
+        - cookie_auth: []
       description: Retrieve user messages that he has sent to display
       operationId: getUserSentMessages
       responses:
@@ -2088,6 +2152,8 @@ paths:
       tags:
       - message
       summary: Get user messages
+      security: 
+        - cookie_auth: []
       description: Retrieve user messages to display
       operationId: getUserMessages
       responses:
@@ -2107,6 +2173,8 @@ paths:
       tags:
       - message
       summary: Get user unread messages
+      security: 
+        - cookie_auth: []
       description: Retrieve user unread messages to display
       operationId: getUserUnreadMessages
       responses:
@@ -2150,6 +2218,8 @@ paths:
       tags:
       - message
       summary: Read all messages
+      security: 
+        - cookie_auth: []
       description: Read all messages.
       operationId: messageRead_all_messagesPOST
       responses:
@@ -2171,6 +2241,8 @@ paths:
       tags:
       - message
       summary: Report a messages
+      security: 
+        - cookie_auth: []
       description: Report a messages.
       operationId: reportMessage
       parameters:
@@ -2207,6 +2279,8 @@ paths:
       tags:
       - mod
       summary: Approve a post
+      security: 
+        - cookie_auth: []
       description: Approve a post.
       operationId: approvePost
       parameters:
@@ -2235,15 +2309,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Mod
-  /mod/invite/{subredditId}:
+  /mod/invite/{subredditName}:
     post:
       tags:
       - mod
       summary: invite a moderator
+      security: 
+        - cookie_auth: []
       description: invite a moderator
       operationId: inviteMod
       parameters:
-      - name: subredditId
+      - name: subredditName
         in: path
         description: ID of the subreddit to be moderated
         required: true
@@ -2274,6 +2350,8 @@ paths:
       tags:
       - mod
       summary: Accept moderation invite
+      security: 
+        - cookie_auth: []
       description: Accept moderation invite
       operationId: acceptModInvite
       requestBody:
@@ -2298,6 +2376,8 @@ paths:
       tags:
       - mod
       summary: reject moderation invite
+      security: 
+        - cookie_auth: []
       description: reject moderation invite
       operationId: rejectModInvite
       responses:
@@ -2310,15 +2390,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Mod
-  /mod/leave/{subredditId}:
+  /mod/leave/{subredditName}:
     delete:
       tags:
       - mod
       summary: Leave community moderation
+      security: 
+        - cookie_auth: []
       description: Leave community moderation
       operationId: leaveCommunityMod
       parameters:
-      - name: subredditId
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -2335,15 +2417,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Mod
-  /mod/mute/{subredditId}:
+  /mod/mute/{subredditName}:
     patch:
       tags:
       - mod
       summary: mute user in community
+      security: 
+        - cookie_auth: []
       description: mute user in community
       operationId: muteUser
       parameters:
-      - name: subredditId
+      - name: subredditName
         in: path
         description: ID of the subreddit which the user should be muted
         required: true
@@ -2369,15 +2453,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Mod
-  /mod/unmute/{subredditId}:
+  /mod/unmute/{subredditName}:
     patch:
       tags:
       - mod
       summary: unmute user in community
+      security: 
+        - cookie_auth: []
       description: unmute user in community
       operationId: unmuteUser
       parameters:
-      - name: subredditId
+      - name: subredditName
         in: path
         description: ID of the subreddit which the user should be unmuted
         required: true
@@ -2408,6 +2494,8 @@ paths:
       tags:
       - chat
       summary: create chat group
+      security: 
+        - cookie_auth: []
       description: create chat group
       operationId: createGroup
       requestBody:
@@ -2436,6 +2524,8 @@ paths:
       tags:
       - chat
       summary: invite users to chat group
+      security: 
+        - cookie_auth: []
       description: invite users to chat group
       operationId: inviteUsers
       requestBody:
@@ -2464,6 +2554,8 @@ paths:
       tags:
       - chat
       summary: leave chat group
+      security: 
+        - cookie_auth: []
       description: leave chat group
       operationId: leaveGroup
       requestBody:
