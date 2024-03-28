@@ -9,8 +9,6 @@ info:
 servers:
 - url: https://virtserver.swaggerhub.com/cReddit/cReddit/1.0.0
   description: SwaggerHub API Auto Mocking
-security:
-- jwt_auth: []
 tags:
 - name: user
   description: User Management
@@ -29,7 +27,7 @@ paths:
     post:
       tags:
       - user
-      summary: Create user (Signup) DONE
+      summary: Create user (Signup)
       description: Register a new user.
       operationId: createUser
       requestBody:
@@ -72,7 +70,7 @@ paths:
     delete:
       tags:
       - user
-      summary: Delete a user DONE
+      summary: Delete a user
       operationId: deleteUser
       responses:
         "200":
@@ -97,7 +95,7 @@ paths:
     post:
       tags:
       - user
-      summary: Logs user into the system DONE
+      summary: Logs user into the system
       description: Log in with username and password.
       operationId: login
       requestBody:
@@ -134,7 +132,7 @@ paths:
     post:
       tags:
       - user
-      summary: Logs user into the system using google services if no user exists with the email, a new user is created DONE
+      summary: Logs user into the system using google services if no user exists with the email, a new user is created
       description: Log in with google OAuth token
       operationId: loginGoogle
       requestBody:
@@ -173,7 +171,9 @@ paths:
     get:
       tags:
       - user
-      summary: Logs out current logged in user session DONE
+      summary: Logs out current logged in user session
+      security: 
+        - cookie_auth: []
       operationId: logout
       responses:
         "200":
@@ -188,7 +188,9 @@ paths:
     get:
       tags:
       - user
-      summary: Refreshes the user token DONE
+      summary: Refreshes the user token
+      security: 
+        - cookie_auth: []
       description: Refreshes the user token
       operationId: refresh
       responses:
@@ -216,7 +218,7 @@ paths:
     get:
       tags:
       - user
-      summary: Email Verification DONE
+      summary: Email Verification
       description: Verify user email
       operationId: verifyUser
       parameters:
@@ -257,7 +259,7 @@ paths:
           content:
             application/json:
               example:
-                username: u/theUser
+                username: theUser
                 displayName: theUser
                 about: Hello to my page
                 email: john@email.com
@@ -393,6 +395,8 @@ paths:
       tags:
       - user
       summary: Get user settings
+      security: 
+        - cookie_auth: []
       description: Retrieve user settings to display
       operationId: getUserSettings
       responses:
@@ -411,6 +415,8 @@ paths:
       tags:
       - user
       summary: Edit user settings
+      security: 
+        - cookie_auth: []
       description: Update user settings.
       operationId: editUserSettings
       requestBody:
@@ -476,6 +482,8 @@ paths:
       tags:
       - user
       summary: Change password for the user when he is logged in
+      security: 
+        - cookie_auth: []
       operationId: changePassword
       requestBody:
         content:
@@ -603,6 +611,8 @@ paths:
       summary: Allows user to change email
       description: Change user email address.
       operationId: changeEmail
+      security: 
+        - cookie_auth: []
       requestBody:
         content:
           application/json:
@@ -640,6 +650,8 @@ paths:
       tags:
       - user
       summary: Block User
+      security: 
+        - cookie_auth: []
       description: Block a specific user.
       operationId: block
       parameters:
@@ -748,6 +760,8 @@ paths:
       summary: Follow User
       description: Follow a specific user.
       operationId: follow
+      security: 
+        - cookie_auth: []
       parameters:
       - name: username
         in: path
@@ -893,11 +907,34 @@ paths:
               example:
                 message: An error occurred while checking if the username is available
       x-swagger-router-controller: User
+  /user/generate-username:
+    get:
+      tags:
+      - user
+      summary: Generate a random valid username
+      description: Generate a random valid username for registration.
+      operationId: generateUsername
+      responses:
+        "200":
+          description: Username generated successfully
+          content:
+            application/json:
+              example:
+                message: Username generated
+                username: randomUsername
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while generating the username
   /user/clear-history:
     delete:
       tags:
       - user
       summary: Clear user history
+      security: 
+        - cookie_auth: []
       description: Clear user browsing history.
       operationId: clearHistory
       responses:
@@ -912,15 +949,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: User
-  /user/block-community/{subreddit}:
+  /user/{subredditName}/block-community:
     post:
       tags:
       - user
       summary: Block Community
       description: Block a specific community.
+      security: 
+        - cookie_auth: []
       operationId: blockCommunity
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         description: Name of the community to block
         required: true
@@ -948,7 +987,7 @@ paths:
       summary: Unblock
       operationId: unblockCommunity
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         description: Name of the community to Unblock
         required: true
@@ -975,6 +1014,8 @@ paths:
       tags:
       - user
       summary: Get user history
+      security: 
+        - cookie_auth: []
       description: Retrieve user history.
       operationId: getHistory
       responses:
@@ -1005,6 +1046,8 @@ paths:
       summary: Get user saved posts and comments
       description: Retrieve user's saved posts and comments.
       operationId: getSaved
+      security: 
+        - cookie_auth: []
       responses:
         "200":
           description: User saved posts retrieved successfully
@@ -1054,28 +1097,91 @@ paths:
               example:
                 message: An error occurred while retrieving the user saved posts
       x-swagger-router-controller: User
-  /post:
-    post:
+  /user/moderator-in:
+    get:
       tags:
-      - post
-      summary: Create post
-      operationId: createPost
-      requestBody:
-        description: Created post object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Post'
-        required: true
+      - user
+      summary: Retrieve subreddits that user is a moderator
+      security: 
+        - cookie_auth: []
+      description: Retrieve subreddits that user is a moderator
+      operationId: getSubredditMod
       responses:
         "200":
-          description: Post created successfully
+          description: list of subreddits
           content:
             application/json:
               example:
-                message: Post created successfully
+                id: "1"
+                name: Egypt
+                noOfMembers: "100"
+        "401":
+          description: No such subreddit is found
         "500":
           description: Internal Server Error
+      x-swagger-router-controller: Subreddit
+  /post:
+    post:
+      tags:
+        - post
+      summary: Create post
+      security: 
+        - cookie_auth: []
+      operationId: createPost
+      requestBody:
+        description: post to be created
+        content:
+          application/json:
+            examples:
+              CreatePost:
+                value:
+                  $ref: '#/components/schemas/CreatePost'
+        required: true
+      responses:
+        "200":
+          description: Post created successfully (while ignoring additional fields)
+          content:
+            application/json:
+              example:
+                message: Post created successfully (while ignoring additional fields)
+        "400":
+          description: Missing required fields
+          content:
+            application/json:
+              examples:
+                MissingRequiredFields:
+                  value:
+                    message: Post type, community name, and title are required
+                InvalidPostType:
+                  value:
+                    message: Invalid type
+                MissingImages&Video:
+                  value:
+                    message: Images or video are required
+                MaximumImagesLimit:
+                  value:
+                    message: Maximum of 10 images or videos
+                InvalidURL:
+                  value:
+                    message: Invalid URL
+                InvalidPollOptionsFormat:
+                  value:
+                    message: Poll options must be an array
+                InvalidPollOptionsLength:
+                  value:
+                    message: Poll options must have at least 2 options
+                InvalidExpirationDate:
+                  value:
+                    message: Invalid expiration date
+                InvalidCommunity:
+                  value:
+                    message: Community not found
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Error editing post
       x-swagger-router-controller: Post
   /post/{postId}:
     get:
@@ -1098,6 +1204,7 @@ paths:
           content:
             application/json:
               schema:
+                status: OK
                 message: Post data retrieved successfully
                 $ref: '#/components/schemas/Post'
         "401":
@@ -1105,18 +1212,21 @@ paths:
           content:
             application/json:
               example:
+                status: Unauthorized
                 message: User must be logged in
         "404":
           description: Post not found
           content:
             application/json:
               example:
+                status: Not Found
                 message: Post not found
         "500":
           description: Internal Server Error
           content:
             application/json:
               example:
+                status: Internal server error
                 message: An error occurred while retrieving the post
       x-swagger-router-controller: Post
     delete:
@@ -1140,12 +1250,29 @@ paths:
             application/json:
               example:
                 message: Post deleted successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
-        "404":
+        "400":
           description: Post not found
+          content:
+            application/json:
+              examples:
+                PostNotFound:
+                  value:
+                    message: Post is not found
+                InvalidPostId:
+                  value:
+                    message: Invalid post ID
+        "403":
+          description: You are not authorized to delete this post
+          content:
+            application/json:
+              example:
+                message: You are not authorized to delete this post
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Invalid image or video URLs found in post
       x-swagger-router-controller: Post
     patch:
       tags:
@@ -1161,11 +1288,11 @@ paths:
         schema:
           type: string
       requestBody:
-        description: Edit post object
+        description: ONLY PERMITTED FOR POST & POLL TYPES
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EditPost'
+                $ref: '#/components/schemas/EditPost'
         required: true
       responses:
         "200":
@@ -1174,8 +1301,35 @@ paths:
             application/json:
               example:
                 message: Post edited successfully
+        "400":
+          description: Post edited successfully
+          content:
+            application/json:
+              examples:
+                PostNotFound:
+                  value:
+                    message: Post is not found
+                NoContent:
+                  value:
+                    message: No content to update
+                InvalidPostId:
+                  value:
+                    message: Invalid post ID
+                InvalidPostType:
+                  value:
+                    message: You cannot edit this post type
+        "403":
+          description: You are not authorized to edit this post
+          content:
+            application/json:
+              example:
+                message: You are not authorized to edit this post
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Error editing post
       x-swagger-router-controller: Post
   /post/{postId}/comments:
     get:
@@ -1214,6 +1368,8 @@ paths:
       tags:
       - post
       summary: Vote on a poll
+      security: 
+        - cookie_auth: []
       operationId: votePost
       parameters:
       - name: postId
@@ -1242,7 +1398,9 @@ paths:
     patch:
       tags:
       - post
-      summary: Save post
+      summary: Save/unsave post
+      security: 
+        - cookie_auth: []
       operationId: savePost
       parameters:
       - name: postId
@@ -1253,26 +1411,55 @@ paths:
         schema:
           type: string
       requestBody:
-        description: Created post object
+        description: action to save/unsave post
         content:
           application/json:
-            example:
-              isSaved: true
+            schema:
+                $ref: '#/components/schemas/SavePost'
       responses:
         "200":
-          description: Post saved successfully
+          description: Post saved/unsaved successfully
           content:
             application/json:
               example:
-                message: Post saved successfully
+                message: Post saved/unsaved successfully
+        "400":
+          description: Post not found
+          content:
+            application/json:
+              examples:
+                MissingRequiredField:
+                  value:
+                    message: isSaved field is required
+                InvalidPostId:
+                  value:
+                    message: Invalid post ID
+                PostNotFound:
+                  value:
+                    message: Post is not found
+                UserNotFound:
+                  value:
+                    message: User is not found
+                PostAlreadySaved:
+                  value:
+                    message: Post is already saved
+                PostNotSaved:
+                  value:
+                    message: Post is not saved
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Error saving post
       x-swagger-router-controller: Post
   /post/{postId}/lock:
     patch:
       tags:
       - post
       summary: Lock post
+      security: 
+        - cookie_auth: []
       operationId: lockPost
       parameters:
       - name: postId
@@ -1286,23 +1473,46 @@ paths:
         description: Created post object
         content:
           application/json:
-            example:
-              isLocked: true
+            schema:
+              $ref: '#/components/schemas/LockPost'
       responses:
         "200":
-          description: Post lock changed successfully
+          description: Post lock/unlocked successfully
           content:
             application/json:
               example:
                 message: Post lock changed successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                MissingRequiredField:
+                  value:
+                    message: isLocked field is required
+                InvalidPostId:
+                  value:
+                    message: Invalid post ID
+                PostNotFound:
+                  value:
+                    message: Post is not found
+                PostAlreadyLocked/Unlocked:
+                  value:
+                    message: Post is already locked/unlocked
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Error saving post
       x-swagger-router-controller: Post
-  /post/{postId}/hidden:
+  /post/{postId}/hide:
     patch:
       tags:
       - post
       summary: Hide post
+      security: 
+        - cookie_auth: []
       operationId: hidePost
       parameters:
       - name: postId
@@ -1316,8 +1526,8 @@ paths:
         description: Hides post object
         content:
           application/json:
-            example:
-              isHidden: true
+            schema:
+              $ref: '#/components/schemas/HidePost'
       responses:
         "200":
           description: Post visibility changed successfully
@@ -1325,8 +1535,35 @@ paths:
             application/json:
               example:
                 message: Post visibility changed successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                MissingRequiredField:
+                  value:
+                    message: isHidden field is required
+                InvalidPostId:
+                  value:
+                    message: Invalid post ID
+                PostNotFound:
+                  value:
+                    message: Post is not found
+                UserNotFound:
+                  value:
+                    message: User is not found
+                PostAlreadyHidden:
+                  value:
+                    message: Post is already hidden
+                PostNotHidden:
+                  value:
+                    message: Post is not hidden
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Error hiding post
       x-swagger-router-controller: Post
   /post/{postId}/follow:
     patch:
@@ -1334,6 +1571,8 @@ paths:
       - post
       summary: Follow post
       operationId: followPost
+      security: 
+        - cookie_auth: []
       parameters:
       - name: postId
         in: path
@@ -1364,6 +1603,8 @@ paths:
       - post
       summary: Report post
       operationId: reportPost
+      security: 
+        - cookie_auth: []
       parameters:
       - name: postId
         in: path
@@ -1412,7 +1653,7 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/{subreddit}:
+  /subreddit/{subredditName}:
     get:
       tags:
       - subreddit
@@ -1420,7 +1661,7 @@ paths:
       description: Called when user navigates to subreddit
       operationId: getSubreddit
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1447,15 +1688,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/{subreddit}/settings:
+  /subreddit/{subredditName}/settings:
     get:
       tags:
       - subreddit
       summary: Get subreddit settings
+      security: 
+        - cookie_auth: []
       description: Retrieve subreddit settings to display
       operationId: getSubredditSettings
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1481,7 +1724,7 @@ paths:
       description: Update subreddit settings.
       operationId: editSubredditSettings
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1507,15 +1750,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/about/edited/{subreddit}:
+  /subreddit/{subredditName}/edited:
     get:
       tags:
       - subreddit
       summary: Retrieve edited posts for a subreddit
-      description: Retrieve the edited posts in this subreddit.
+      description: Retrieve the edited posts in this subreddit
+      security: 
+        - cookie_auth: []
       operationId: getEditedPosts
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1534,36 +1779,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/mine/moderator:
-    get:
-      tags:
-      - subreddit
-      summary: Retrieve subreddits that user is a moderator
-      description: Retrieve subreddits that user is a moderator
-      operationId: getSubredditMod
-      responses:
-        "200":
-          description: list of subreddits
-          content:
-            application/json:
-              example:
-                id: "1"
-                name: Egypt
-                noOfMembers: "100"
-        "401":
-          description: No such subreddit is found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Subreddit
-  /subreddit/about/banned/{subreddit}:
+  /subreddit/{subredditName}/banned:
     get:
       tags:
       - subreddit
       summary: Retrieve banned users
+      security: 
+        - cookie_auth: []
       description: Retrieve banned users
       operationId: getBanned
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1585,15 +1811,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/about/muted/{subreddit}:
+  /subreddit/{subredditName}/muted:
     get:
       tags:
       - subreddit
       summary: Retrieve muted users
+      security: 
+        - cookie_auth: []
       description: Retrieve muted users
       operationId: getMuted
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1615,15 +1843,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/about/moderator/{subreddit}:
+  /subreddit/{subredditName}/moderators:
     get:
       tags:
       - subreddit
       summary: Retrieve moderator users
+      security: 
+        - cookie_auth: []
       description: Retrieve moderator users
       operationId: getModerators
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1645,15 +1875,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/about/reports/{subreddit}:
+  /subreddit/{subredditName}/reports:
     get:
       tags:
       - subreddit
       summary: Retrieve reported posts
+      security: 
+        - cookie_auth: []
       description: Retrieve reported posts
       operationId: getReportedPosts
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1672,15 +1904,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/about/spam/{subreddit}:
+  /subreddit/{subredditName}/spam:
     get:
       tags:
       - subreddit
       summary: Retrieve spam posts
+      security: 
+        - cookie_auth: []
       description: Retrieve spam posts
       operationId: getSpammedPosts
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1699,15 +1933,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/about/modqueue/{subreddit}:
+  /subreddit/{subredditName}/modqueue:
     get:
       tags:
       - subreddit
       summary: Retrieve modqueue posts
+      security: 
+        - cookie_auth: []
       description: Retrieve modqueue posts
       operationId: getModQueuePosts
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1726,15 +1962,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/about/unmoderated/{subreddit}:
+  /subreddit/{subreddit}/unmoderated:
     get:
       tags:
       - subreddit
       summary: Retrieve unmoderated posts
+      security: 
+        - cookie_auth: []
       description: Retrieve unmoderated posts
       operationId: getUnmoderatedPosts
       parameters:
-      - name: subreddit
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -1780,6 +2018,8 @@ paths:
       tags:
       - notification
       summary: Get all notifications for a user
+      security: 
+        - cookie_auth: []
       description: Get all notifications for a user
       operationId: getAllNotifications
       responses:
@@ -1797,6 +2037,8 @@ paths:
       tags:
       - notification
       summary: Mark all notifications as read
+      security: 
+        - cookie_auth: []
       description: Mark all notifications as read
       operationId: markAllNotificationsAsRead
       responses:
@@ -1814,6 +2056,8 @@ paths:
       tags:
       - notification
       summary: Get 5 recent notifications
+      security: 
+        - cookie_auth: []
       description: Get 5 recent notifications
       operationId: getRecentNotifications
       responses:
@@ -1856,6 +2100,8 @@ paths:
       tags:
       - message
       summary: Create a message
+      security: 
+        - cookie_auth: []
       description: Create message.
       operationId: createMessage
       requestBody:
@@ -1881,6 +2127,8 @@ paths:
       tags:
       - message
       summary: Delete a message
+      security: 
+        - cookie_auth: []
       description: Delete message.
       operationId: deleteMessage
       parameters:
@@ -1911,6 +2159,8 @@ paths:
       tags:
       - message
       summary: Get user sent messages
+      security: 
+        - cookie_auth: []
       description: Retrieve user messages that he has sent to display
       operationId: getUserSentMessages
       responses:
@@ -1930,6 +2180,8 @@ paths:
       tags:
       - message
       summary: Get user messages
+      security: 
+        - cookie_auth: []
       description: Retrieve user messages to display
       operationId: getUserMessages
       responses:
@@ -1949,6 +2201,8 @@ paths:
       tags:
       - message
       summary: Get user unread messages
+      security: 
+        - cookie_auth: []
       description: Retrieve user unread messages to display
       operationId: getUserUnreadMessages
       responses:
@@ -1992,6 +2246,8 @@ paths:
       tags:
       - message
       summary: Read all messages
+      security: 
+        - cookie_auth: []
       description: Read all messages.
       operationId: messageRead_all_messagesPOST
       responses:
@@ -2013,6 +2269,8 @@ paths:
       tags:
       - message
       summary: Report a messages
+      security: 
+        - cookie_auth: []
       description: Report a messages.
       operationId: reportMessage
       parameters:
@@ -2049,6 +2307,8 @@ paths:
       tags:
       - mod
       summary: Approve a post
+      security: 
+        - cookie_auth: []
       description: Approve a post.
       operationId: approvePost
       parameters:
@@ -2077,15 +2337,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Mod
-  /mod/invite/{subredditId}:
+  /mod/invite/{subredditName}:
     post:
       tags:
       - mod
       summary: invite a moderator
+      security: 
+        - cookie_auth: []
       description: invite a moderator
       operationId: inviteMod
       parameters:
-      - name: subredditId
+      - name: subredditName
         in: path
         description: ID of the subreddit to be moderated
         required: true
@@ -2116,6 +2378,8 @@ paths:
       tags:
       - mod
       summary: Accept moderation invite
+      security: 
+        - cookie_auth: []
       description: Accept moderation invite
       operationId: acceptModInvite
       requestBody:
@@ -2140,6 +2404,8 @@ paths:
       tags:
       - mod
       summary: reject moderation invite
+      security: 
+        - cookie_auth: []
       description: reject moderation invite
       operationId: rejectModInvite
       responses:
@@ -2152,15 +2418,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Mod
-  /mod/leave/{subredditId}:
+  /mod/leave/{subredditName}:
     delete:
       tags:
       - mod
       summary: Leave community moderation
+      security: 
+        - cookie_auth: []
       description: Leave community moderation
       operationId: leaveCommunityMod
       parameters:
-      - name: subredditId
+      - name: subredditName
         in: path
         required: true
         style: simple
@@ -2177,15 +2445,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Mod
-  /mod/mute/{subredditId}:
+  /mod/mute/{subredditName}:
     patch:
       tags:
       - mod
       summary: mute user in community
+      security: 
+        - cookie_auth: []
       description: mute user in community
       operationId: muteUser
       parameters:
-      - name: subredditId
+      - name: subredditName
         in: path
         description: ID of the subreddit which the user should be muted
         required: true
@@ -2211,15 +2481,17 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Mod
-  /mod/unmute/{subredditId}:
+  /mod/unmute/{subredditName}:
     patch:
       tags:
       - mod
       summary: unmute user in community
+      security: 
+        - cookie_auth: []
       description: unmute user in community
       operationId: unmuteUser
       parameters:
-      - name: subredditId
+      - name: subredditName
         in: path
         description: ID of the subreddit which the user should be unmuted
         required: true
@@ -2250,6 +2522,8 @@ paths:
       tags:
       - chat
       summary: create chat group
+      security: 
+        - cookie_auth: []
       description: create chat group
       operationId: createGroup
       requestBody:
@@ -2278,6 +2552,8 @@ paths:
       tags:
       - chat
       summary: invite users to chat group
+      security: 
+        - cookie_auth: []
       description: invite users to chat group
       operationId: inviteUsers
       requestBody:
@@ -2306,6 +2582,8 @@ paths:
       tags:
       - chat
       summary: leave chat group
+      security: 
+        - cookie_auth: []
       description: leave chat group
       operationId: leaveGroup
       requestBody:
@@ -2951,6 +3229,119 @@ components:
           example: false
         children:
           type: object
+    CreatePost:
+      type: object
+      properties:
+        type:
+          type: string
+          example: Post
+        commumityName:
+          type: string
+          example: cReddit_SW_Project
+        title:
+          type: string
+          example: Hello World
+        content:
+          type: string
+          example: This is my content
+        isSpoiler:
+          type: boolean
+          example: false
+        isNSFW:
+          type: boolean
+          example: false
+    CreateImage:
+      type: object
+      properties:
+        type:
+          type: string
+          example: Post
+        commumityName:
+          type: string
+          example: cReddit_SW_Project
+        title:
+          type: string
+          example: Hello World
+        isSpoiler:
+          type: boolean
+          example: false
+        isNSFW:
+          type: boolean
+          example: false
+    CreateLink:
+      type: object
+      properties:
+        type:
+          type: string
+          example: Post
+        commumityName:
+          type: string
+          example: cReddit_SW_Project
+        title:
+          type: string
+          example: Hello World
+        content:
+          type: string
+          example: http://www.google.com
+        isSpoiler:
+          type: boolean
+          example: false
+        isNSFW:
+          type: boolean
+          example: false
+    CreatePoll:
+      type: object
+      properties:
+        type:
+          type: string
+          example: Post
+        commumityName:
+          type: string
+          example: cReddit_SW_Project
+        title:
+          type: string
+          example: Hello World
+        content:
+          type: string
+          example: This is my content
+        pollOptions:
+          type: array
+          items:
+            type: string
+            example: Option 1, Option 2, Option 3
+        expirationDate:
+          type: string
+          example: 06/03/2024 22:10:03
+        isSpoiler:
+          type: boolean
+          example: false
+        isNSFW:
+          type: boolean
+          example: false
+    EditPost:
+      type: object
+      properties:
+        content:
+          type: string
+          example: This is my content
+    SavePost:
+      type: object
+      properties:
+        isSaved:
+          type: boolean
+          example: true
+    HidePost:
+      type: object
+      properties:
+        isHidden:
+          type: boolean
+          example: true
+    LockPost:
+      type: object
+      properties:
+        isLocked:
+          type: boolean
+          example: true
     Post:
       type: array
       items:
@@ -3010,31 +3401,7 @@ components:
             items:
               oneOf:
               - $ref: '#/components/schemas/SinglePost'
-        example:
-          comments: 50
-          upvotes: 1500
-          pollVotes:
-            option3: 40
-            option1: 10
-            option2: 20
-          isNSFW: false
-          postId: 350651awd651awd
-          username: Ya rb n5ls
-          title: Hello World
-          downvotes: 100
-          content: This is my content
-          isSpoiler: false
-          uploadDate: 06/03/2024 22:10:03
-          children:
-          - ""
-          - ""
-          followers:
-          - "Mosaad"
-          - "BeefBurger"
-          communityName: Watermelon
-          profilePic: https://loremflickr.com/640/480?lock=5287558068043776
-          savedAt: 2024-07-13T22:44:11.445Z
-    EditPost:
+     EditPost:
       type: object
       properties:
         content:
