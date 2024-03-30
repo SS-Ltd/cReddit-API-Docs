@@ -266,7 +266,7 @@ paths:
                 profilePicture: drive.creddit.com/pfp
                 banner: drive.creddit.com/pfp
                 followers: 100
-                cakeDay: 29/08/2023
+                cakeDay: '2024-03-25T15:37:33.339+00:00'
         "401":
           description: "Unauthorized, user must be logged in"
         "404":
@@ -324,7 +324,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/Feed'
         "401":
           description: "Unauthorized, user must be logged in"
         "404":
@@ -353,7 +353,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/Feed'
         "401":
           description: "Unauthorized, user must be logged in"
         "404":
@@ -382,7 +382,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/Feed'
         "401":
           description: "Unauthorized, user must be logged in"
         "404":
@@ -1025,7 +1025,7 @@ paths:
             application/json:
               schema:
                 message: User history retrieved successfully
-                $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/Feed'
         "401":
           description: Unauthorized, user must be logged in
           content:
@@ -1055,7 +1055,7 @@ paths:
             application/json:
               schema:
                 message: User saved posts retrieved successfully
-                $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/Feed'
         "404":
           description: user not found
           content:
@@ -1083,7 +1083,7 @@ paths:
             application/json:
               schema:
                 message: User saved posts retrieved successfully
-                $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/Feed'
         "404":
           description: user not found
           content:
@@ -1331,7 +1331,7 @@ paths:
               example:
                 message: Error editing post
       x-swagger-router-controller: Post
-  /post/{postId}/comments:
+  /post/{postId}/comment:
     get:
       tags:
       - post
@@ -1353,6 +1353,22 @@ paths:
         schema:
           type: string
           example: new
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: false
+        schema:
+          type: integer
+          example: 2
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: false
+        schema:
+          type: integer
+          example: 5
       responses:
         "200":
           description: Comments retrieved successfully
@@ -1653,7 +1669,7 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/{subredditName}:
+  /subreddit/{subredditName}/overview:
     get:
       tags:
       - subreddit
@@ -1773,7 +1789,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/Feed'
         "404":
           description: No such subreddit is found
         "500":
@@ -2783,7 +2799,7 @@ components:
           items:
             type: object
             oneOf:
-            - $ref: '#/components/schemas/Post'
+            - $ref: '#/components/schemas/Feed'
       example:
         posts:
         - ""
@@ -3199,7 +3215,7 @@ components:
           example: drive.creddit.com/test
         uploadDate:
           type: string
-          example: 06/03/2024 22:10:03
+          example: '2024-03-25T15:37:33.339+00:00'
         title:
           type: string
           example: Hello World
@@ -3311,7 +3327,7 @@ components:
             example: Option 1, Option 2, Option 3
         expirationDate:
           type: string
-          example: 06/03/2024 22:10:03
+          example: '2024-03-25T15:37:33.339+00:00'
         isSpoiler:
           type: boolean
           example: false
@@ -3337,64 +3353,76 @@ components:
           type: boolean
           example: true
     Post:
-      type: array
-      items:
-        type: object
-        properties:
-          postId:
-            type: string
-            example: 350651awd651awd
-          username:
-            type: string
-            example: Sayed
-          communityName:
-            type: string
-            example: Watermelon
-          uploadDate:
-            type: string
-            example: 06/03/2024 22:10:03
-          title:
-            type: string
-            example: Hello World
-          content:
-            type: string
-            example: This is my content
-          comments:
-            type: integer
-            example: 50
-          upvotes:
-            type: integer
-            example: 1500
-          downvotes:
-            type: integer
-            example: 100
-          isNSFW:
-            type: boolean
-            example: false
-          isSpoiler:
-            type: boolean
-            example: false
-          isLocked:
-            type: boolean
-            example: true
-          isEdited:
-            type: boolean
-            example: false
-          followers:
-            type: array
-            items: 
-              type: object
-              properties:
-                username: 
-                  type: string
-                  example: Mosaad
-          pollVotes:
-            $ref: '#/components/schemas/Post_pollVotes'
-          children:
-            type: array
-            items:
-              oneOf:
-              - $ref: '#/components/schemas/SinglePost'
+      type: object
+      properties:
+        postId:
+          type: string
+          example: 350651awd651awd
+        type:
+          type: string
+          example: '(Images & Video) or (Normal) or (Poll) or (Links)'
+        username:
+          type: string
+          example: Sayed
+        communityName:
+          type: string
+          example: Watermelon
+        title:
+          type: string
+          example: Hello World
+        content:
+          type: string
+          example: This is my content
+        profilePicture:
+          type: string
+          example: drive.creddit.com/subreddit_or_user_pfp
+        netVote:
+          type: integer
+          example: 1500
+        commentCount:
+          type: integer
+          example: 50
+        isNSFW:
+          type: boolean
+          example: false
+        isSpoiler:
+          type: boolean
+          example: false
+        isApproved:
+          type: boolean
+          example: false
+        isUpvoted:
+          type: boolean
+          example: false
+        isDownvoted:
+          type: boolean
+          example: false
+        isHidden:
+          type: boolean
+          example: false
+        isSaved:
+          type: boolean
+          example: false
+        uploadDate:
+          type: string
+          example: '2024-03-25T15:37:33.339+00:00'
+        pollOptions:
+          type: array
+          items:
+            type: object
+            properties:
+              option:
+                type: string
+                example: Option 1
+              isVoted:
+                type: boolean
+                example: false
+              votes:
+                type: integer
+                example: 10
+        expirationDate:
+          type: string
+          example: '2024-03-25T15:37:33.339+00:00'       
     EditPost:
       type: object
       properties:
@@ -3453,8 +3481,7 @@ components:
           type: array
           items:
             type: string
-            example: "[\"SlaxSplash\",\"Baroudy 14\",\"No_Animator_8210\"]"
-      
+            example: "[\"SlaxSplash\",\"Baroudy 14\",\"No_Animator_8210\"]"    
     SubredditSettings:
       type: object
       properties:
