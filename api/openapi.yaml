@@ -67,6 +67,33 @@ paths:
                 ErrorCreatingUser:
                   value:
                     message: Error creating user
+    get:
+      tags:
+      - user
+      summary: Get user data
+      security:
+        - cookie_auth: []
+      description: Retrieve information about a specific user.
+      operationId: getUserView
+      responses:
+        "200":
+          description: User data retrieved successfully
+          content:
+            application/json:
+              example:
+                username: theUser
+                displayName: theUser
+                about: Hello to my page
+                email: john@email.com
+                profilePicture: drive.creddit.com/pfp
+                banner: drive.creddit.com/pfp
+                followers: 100
+                cakeDay: '2024-03-25T15:37:33.339+00:00'
+        "401":
+          description: "Unauthorized, user must be logged in"
+        "404":
+          description: User not found
+
     delete:
       tags:
       - user
@@ -238,7 +265,7 @@ paths:
                 message: User verified successfully
         "400":
           description: "Error verifying user"
-  /user/u/{username}:
+  /user/{username}:
     get:
       tags:
       - user
@@ -1123,19 +1150,21 @@ paths:
   /post:
     post:
       tags:
-        - post
+      - post
       summary: Create post
-      security: 
-        - cookie_auth: []
       operationId: createPost
       requestBody:
         description: post to be created
         content:
           application/json:
-            examples:
-              CreatePost:
-                value:
-                  $ref: '#/components/schemas/CreatePost'
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/CreatePost'
+                - $ref: '#/components/schemas/CreateLink'
+                - $ref: '#/components/schemas/CreateImage'
+                - $ref: '#/components/schemas/CreatePoll'
+            example:
+              check Schema -> CreatePost, CreateLink, CreateImage, CreatePoll
         required: true
       responses:
         "200":
