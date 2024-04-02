@@ -82,7 +82,7 @@ paths:
       security:
         - cookie_auth: []
       description: Retrieve information about a specific user.
-      operationId: getUserView
+      operationId: getUser
       responses:
         "200":
           description: User data retrieved successfully
@@ -99,8 +99,16 @@ paths:
                 cakeDay: "2024-03-25T15:37:33.339+00:00"
         "401":
           description: "Unauthorized, user must be logged in"
+          content:
+            application/json:
+              example:
+                message: Unauthorized, user must be logged in
         "404":
           description: User not found
+          content:
+            application/json:
+              example:
+                message: User not found
     delete:
       tags:
         - user
@@ -325,12 +333,26 @@ paths:
                 banner: drive.creddit.com/pfp
                 followers: 100
                 cakeDay: "2024-03-25T15:37:33.339+00:00"
+                isFollowed: "false"
+                isBlocked: "false"
         "401":
           description: "Unauthorized, user must be logged in"
+          content:
+            application/json:
+              example:
+                message: Unauthorized, user must be logged in
         "404":
           description: User not found
+          content:
+            application/json:
+              example:
+                message: User not found
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Internal Server Error
       x-swagger-router-controller: User
   /user/upvoted:
     get:
@@ -1760,8 +1782,18 @@ paths:
                 icon: drive.creddit.com/pfp
                 banner: drive.creddit.com/banner
                 members: 100
-                rules: ["No spamming", "No harassment"]
+                rules:
+                  [
+                    {
+                      text: "No harassment",
+                      appliesTo: "Comments only",
+                      _id: "1",
+                    },
+                    { text: "No bala7", appliesTo: "Comments only", _id: "2" },
+                  ]
                 moderators: ["Baroudy1452", "Baroudy1453"]
+                isModerator: false
+                isMember: true
         "400":
           description: "Error getting subreddit view: Subreddit name is required"
           content:
