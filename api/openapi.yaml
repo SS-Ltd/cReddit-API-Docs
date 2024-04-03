@@ -3501,57 +3501,51 @@ components:
     Post:
       type: object
       properties:
-        postId:
+        postID:
           type: string
           example: 350651awd651awd
         type:
           type: string
-          example: "(Images & Video) or (Normal) or (Poll) or (Links)"
+          example: "(Images & Video) or (Normal) or (Poll) or (Links) or (Comment)"
+        isImage:
+          type: string
+          example: true (only if type is Comment)
         username:
           type: string
           example: Sayed
         communityName:
           type: string
           example: Watermelon
-        title:
-          type: string
-          example: Hello World
-        content:
-          type: string
-          example: This is my content
         profilePicture:
           type: string
-          example: drive.creddit.com/subreddit_or_user_pfp
+          example: drive.creddit.com/subreddit_or_user_pfpe
         netVote:
           type: integer
           example: 1500
         commentCount:
           type: integer
           example: 50
-        isNSFW:
+        isSpoiler:
           type: boolean
           example: false
-        isSpoiler:
+        isNSFW:
           type: boolean
           example: false
         isApproved:
           type: boolean
           example: false
-        isUpvoted:
+        isLocked:
           type: boolean
           example: false
-        isDownvoted:
+        isEdited:
           type: boolean
           example: false
-        isHidden:
-          type: boolean
-          example: false
-        isSaved:
-          type: boolean
-          example: false
-        uploadDate:
+        title:
           type: string
-          example: "2024-03-25T15:37:33.339+00:00"
+          example: Hello World
+        content:
+          type: string
+          example: This is my content
         pollOptions:
           type: array
           items:
@@ -3569,6 +3563,24 @@ components:
         expirationDate:
           type: string
           example: "2024-03-25T15:37:33.339+00:00"
+        createdAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        updatedAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        isUpvoted:
+          type: boolean
+          example: false
+        isDownvoted:
+          type: boolean
+          example: false
+        isSaved:
+          type: boolean
+          example: false
+        isHidden:
+          type: boolean
+          example: false
     EditPost:
       type: object
       properties:
