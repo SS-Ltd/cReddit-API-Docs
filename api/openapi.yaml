@@ -3501,9 +3501,12 @@ components:
     Post:
       type: object
       properties:
-        postID:
+        _id:
           type: string
           example: 350651awd651awd
+        postID:
+          type: string
+          example: 350651awd651awd (in case of Comment)
         type:
           type: string
           example: "(Images & Video) or (Normal) or (Poll) or (Links) or (Comment)"
