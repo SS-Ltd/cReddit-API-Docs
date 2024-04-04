@@ -1226,14 +1226,53 @@ paths:
       requestBody:
         description: post to be created
         content:
-          application/json:
+          multipart/form-data:
             schema:
               oneOf:
                 - $ref: "#/components/schemas/CreatePost"
                 - $ref: "#/components/schemas/CreateLink"
                 - $ref: "#/components/schemas/CreateImage"
                 - $ref: "#/components/schemas/CreatePoll"
-            example: check Schema -> CreatePost, CreateLink, CreateImage, CreatePoll
+            examples:
+              PostExample:
+                value:
+                  type: "Post"
+                  communityName: "funny"
+                  title: "Text Post Example"
+                  content: "This is a text post example."
+                  isSpoiler: false
+                  isNSFW: false
+              LinkExample:
+                value:
+                  type: "Links"
+                  communityName: "funny"
+                  title: "Text Post Example"
+                  content: "This is a text post example."
+                  isSpoiler: false
+                  isNSFW: false
+              ImagesExample:
+                value:
+                  type: "Images & Video"
+                  communityName: "funny"
+                  title: "Text Post Example"
+                  images:
+                    - file: <image_file_1>
+                    - file: <image_file_2>
+                  isSpoiler: false
+                  isNSFW: false
+              PollExample:
+                value:
+                  type: "Poll"
+                  communityName: "funny"
+                  title: "Text Post Example"
+                  content: "This is a text post example."
+                  pollOptions: ["option1", "option2"]
+                  expirationDate: "2024-03-25T15:37:33.339+00:00"
+                  isSpoiler: false
+                  isNSFW: false
+            encoding:
+              file:
+                contentType: "multipart/form-data"
         required: true
       responses:
         "200":
@@ -3439,7 +3478,7 @@ components:
         type:
           type: string
           example: Post
-        commumityName:
+        communityName:
           type: string
           example: cReddit_SW_Project
         title:
@@ -3460,12 +3499,15 @@ components:
         type:
           type: string
           example: Post
-        commumityName:
+        communityName:
           type: string
           example: cReddit_SW_Project
         title:
           type: string
           example: Hello World
+        images:
+          type: string
+          format: binary
         isSpoiler:
           type: boolean
           example: false
@@ -3478,7 +3520,7 @@ components:
         type:
           type: string
           example: Post
-        commumityName:
+        communityName:
           type: string
           example: cReddit_SW_Project
         title:
@@ -3499,7 +3541,7 @@ components:
         type:
           type: string
           example: Post
-        commumityName:
+        communityName:
           type: string
           example: cReddit_SW_Project
         title:
