@@ -3370,22 +3370,19 @@ components:
         darkMode: true
         chatEmail: true
     JoinedCommunities:
-      type: object
-      properties:
-        communities:
-          type: array
-          items:
-            type: object
-            properties:
-              communityName:
-                type: string
-                example: cReddit_SW_Project
-              profilePicture:
-                type: string
-                example: drive.creddit.com/test
-              members:
-                type: integer
-                example: 100
+      type: array
+      items:
+        type: object
+        properties:
+          communityName:
+            type: string
+            example: cReddit_SW_Project
+          profilePicture:
+            type: string
+            example: drive.creddit.com/test
+          members:
+            type: integer
+            example: 100
     SinglePost:
       type: object
       properties:
