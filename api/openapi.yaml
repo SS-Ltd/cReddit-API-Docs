@@ -3383,6 +3383,9 @@ components:
               profilePicture:
                 type: string
                 example: drive.creddit.com/test
+              members:
+                type: integer
+                example: 100
     SinglePost:
       type: object
       properties:
