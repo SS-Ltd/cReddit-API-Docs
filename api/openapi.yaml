@@ -1166,6 +1166,34 @@ paths:
               example:
                 message: An error occurred while retrieving the user saved posts
       x-swagger-router-controller: User
+  /user/joined-communities:
+    get:
+      tags:
+        - user
+      summary: Get user joined communities
+      description: Retrieve user's joined communities.
+      operationId: getJoinedCommunities
+      responses:
+        "200":
+          description: User joined communities retrieved successfully
+          content:
+            application/json:
+              schema:
+                message: User joined communities retrieved successfully
+                $ref: "#/components/schemas/JoinedCommunities"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              example:
+                message: User not found
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while retrieving the user joined communities
+      x-swagger-router-controller: User
   /user/moderator-in:
     get:
       tags:
@@ -3341,6 +3369,20 @@ components:
         allowFollow: true
         darkMode: true
         chatEmail: true
+    JoinedCommunities:
+      type: object
+      properties:
+        communities:
+          type: array
+          items:
+            type: object
+            properties:
+              communityName:
+                type: string
+                example: cReddit_SW_Project
+              profilePicture:
+                type: string
+                example: drive.creddit.com/test
     SinglePost:
       type: object
       properties:
@@ -3582,6 +3624,12 @@ components:
           type: boolean
           example: false
         isHidden:
+          type: boolean
+          example: false
+        isJoined:
+          type: boolean
+          example: false
+        isModerator:
           type: boolean
           example: false
     EditPost:
