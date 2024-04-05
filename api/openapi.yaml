@@ -97,6 +97,7 @@ paths:
                 banner: drive.creddit.com/pfp
                 followers: 100
                 cakeDay: "2024-03-25T15:37:33.339+00:00"
+                isNSFW: "false"
         "401":
           description: "Unauthorized, user must be logged in"
           content:
@@ -362,7 +363,24 @@ paths:
       security:
         - cookie_auth: []
       description: Retrieve user's upvoted posts.
-      operationId: getUserUpvotes
+      operationId: getUpvotedPosts
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
       responses:
         "200":
           description: User upvotes retreived successfully
@@ -383,9 +401,26 @@ paths:
         - user
       summary: Get user downvoted posts
       description: Retrieve user's downvoted posts.
-      operationId: getUserDownvotes
+      operationId: getDownvotedPosts
       security:
         - cookie_auth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
       responses:
         "200":
           description: User downvotes retreived successfully
@@ -873,7 +908,7 @@ paths:
               example:
                 message: An error occurred while unfollowing the user
       x-swagger-router-controller: User
-  /user/is-available/{username}:
+  /user/is-username-available/{username}:
     get:
       tags:
         - user
@@ -1027,6 +1062,39 @@ paths:
         - cookie_auth: []
       description: Retrieve user posts.
       operationId: getPosts
+      parameters:
+        - name: sort
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "hot or top or new"
+        - name: time
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "now or today or week or month or year or all"
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
       responses:
         "200":
           description: User posts retrieved successfully
@@ -1057,6 +1125,39 @@ paths:
         - cookie_auth: []
       description: Retrieve user comments.
       operationId: getPosts
+      parameters:
+        - name: sort
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "hot or top or new"
+        - name: time
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "now or today or week or month or year or all"
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
       responses:
         "200":
           description: User comments retrieved successfully
@@ -1087,6 +1188,23 @@ paths:
         - cookie_auth: []
       description: Retrieve user history.
       operationId: getHistory
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 2
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
       responses:
         "200":
           description: User history retrieved successfully
@@ -1115,6 +1233,117 @@ paths:
       summary: Get user saved posts and comments
       description: Retrieve user's saved posts and comments.
       operationId: getSaved
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
+      security:
+        - cookie_auth: []
+      responses:
+        "200":
+          description: User saved posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                message: User saved posts retrieved successfully
+                $ref: "#/components/schemas/Feed"
+        "404":
+          description: user not found
+          content:
+            application/json:
+              example:
+                message: user not found
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while retrieving the user saved posts
+      x-swagger-router-controller: User
+  /user/saved-posts:
+    get:
+      tags:
+        - user
+      summary: Get user saved posts and comments
+      description: Retrieve user's saved posts and comments.
+      operationId: getSavedPosts
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
+      security:
+        - cookie_auth: []
+      responses:
+        "200":
+          description: User saved posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                message: User saved posts retrieved successfully
+                $ref: "#/components/schemas/Feed"
+        "404":
+          description: user not found
+          content:
+            application/json:
+              example:
+                message: user not found
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while retrieving the user saved posts
+      x-swagger-router-controller: User
+  /user/saved-comments:
+    get:
+      tags:
+        - user
+      summary: Get user saved posts and comments
+      description: Retrieve user's saved posts and comments.
+      operationId: getSavedComments
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
       security:
         - cookie_auth: []
       responses:
@@ -1145,6 +1374,23 @@ paths:
       summary: Get user hidden posts
       description: Retrieve user's hidden posts.
       operationId: getHiddenPosts
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
       responses:
         "200":
           description: User hidden posts retrieved successfully
@@ -1173,6 +1419,25 @@ paths:
       summary: Get user joined communities
       description: Retrieve user's joined communities.
       operationId: getJoinedCommunities
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
+      security:
+        - cookie_auth: []
       responses:
         "200":
           description: User joined communities retrieved successfully
@@ -1498,7 +1763,7 @@ paths:
           explode: false
           schema:
             type: integer
-            example: 2
+            example: 1
         - name: limit
           in: query
           required: false
@@ -3837,7 +4102,7 @@ components:
           example: 10
         option2:
           type: integer
-          example: 20
+          example: 10
         option3:
           type: integer
           example: 40
