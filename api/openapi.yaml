@@ -1734,6 +1734,66 @@ paths:
               example:
                 message: Error editing post
       x-swagger-router-controller: Post
+  /post/home-feed:
+    get:
+      tags:
+        - post
+      summary: Get home feed
+      description: Retrieve the home feed.
+      operationId: getHomeFeed
+      parameters:
+        - name: sort
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "hot or top or new"
+        - name: time
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "now or today or week or month or year or all"
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
+      responses:
+        "200":
+          description: Home feed retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feed"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              example:
+                message: User not found
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while getting home feed
+      x-swagger-router-controller: Post
   /post/{postId}/comment:
     get:
       tags:
