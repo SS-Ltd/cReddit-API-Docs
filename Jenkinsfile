@@ -1,24 +1,25 @@
 pipeline {
     agent any
+    environment {
+        dockerHub = credentials('creddit-dockerhub-hussein')
+    }
     stages {
         stage('Build & test') {
             steps {
-                 sh 'docker build . -t husseinelhawary/creddit_api'
+                 sh "docker build . -t ${env.dockerHub_USR}/creddit_api"
             }
         }
 
         stage('push to registery') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'creddit-dockerhub-hussein', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
-                    sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
-                    sh "docker push ${env.dockerHubUser}/creddit_api"
-                }
+                sh "docker login -u ${env.dockerHub_USR} -p ${env.dockerHub_PSW}"
+                sh "docker push ${env.dockerHub_USR}/creddit_api"
             }
         }
 
         stage('rebuild docker compose'){
             steps {
-                sh '/home/jenkins/rebuild_backend.sh'
+                sh "/home/jenkins/pull_image.sh ${env.dockerHub_USR}  ${env.dockerHub_PSW} APIDocs"
             }
         }
     }
