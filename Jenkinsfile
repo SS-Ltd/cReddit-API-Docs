@@ -11,7 +11,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'creddit-dockerhub-hussein', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
                     sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
-                    sh 'docker push ${env.dockerHubUser}/creddit_api'
+                    sh "docker push ${env.dockerHubUser}/creddit_api"
                 }
             }
         }
