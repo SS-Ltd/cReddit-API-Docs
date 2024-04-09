@@ -14,6 +14,8 @@ tags:
     description: User Management
   - name: post
     description: Post/Comments Management
+  - name: comment
+    description: Comments Management
   - name: subreddit
     description: Community Management
   - name: notification
@@ -1842,14 +1844,108 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Post
-  /post/{postId}/vote:
+  /post/{postId}/upvote:
+    patch:
+      tags:
+        - post
+      summary: upvote a specific post
+      description: specify a post to upvote
+      operationId: upvotePost
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Post 
+          content:
+            application/json:
+              example:
+                message: Post voted successfully
+        "400":
+          description: Post not found
+          content:
+            application/json:
+              examples:
+                InvalidPostId:
+                  value:
+                    message: Invalid post ID
+                PostNotFound:
+                  value:
+                    message: Post does not exist
+        "401":
+          description: "Unauthorized, user must be logged in"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while upvoting the post
+      x-swagger-router-controller: Post
+  /post/{postId}/downvote:
+    patch:
+      tags:
+        - post
+      summary: downvote a specific post
+      description: specify a post to downvote
+      operationId: downvotePost
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Post 
+          content:
+            application/json:
+              example:
+                message: Post voted successfully
+        "400":
+          description: Post not found
+          content:
+            application/json:
+              examples:
+                InvalidPostId:
+                  value:
+                    message: Invalid post ID
+                PostNotFound:
+                  value:
+                    message: Post does not exist
+        "401":
+          description: "Unauthorized, user must be logged in"
+          content:
+            application/json:
+              example:
+                status: Unauthorized
+                message: User must be logged in
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while upvoting the post
+      x-swagger-router-controller: Post
+  /post/{postId}/vote-poll:
     patch:
       tags:
         - post
       summary: Vote on a poll
       security:
         - cookie_auth: []
-      operationId: votePost
+      operationId: votePoll
       parameters:
         - name: postId
           in: path
@@ -1859,11 +1955,11 @@ paths:
           schema:
             type: string
       requestBody:
-        description: vote on a post object
+        description: vote on a poll option
         content:
           application/json:
-            example:
-              votedOption: Option 1
+            schema:
+                $ref: "#/components/schemas/VotePoll"
         required: true
       responses:
         "200":
@@ -1872,12 +1968,38 @@ paths:
             application/json:
               example:
                 message: Post voted successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                NotAPoll:
+                  value:
+                    message: Post is not a poll
+                PollAlreadyVoted:
+                  value:
+                    message: User has already voted
+                invalidPollOption:
+                  value:
+                    message: invalid poll option
+                expiredPoll:
+                  value:
+                    message: poll has expired
+                PostNotFound:
+                  value:
+                    message: Post does not exist
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while voting on the poll
       x-swagger-router-controller: Post
   /post/{postId}/save:
     patch:
       tags:
         - post
-      summary: Save/unsave post
+      summary: Save/unsave post/comment
       security:
         - cookie_auth: []
       operationId: savePost
@@ -1897,25 +2019,22 @@ paths:
               $ref: "#/components/schemas/SavePost"
       responses:
         "200":
-          description: Post saved/unsaved successfully
+          description: Post/comment saved/unsaved successfully
           content:
             application/json:
               example:
-                message: Post saved/unsaved successfully
+                message: Post/comment saved/unsaved successfully
         "400":
           description: Post not found
           content:
             application/json:
               examples:
-                MissingRequiredField:
-                  value:
-                    message: isSaved field is required
                 InvalidPostId:
                   value:
                     message: Invalid post ID
                 PostNotFound:
                   value:
-                    message: Post is not found
+                    message: Post does not
                 UserNotFound:
                   value:
                     message: User is not found
@@ -2105,6 +2224,169 @@ paths:
             application/json:
               example:
                 message: Post reported successfully
+        "500":
+          description: Internal Server Error
+      x-swagger-router-controller: Post
+  /comment:
+    post:
+      tags:
+        - comment
+      summary: comment on a specific post
+      operationId: createComment
+      security:
+        - cookie_auth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: reference to post object and new content
+        content:
+          application/json:
+            schema:
+              oneOf:
+                  - $ref: "#/components/schemas/CreateTextComment"
+                  - $ref: "#/components/schemas/CreateImageComment"
+            examples:
+              TextCommentExample:
+                value:
+                  postId: "661333b8f5b9ff88aa7ef5a0"
+                  content: "text content"
+              ImageCommentExample:
+                value:
+                  postId: "661333b8f5b9ff88aa7ef5a0"
+                  images: "<image_file>"
+      responses:
+        "200":
+          description: Comment created successfully
+          content:
+            application/json:
+              example:
+                message: Comment created successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                MissingRequiredFields:
+                  value:
+                    message: Post ID is required
+                MissingContent:
+                  value:
+                    message: Comment must have content or image
+                MultipleContent:
+                  value:
+                    message: Comment cannot have content & image at the same time
+                MultipleImages:
+                  value:
+                    message: Comment can only have one image
+                PostNotFound:
+                  value:
+                    message: Cannot comment on a non-existing post
+        "500":
+          description: Internal Server Error
+      x-swagger-router-controller: Post
+  /comment/{commentId}:
+    patch:
+      tags:
+        - comment
+      summary: edit a specific comment
+      operationId: editComment
+      security:
+        - cookie_auth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: reference to post object and new content
+        content:
+          application/json:
+            schema:
+              oneOf:
+                  - $ref: "#/components/schemas/EditTextComment"
+                  - $ref: "#/components/schemas/EditImageComment"
+            examples:
+              TextCommentExample:
+                value:
+                  content: "text content"
+              ImageCommentExample:
+                value:
+                  images: "<image_file>"
+      responses:
+        "200":
+          description: Comment edited successfully
+          content:
+            application/json:
+              example:
+                message: Comment edited successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                MissingImage:
+                  value:
+                    message: No image provided (for image comment)
+                MissingText:
+                  value:
+                    message: No text provided (for text comment)
+                MultipleImages:
+                  value:
+                    message: Comment can only have one image
+                CommentNotFound:
+                  value:
+                    message: Cannot edit a non-existing comment
+                CommentNotYours:
+                  value:
+                    message: You are not authorized to edit this comment
+        "500":
+          description: Internal Server Error
+      x-swagger-router-controller: Post 
+    delete:
+      tags:
+        - comment
+      summary: delete a specific comment
+      operationId: deleteComment
+      security:
+        - cookie_auth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Comment deleted successfully
+          content:
+            application/json:
+              example:
+                message: Comment deleted successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                CommentNotFound:
+                  value:
+                    message: Cannot delete a non-existing comment
+                InvalidCommentId:
+                  value:
+                    message: Comment ID is invalid
+                CommentNotYours:
+                  value:
+                    message: You are not authorized to delete this comment
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Post
@@ -4191,6 +4473,42 @@ components:
         isNSFW:
           type: boolean
           example: false
+    VotePoll:
+      type: object
+      properties:
+        pollOption:
+          type: string
+          example: option 1
+    CreateTextComment:
+      type: object
+      properties:
+        postId:
+          type: string
+          example: 661333b8f5b9ff88aa7ef5a0
+        content:
+          type: string
+          example: "text content"
+    CreateImageComment:
+      type: object
+      properties:
+        postId:
+          type: string
+          example: 661333b8f5b9ff88aa7ef5a0
+        images:
+          type: string
+          example: "<image_file>"
+    EditTextComment:
+      type: object
+      properties:
+        content:
+          type: string
+          example: "text content"
+    EditImageComment:
+      type: object
+      properties:
+        images:
+          type: string
+          example: "<image_file>"
   securitySchemes:
     cookie_auth:
       type: apiKey
