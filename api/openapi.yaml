@@ -1613,26 +1613,34 @@ paths:
                 message: Post data retrieved successfully
                 $ref: "#/components/schemas/Post"
         "401":
-          description: "Unauthorized, user must be logged in"
+          description: User trying to view NSFW content
           content:
             application/json:
               example:
-                status: Unauthorized
-                message: User must be logged in
+                message: Unable to view NSFW content
         "404":
-          description: Post not found
+          description: Not found
+          content:
+            application/json:
+              examples:
+                PostNotFound:
+                  value:
+                    message: Post does not exist
+                UserNotFound:
+                  value:
+                    message: User does not exist
+        "400":
+          description: Invalid post ID that cannot be queried as it is not in the same format as a typical ObjedtID
           content:
             application/json:
               example:
-                status: Not Found
-                message: Post not found
+                message: Post ID is wrong
         "500":
           description: Internal Server Error
           content:
             application/json:
               example:
-                status: Internal server error
-                message: An error occurred while retrieving the post
+                message: An error occurred while getting post
       x-swagger-router-controller: Post
     delete:
       tags:
@@ -2646,6 +2654,93 @@ paths:
           description: No such subreddit is found
         "500":
           description: Internal Server Error
+      x-swagger-router-controller: Subreddit
+  /subreddit/{subredditName}/posts:
+    get:
+      tags:
+        - subreddit
+      summary: Retrieve sorted posts in a subreddit
+      description: Retrieve the posts in this subreddit sorted by query parameter and paginated by limit and page parameters 
+      operationId: getSortedCommunityPosts
+      parameters:
+        - name: subreddit
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: sort
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            enum: [new, hot, top, rising]
+        - name: time
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            enum: [now, today, week, month, year, all]
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 10
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: list of posts sorted by selected method
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feed'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              example:
+                message: Subreddit is required
+        "404":
+          description: Subreddit not found
+          content:
+            application/json:
+              examples:
+                CommunityDoesNotExist:
+                  value:
+                    message: Community does not exist
+                UserDoesNotExist:
+                  value:
+                    message: User does not exist
+                NoPostsFound:
+                  value:
+                    message: No posts found for the community
+        "401":
+          description: Unable to view NSFW content
+          content:
+            application/json:
+              example:
+                message: Unable to view NSFW content
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while getting posts for the community
       x-swagger-router-controller: Subreddit
   /subreddit/{subredditName}/muted:
     get:
@@ -4200,7 +4295,7 @@ components:
           example: 350651awd651awd (in case of Comment)
         type:
           type: string
-          example: "(Images & Video) or (Normal) or (Poll) or (Links) or (Comment)"
+          example: "(Images & Video) or (Post) or (Poll) or (Links) or (Comment)"
         isImage:
           type: string
           example: true (only if type is Comment)
@@ -4254,6 +4349,23 @@ components:
               votes:
                 type: integer
                 example: 10
+        reports:
+          type: array
+          items: 
+            type: object
+            properties:
+              username:
+                type: string
+                example: Sayed
+              profilePicture:
+                type: string
+                example: drive.creddit.com/user_pfp
+              reason:
+                type: string
+                example: Spam
+        isDeletedUser:
+          type: boolean
+          example: false
         expirationDate:
           type: string
           example: "2024-03-25T15:37:33.339+00:00"
@@ -4277,10 +4389,10 @@ components:
           example: false
         isJoined:
           type: boolean
-          example: false
+          example: false (not for posts in a subreddit)
         isModerator:
           type: boolean
-          example: false
+          example: false (not for posts in a subreddit)
     EditPost:
       type: object
       properties:
