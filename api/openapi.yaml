@@ -445,7 +445,7 @@ paths:
       summary: Send an email to the user to reset password
       operationId: forgotPassword
       requestBody:
-        description: Send reset link
+        description: Send reset link Need username or email
         content:
           application/json:
             schema:
@@ -459,11 +459,11 @@ paths:
               example:
                 message: Password reset email sent successfully
         "400":
-          description: Username and Email are required
+          description: Username or Email is required
           content:
             application/json:
               example:
-                message: Username and Email are required
+                message: Username or Email is required
         "404":
           description: Username or Email not found
           content:
@@ -2992,16 +2992,19 @@ components:
     ForgotPassword:
       type: object
       properties:
-        username:
+        info:
           type: string
           example: theUser
-        email:
-          type: string
-          example: john@email.com
     ChangePassword:
       type: object
       properties:
+        oldPassword:
+          type: string
+          example: akaAKA12345
         newPassword:
+          type: string
+          example: ABCa123456
+        confirmPassword:
           type: string
           example: ABCa123456
     ForgotUsername:
@@ -3022,10 +3025,10 @@ components:
     ResetPassword:
       type: object
       properties:
-        oldPassword:
+        password:
           type: string
           example: Abc123
-        newPassword:
+        confirmPassword:
           type: string
           example: Xyz789
     UserLogin:
@@ -3318,12 +3321,12 @@ components:
         isNSFW:
           type: boolean
           example: false
-    EditPost:
-      type: object
-      properties:
-        content:
-          type: string
-          example: This is my content
+    # EditPost:
+    #   type: object
+    #   properties:
+    #     content:
+    #       type: string
+    #       example: This is my content
     SavePost:
       type: object
       properties:
@@ -3401,7 +3404,7 @@ components:
             items:
               oneOf:
               - $ref: '#/components/schemas/SinglePost'
-     EditPost:
+    EditPost:
       type: object
       properties:
         content:
