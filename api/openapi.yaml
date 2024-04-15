@@ -1318,8 +1318,8 @@ paths:
     get:
       tags:
         - user
-      summary: Get user saved posts and comments
-      description: Retrieve user's saved posts and comments.
+      summary: Get user saved posts excluding saved comments
+      description: Retrieve user's saved posts.
       operationId: getSavedPosts
       parameters:
         - name: page
@@ -1365,8 +1365,8 @@ paths:
     get:
       tags:
         - user
-      summary: Get user saved posts and comments
-      description: Retrieve user's saved posts and comments.
+      summary: Get user saved comments
+      description: Retrieve user's saved comments.
       operationId: getSavedComments
       parameters:
         - name: page
@@ -2299,7 +2299,7 @@ paths:
         content:
           application/json:
             example:
-              reason: Harassment
+              communityRule: Report Mahmoud
       responses:
         "200":
           description: Post reported successfully
@@ -2307,6 +2307,31 @@ paths:
             application/json:
               example:
                 message: Post reported successfully
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              examples:
+               Post:
+                value:
+                 message: Post not found
+               Community:
+                value:
+                 message: Community not found
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Community doesn't have this rule:
+                  value:
+                    message: Community rule does not apply
+                post need to belong to a community:
+                  value:
+                    message: Post does not belong to a community
+                Reporting your own post:
+                  value:
+                    message: You cannot report your own post
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Post
@@ -2751,7 +2776,20 @@ paths:
               schema:
                 $ref: "#/components/schemas/Feed"
         "404":
-          description: No such subreddit is found
+          description: Bad Request
+          content:
+            application/json:
+              example:
+                message: Community not found
+            
+        "403":
+          description: Bad Request
+          content:
+            application/json:
+              example:
+                message: Sorry! you are not a moderator
+        
+
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
@@ -3061,6 +3099,23 @@ paths:
       summary: Get top subreddits
       description: Retrieve top subreddits to display
       operationId: getTopCommunities
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
       responses:
         "200":
           description: Top Subreddits retrieved successfully
@@ -3068,7 +3123,7 @@ paths:
             application/json:
               schema:
                 message: Top Subreddits retrieved successfully
-                $ref: "#/components/schemas/Community"
+                $ref: "#/components/schemas/TopCommunity"
         "500":
           description: Internal Server Error
           content:
@@ -4760,6 +4815,33 @@ components:
           items:
             type: string
             example: '["SlaxSplash","Baroudy 14","No_Animator_8210"]'
+    TopCommunity:
+      type: object
+      properties:
+        id:
+          type: string
+          example: b6d05ee98b5ebd57c546bbc1
+        owner:
+          type: string
+          example: Logan
+        name:
+          type: string
+          example: r/cReddit_SW_Project
+        icon:
+          type: string
+          example: drive.creddit.com/test
+        topic:
+          type: string
+          example: Lorem ipsum
+        description:
+          type: string
+          example: once upon a time an Engineering student wanted to live
+        isJoined:
+          type: boolean
+          example: false
+        members:
+          type: integer
+          example: 1000
     SubredditSettings:
       type: object
       properties:
