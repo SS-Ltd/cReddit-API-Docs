@@ -54,6 +54,8 @@ paths:
                 banner: drive.creddit.com/pfp
                 followers: 100
                 cakeDay: "2024-03-25T15:37:33.339+00:00"
+                isNSFW: "false"
+                allowFollow: "true"
         "400":
           description: Bad Request
           content:
@@ -84,7 +86,7 @@ paths:
       security:
         - cookie_auth: []
       description: Retrieve information about a specific user.
-      operationId: getUser
+      operationId: getUserView
       responses:
         "200":
           description: User data retrieved successfully
@@ -100,6 +102,7 @@ paths:
                 followers: 100
                 cakeDay: "2024-03-25T15:37:33.339+00:00"
                 isNSFW: "false"
+                allowFollow: "true"
         "401":
           description: "Unauthorized, user must be logged in"
           content:
@@ -185,8 +188,8 @@ paths:
     post:
       tags:
         - user
-      summary: Logs user into the system using google services if no user exists with the email, a new user is created
-      description: Log in with google OAuth token
+      summary: Logs user into the system using Google services if no user exists with the same google ID, a new user is created
+      description: Log in with Google OAuth token
       operationId: loginGoogle
       requestBody:
         content:
@@ -196,7 +199,7 @@ paths:
         required: true
       responses:
         "200":
-          description: User logged in successfully
+          description: Found a user with the Google ID and logged them in
           content:
             application/json:
               example:
@@ -210,7 +213,7 @@ paths:
                 followers: 100
                 cakeDay: "2024-03-25T15:37:33.339+00:00"
         "201":
-          description: User created successfully
+          description: Created new user since no user with the same google ID exists
           content:
             application/json:
               example:
@@ -230,7 +233,7 @@ paths:
               example:
                 message: Error creating user
         "401":
-          description: "Invalid token"
+          description: Invalid Google access token
           content:
             application/json:
               example:
@@ -364,7 +367,7 @@ paths:
       summary: Get user upvoted posts
       security:
         - cookie_auth: []
-      description: Retrieve user's upvoted posts.
+      description: Retrieve paginated user's upvoted posts using the almighty getPosts aggregation pipeline (sorted by the time of upvote).
       operationId: getUpvotedPosts
       parameters:
         - name: page
@@ -385,24 +388,24 @@ paths:
             example: 5
       responses:
         "200":
-          description: User upvotes retreived successfully
+          description: User upvoted posts retrieved successfully
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Feed"
+        "400":
+          description: Error getting upvoted posts
         "401":
           description: "Unauthorized, user must be logged in"
         "404":
           description: User not found
-        "500":
-          description: Internal Server Error
       x-swagger-router-controller: User
   /user/downvoted:
     get:
       tags:
         - user
       summary: Get user downvoted posts
-      description: Retrieve user's downvoted posts.
+      description: Retrieve user's downvoted posts using the almighty getPosts aggregation pipeline (sorted by the time of downvote).
       operationId: getDownvotedPosts
       security:
         - cookie_auth: []
@@ -453,10 +456,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserSettings"
+        "400":
+          description: Error updating user settings
         "401":
-          description: "Unauthorized, user must be logged in"
-        "500":
-          description: Internal Server Error
+          description: Unauthorized, user must be logged in
+        "404":
+          description: User not found
       x-swagger-router-controller: User
     put:
       tags:
@@ -471,7 +476,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserSettings"
+              $ref: "#/components/schemas/UpdateUserSettings"
         required: true
       responses:
         "200":
@@ -957,8 +962,8 @@ paths:
     get:
       tags:
         - user
-      summary: Generate a random valid username
-      description: Generate a random valid username for registration.
+      summary: Generate a random valid username to ease the sign up process for the user.
+      description: Generate a random valid username using faker.js package.
       operationId: generateUsername
       responses:
         "200":
@@ -1059,10 +1064,10 @@ paths:
     get:
       tags:
         - user
-      summary: Get user posts
+      summary: Get posts created by the user with the given username
       security:
         - cookie_auth: []
-      description: Retrieve user posts.
+      description: Retrieve paginated user posts.
       operationId: getPosts
       parameters:
         - name: sort
@@ -1105,28 +1110,33 @@ paths:
               schema:
                 message: User posts retrieved successfully
                 $ref: "#/components/schemas/Feed"
-        "401":
-          description: Unauthorized, user must be logged in
+        "400":
+          description: Error getting user posts
           content:
             application/json:
               example:
-                message: User must be logged in
-        "500":
-          description: Internal Server Error
+                message: Error getting user posts
+        "404":
+          description: User not found
           content:
             application/json:
-              example:
-                message: An error occurred while retrieving the user's posts
+              examples:
+                UserNotFound:
+                  value:
+                    message: User not found
+                VisitorNotFound:
+                  value:
+                    message: Visitor not found
       x-swagger-router-controller: User
   /user/{username}/comments:
     get:
       tags:
         - user
-      summary: Get user comments
+      summary: Same as /user/{username}/posts but for comments
       security:
         - cookie_auth: []
-      description: Retrieve user comments.
-      operationId: getPosts
+      description: Retrieve paginated user comments.
+      operationId: getComments
       parameters:
         - name: sort
           in: query
@@ -1168,27 +1178,32 @@ paths:
               schema:
                 message: User comments retrieved successfully
                 $ref: "#/components/schemas/Feed"
-        "401":
-          description: Unauthorized, user must be logged in
+        "400":
+          description: Error getting user comments
           content:
             application/json:
               example:
-                message: User must be logged in
-        "500":
-          description: Internal Server Error
+                message: Error getting user comments
+        "404":
+          description: User not found
           content:
             application/json:
-              example:
-                message: An error occurred while retrieving the user's comments
+              examples:
+                UserNotFound:
+                  value:
+                    message: User not found
+                VisitorNotFound:
+                  value:
+                    message: Visitor not found
       x-swagger-router-controller: User
   /user/history:
     get:
       tags:
         - user
-      summary: Get user history
+      summary: Get the posts that the user has recently interacted to.
       security:
         - cookie_auth: []
-      description: Retrieve user history.
+      description: Returns a paginated feed of posts.
       operationId: getHistory
       parameters:
         - name: page
@@ -1215,18 +1230,40 @@ paths:
               schema:
                 message: User history retrieved successfully
                 $ref: "#/components/schemas/Feed"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              example:
+                message: Error getting history
         "401":
           description: Unauthorized, user must be logged in
           content:
             application/json:
               example:
                 message: User must be logged in
-        "500":
-          description: Internal Server Error
+      x-swagger-router-controller: User
+    delete:
+      tags:
+        - user
+      summary: Clear user history
+      security:
+        - cookie_auth: []
+      description: Clear user browsing history.
+      operationId: clearHistory
+      responses:
+        "200":
+          description: User history cleared successfully
           content:
             application/json:
               example:
-                message: An error occurred while retrieving the user history
+                message: User history cleared successfully
+        "400":
+          description: "Error clearing history"
+        "401":
+          description: "Unauthorized, user must be logged in"
+        "404":
+          description: User not found
       x-swagger-router-controller: User
   /user/saved:
     get:
@@ -1419,7 +1456,7 @@ paths:
       tags:
         - user
       summary: Get user joined communities
-      description: Retrieve user's joined communities.
+      description: Retrieve paginated user's joined communities.
       operationId: getJoinedCommunities
       parameters:
         - name: page
@@ -1448,18 +1485,18 @@ paths:
               schema:
                 message: User joined communities retrieved successfully
                 $ref: "#/components/schemas/JoinedCommunities"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              example:
+                message: Error getting joined communities
         "404":
           description: User not found
           content:
             application/json:
               example:
                 message: User not found
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              example:
-                message: An error occurred while retrieving the user joined communities
       x-swagger-router-controller: User
   /user/moderator-in:
     get:
@@ -1861,7 +1898,7 @@ paths:
             type: string
       responses:
         "200":
-          description: Post 
+          description: Post
           content:
             application/json:
               example:
@@ -1907,7 +1944,7 @@ paths:
             type: string
       responses:
         "200":
-          description: Post 
+          description: Post
           content:
             application/json:
               example:
@@ -1959,7 +1996,7 @@ paths:
         content:
           application/json:
             schema:
-                $ref: "#/components/schemas/VotePoll"
+              $ref: "#/components/schemas/VotePoll"
         required: true
       responses:
         "200":
@@ -2249,8 +2286,8 @@ paths:
           application/json:
             schema:
               oneOf:
-                  - $ref: "#/components/schemas/CreateTextComment"
-                  - $ref: "#/components/schemas/CreateImageComment"
+                - $ref: "#/components/schemas/CreateTextComment"
+                - $ref: "#/components/schemas/CreateImageComment"
             examples:
               TextCommentExample:
                 value:
@@ -2312,8 +2349,8 @@ paths:
           application/json:
             schema:
               oneOf:
-                  - $ref: "#/components/schemas/EditTextComment"
-                  - $ref: "#/components/schemas/EditImageComment"
+                - $ref: "#/components/schemas/EditTextComment"
+                - $ref: "#/components/schemas/EditImageComment"
             examples:
               TextCommentExample:
                 value:
@@ -2350,7 +2387,7 @@ paths:
                     message: You are not authorized to edit this comment
         "500":
           description: Internal Server Error
-      x-swagger-router-controller: Post 
+      x-swagger-router-controller: Post
     delete:
       tags:
         - comment
@@ -3765,66 +3802,134 @@ components:
             chatEmail:
               type: boolean
               example: true
-    UserSettingsPut:
+    UpdateUserSettings:
       type: object
       properties:
-        displayName:
-          type: string
-          example: theUser
+        account:
+          type: object
+          properties:
+            email:
+              type: string
+              example: user@gmail.com
+            gender:
+              type: string
+              example: Man
+            google:
+              type: boolean
+              example: true
+        profile:
+          type: object
+          properties:
+            displayName:
+              type: string
+              example: "John Doe"
+            about:
+              type: string
+              example: "I am a developer"
+            socialLinks:
+              type: array
+              items:
+                $ref: "#/components/schemas/UserSettings_preferences_socialLinks"
+            isNSFW:
+              type: boolean
+              example: true
+            allowFollow:
+              type: boolean
+              example: true
+            isContentVisible:
+              type: boolean
+              example: true
+        safetyAndPrivacy:
+          type: object
+          properties:
+            blockedUsers:
+              type: array
+              items:
+                type: string
+                example: "user1"
+            mutedCommunities:
+              type: array
+              items:
+                type: string
+                example: "community1"
+        feedSettings:
+          type: object
+          properties:
+            showAdultContent:
+              type: boolean
+              example: true
+            autoPlayMedia:
+              type: boolean
+              example: true
+            communityThemes:
+              type: boolean
+              example: true
+            communityContentSort:
+              type: string
+              enum:
+                - top
+                - rising
+                - hot
+                - new
+            globalContentView:
+              type: string
+              enum:
+                - card
+                - classic
+                - compact
+            openNewTab:
+              type: boolean
+              example: true
+        notifications:
+          type: object
+          properties:
+            mentionsNotifs:
+              type: boolean
+              example: true
+            commentsNotifs:
+              type: boolean
+              example: true
+            postsUpvotesNotifs:
+              type: boolean
+              example: true
+            repliesNotifs:
+              type: boolean
+              example: true
+            newFollowersNotifs:
+              type: boolean
+              example: true
+            postNotifs:
+              type: boolean
+              example: true
+            cakeDayNotifs:
+              type: boolean
+              example: true
+            modNotifs:
+              type: boolean
+              example: true
+            moderatorInCommunities:
+              type: array
+              items:
+                type: string
+                example: "community1"
+            invitationNotifs:
+              type: boolean
+              example: true
         email:
+          type: object
+          properties:
+            followEmail:
+              type: boolean
+              example: true
+            chatEmail:
+              type: boolean
+              example: true
+        avatar:
           type: string
-          example: jondoe@gmail.com
-        about:
+          example: drive.creddit.com/test
+        banner:
           type: string
-          example: Hello world
-        gender:
-          type: string
-          example: Man
-        country:
-          type: string
-          example: Egypt
-        preferences:
-          $ref: "#/components/schemas/UserSettings_preferences"
-      example:
-        country: Egypt
-        preferences:
-          socialLinks:
-            - displayName: El twitter bta3y
-              platform: twitter
-              url: https://twitter.com/faUwUsa
-            - displayName: El twitter bta3y
-              platform: twitter
-              url: https://twitter.com/faUwUsa
-          inboxMessagesNotif: true
-          repliesNotif: true
-          communityContentSort: top
-          apple: apple id
-          openNewTab: true
-          twitter: twitter handle
-          followEmail: true
-          modNotif: true
-          upvotesNotif: true
-          cakeDayNotif: true
-          isActiveCommunityVisible: true
-          communityThemes: true
-          chatMessagesNotif: true
-          globalContentView: card
-          chatRequests: true
-          showAdultContent: true
-          isContentVisible: true
-          google: jondoe@gmail.com
-          mentionsNotif: true
-          newFollowerNotif: true
-          invitationNotif: true
-          commentsNotif: true
-          autoPlayMedia: true
-          allowFollow: true
-          darkMode: true
-          chatEmail: true
-        gender: Man
-        displayName: theUser
-        about: Hello world
-        email: jondoe@gmail.com
+          example: drive.creddit.com/test
     ForgotPassword:
       type: object
       properties:
