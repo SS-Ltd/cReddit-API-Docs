@@ -1741,7 +1741,7 @@ paths:
       tags:
         - post
       summary: Get home feed
-      description: Retrieve the home feed.
+      description: Retrieve the home feed for a user or guest sorted and paginated. For a guest, sorting will always be by best (random)
       operationId: getHomeFeed
       parameters:
         - name: sort
@@ -1751,7 +1751,7 @@ paths:
           explode: false
           schema:
             type: string
-            example: "hot or top or new"
+            example: "hot or top or new or best or rising"
         - name: time
           in: query
           required: false
@@ -1788,7 +1788,7 @@ paths:
           content:
             application/json:
               example:
-                message: User not found
+                message: User does not exist
         "500":
           description: Internal Server Error
           content:
@@ -4281,6 +4281,9 @@ components:
         isModerator:
           type: boolean
           example: false
+        child:
+          type: object
+          example: like any post (in case of a cross post)
     EditPost:
       type: object
       properties:
