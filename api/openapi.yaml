@@ -30,7 +30,7 @@ paths:
       tags:
         - user
       summary: Create user (Signup)
-      description: Register a new user.
+      description: Register a new user or restore a previous deleted one.
       operationId: createUser
       requestBody:
         description: Created user object
@@ -85,8 +85,8 @@ paths:
       summary: Get user data
       security:
         - cookie_auth: []
-      description: Retrieve information about a specific user.
-      operationId: getUserView
+      description: Retrieve information about logged-in user.
+      operationId: getUser
       responses:
         "200":
           description: User data retrieved successfully
@@ -119,6 +119,7 @@ paths:
       tags:
         - user
       summary: Delete a user
+      description: Soft deletion of user account.
       operationId: deleteUser
       responses:
         "200":
@@ -188,8 +189,8 @@ paths:
     post:
       tags:
         - user
-      summary: Logs user into the system using Google services if no user exists with the same google ID, a new user is created
-      description: Log in with Google OAuth token
+      summary: Logs user into the system using Google services 
+      description: Log in with Google OAuth token. If no user exists with the same google ID, a new user is created
       operationId: loginGoogle
       requestBody:
         content:
@@ -244,6 +245,7 @@ paths:
       tags:
         - user
       summary: Logs out current logged in user session
+      description: Delete user tokens by setting the cookies expiration date to the past
       security:
         - cookie_auth: []
       operationId: logout
@@ -261,9 +263,9 @@ paths:
       tags:
         - user
       summary: Refreshes the user token
+      description: Generates a new access token and returns it in an HTTPONLY cookie if the refresh token is valid
       security:
         - cookie_auth: []
-      description: Refreshes the user token
       operationId: refresh
       responses:
         "200":
@@ -447,7 +449,7 @@ paths:
       summary: Get user settings
       security:
         - cookie_auth: []
-      description: Retrieve user settings to display
+      description: Retrieve logged-in user settings
       operationId: getUserSettings
       responses:
         "200":
@@ -469,7 +471,7 @@ paths:
       summary: Edit user settings
       security:
         - cookie_auth: []
-      description: Update user settings.
+      description: Update user settings by including the changed field in the request body.
       operationId: editUserSettings
       requestBody:
         description: User settings object
@@ -652,7 +654,7 @@ paths:
           content:
             application/json:
               example:
-                message: Email does not exist
+                message: Email not found
         "500":
           description: Internal Server Error
       x-swagger-router-controller: User
@@ -1526,6 +1528,7 @@ paths:
       tags:
         - post
       summary: Create post
+      description: Creates a post of type Post, Link, Images & Video, or Poll. It ignores additional fields other than those required by the post type as shown in the examples.
       operationId: createPost
       requestBody:
         description: post to be created
@@ -1728,6 +1731,7 @@ paths:
       tags:
         - post
       summary: Edit post
+      description: change the content of a Post or Poll type post
       operationId: editPost
       parameters:
         - name: postId
@@ -1845,7 +1849,8 @@ paths:
     get:
       tags:
         - post
-      summary: Gets comments under a single post sorted by sort parameter if given or by community suggested sort if sort parameter is not given and paginated
+      summary: Get comments for a specific post
+      description: Gets comments under a single post sorted by sort parameter if given or by community suggested sort if sort parameter is not given and paginated
       operationId: getComments
       parameters:
         - name: postId
@@ -1924,7 +1929,7 @@ paths:
       tags:
         - post
       summary: upvote a specific post
-      description: specify a post to upvote
+      description: specify a post to upvote. Already handles the logic if the user has already an interaction with the post
       operationId: upvotePost
       parameters:
         - name: postId
@@ -1970,7 +1975,7 @@ paths:
       tags:
         - post
       summary: downvote a specific post
-      description: specify a post to downvote
+      description: specify a post to downvote. Already handles the logic if the user has already an interaction with the post
       operationId: downvotePost
       parameters:
         - name: postId
@@ -2075,6 +2080,7 @@ paths:
       tags:
         - post
       summary: Save/unsave post/comment
+      description: Save/unsave a post or comment by specifying the desired state in isSaved field
       security:
         - cookie_auth: []
       operationId: savePost
@@ -2130,7 +2136,8 @@ paths:
     patch:
       tags:
         - post
-      summary: Lock post
+      summary: Lock post 
+      description: Lock/unlock a post by specifying the desired state in isLocked field
       security:
         - cookie_auth: []
       operationId: lockPost
@@ -2184,6 +2191,7 @@ paths:
       tags:
         - post
       summary: Hide post
+      description: Hide/unhide a post by specifying the desired state in isHidden field
       security:
         - cookie_auth: []
       operationId: hidePost
@@ -2307,6 +2315,7 @@ paths:
       tags:
         - comment
       summary: comment on a specific post
+      description: comment on a specific post with text or image
       operationId: createComment
       security:
         - cookie_auth: []
@@ -2381,13 +2390,13 @@ paths:
             type: string
       responses:
         "200":
-          description: Post data retrieved successfully
+          description: Comment data retrieved successfully
           content:
             application/json:
               schema:
                 status: OK
                 message: Post data retrieved successfully
-                $ref: "#/components/schemas/Post"
+                $ref: "#/components/schemas/Comment"
         "401":
           description: User trying to view NSFW content
           content:
@@ -2424,7 +2433,8 @@ paths:
     patch:
       tags:
         - comment
-      summary: edit a specific comment
+      summary: edit a specific comment'
+      description: edit a specific comment with text or image (must be the same type as original comment)
       operationId: editComment
       security:
         - cookie_auth: []
@@ -4122,7 +4132,13 @@ components:
     ChangePassword:
       type: object
       properties:
+        oldPassword:
+            type: string
+            example: ABCa123456
         newPassword:
+          type: string
+          example: ABCa123456
+        confirmPassword:
           type: string
           example: ABCa123456
     ForgotUsername:
@@ -4485,7 +4501,7 @@ components:
           example: 350651awd651awd (in case of Comment)
         type:
           type: string
-          example: "(Images & Video) or (Post) or (Poll) or (Links) or (Comment)"
+          example: "(Images & Video) or (Post) or (Poll) or (Links)"
         isImage:
           type: string
           example: true (only if type is Comment)
@@ -4539,6 +4555,104 @@ components:
               votes:
                 type: integer
                 example: 10
+        reports:
+          type: array
+          items: 
+            type: object
+            properties:
+              username:
+                type: string
+                example: Sayed
+              profilePicture:
+                type: string
+                example: drive.creddit.com/user_pfp
+              reason:
+                type: string
+                example: Spam
+        isDeletedUser:
+          type: boolean
+          example: false
+        isBlocked:
+          type: boolean
+          example: false
+        expirationDate:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        createdAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        updatedAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        isUpvoted:
+          type: boolean
+          example: false
+        isDownvoted:
+          type: boolean
+          example: false
+        isSaved:
+          type: boolean
+          example: false
+        isHidden:
+          type: boolean
+          example: false
+        isJoined:
+          type: boolean
+          example: false (not for posts in a subreddit)
+        isModerator:
+          type: boolean
+          example: false (not for posts in a subreddit)
+        child:
+          type: object
+          example: like any post (in case of a cross post)
+    Comment:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 350651awd651awd
+        postID:
+          type: string
+          example: 350651awd651awd
+        type:
+          type: string
+          example: "Comment"
+        isImage:
+          type: string
+          example: true
+        username:
+          type: string
+          example: Sayed
+        communityName:
+          type: string
+          example: Watermelon
+        profilePicture:
+          type: string
+          example: drive.creddit.com/subreddit_or_user_pfpe
+        netVote:
+          type: integer
+          example: 1500
+        isSpoiler:
+          type: boolean
+          example: false
+        isNSFW:
+          type: boolean
+          example: false
+        isApproved:
+          type: boolean
+          example: false
+        isLocked:
+          type: boolean
+          example: false
+        isEdited:
+          type: boolean
+          example: false
+        title:
+          type: string
+          example: Hello World
+        content:
+          type: string
+          example: This is my content
         reports:
           type: array
           items: 
