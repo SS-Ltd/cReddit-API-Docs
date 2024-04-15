@@ -7,35 +7,37 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.0
 servers:
-- url: https://virtserver.swaggerhub.com/cReddit/cReddit/1.0.0
-  description: SwaggerHub API Auto Mocking
+  - url: https://virtserver.swaggerhub.com/cReddit/cReddit/1.0.0
+    description: SwaggerHub API Auto Mocking
 tags:
-- name: user
-  description: User Management
-- name: post
-  description: Post/Comments Management
-- name: subreddit
-  description: Community Management
-- name: notification
-  description: Notifications Management
-- name: mod
-  description: Moderation
-- name: search
-  description: Search
+  - name: user
+    description: User Management
+  - name: post
+    description: Post/Comments Management
+  - name: comment
+    description: Comments Management
+  - name: subreddit
+    description: Community Management
+  - name: notification
+    description: Notifications Management
+  - name: mod
+    description: Moderation
+  - name: search
+    description: Search
 paths:
   /user:
     post:
       tags:
-      - user
+        - user
       summary: Create user (Signup)
-      description: Register a new user.
+      description: Register a new user or restore a previous deleted one.
       operationId: createUser
       requestBody:
         description: Created user object
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
         required: true
       responses:
         "201":
@@ -44,6 +46,16 @@ paths:
             application/json:
               example:
                 message: User created successfully
+                username: theUser
+                displayName: theUser
+                about: Hello to my page
+                email: john@email.com
+                profilePicture: drive.creddit.com/pfp
+                banner: drive.creddit.com/pfp
+                followers: 100
+                cakeDay: "2024-03-25T15:37:33.339+00:00"
+                isNSFW: "false"
+                allowFollow: "true"
         "400":
           description: Bad Request
           content:
@@ -63,14 +75,51 @@ paths:
                     message: Invalid gender
                 PasswordMinimumLength:
                   value:
-                    message: Password must be at least 8 characters long
+                    message: Password must contain at least one lower and upper case letters and at least one digit and must be at least 8 characters
                 ErrorCreatingUser:
                   value:
                     message: Error creating user
+    get:
+      tags:
+        - user
+      summary: Get user data
+      security:
+        - cookie_auth: []
+      description: Retrieve information about logged-in user.
+      operationId: getUser
+      responses:
+        "200":
+          description: User data retrieved successfully
+          content:
+            application/json:
+              example:
+                username: theUser
+                displayName: theUser
+                about: Hello to my page
+                email: john@email.com
+                profilePicture: drive.creddit.com/pfp
+                banner: drive.creddit.com/pfp
+                followers: 100
+                cakeDay: "2024-03-25T15:37:33.339+00:00"
+                isNSFW: "false"
+                allowFollow: "true"
+        "401":
+          description: "Unauthorized, user must be logged in"
+          content:
+            application/json:
+              example:
+                message: Unauthorized, user must be logged in
+        "404":
+          description: User not found
+          content:
+            application/json:
+              example:
+                message: User not found
     delete:
       tags:
-      - user
+        - user
       summary: Delete a user
+      description: Soft deletion of user account.
       operationId: deleteUser
       responses:
         "200":
@@ -94,7 +143,7 @@ paths:
   /user/login:
     post:
       tags:
-      - user
+        - user
       summary: Logs user into the system
       description: Log in with username and password.
       operationId: login
@@ -102,7 +151,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserLogin'
+              $ref: "#/components/schemas/UserLogin"
         required: true
       responses:
         "200":
@@ -111,6 +160,14 @@ paths:
             application/json:
               example:
                 message: User logged in successfully
+                username: theUser
+                displayName: theUser
+                about: Hello to my page
+                email: john@email.com
+                profilePicture: drive.creddit.com/pfp
+                banner: drive.creddit.com/pfp
+                followers: 100
+                cakeDay: "2024-03-25T15:37:33.339+00:00"
         "400":
           description: Bad Request
           content:
@@ -131,29 +188,45 @@ paths:
   /user/auth/google:
     post:
       tags:
-      - user
-      summary: Logs user into the system using google services if no user exists with the email, a new user is created
-      description: Log in with google OAuth token
+        - user
+      summary: Logs user into the system using Google services 
+      description: Log in with Google OAuth token. If no user exists with the same google ID, a new user is created
       operationId: loginGoogle
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserLoginGoogle'
+              $ref: "#/components/schemas/UserLoginGoogle"
         required: true
       responses:
         "200":
-          description: User logged in successfully
+          description: Found a user with the Google ID and logged them in
           content:
             application/json:
               example:
                 message: User logged in successfully
+                username: theUser
+                displayName: theUser
+                about: Hello to my page
+                email: john@email.com
+                profilePicture: drive.creddit.com/pfp
+                banner: drive.creddit.com/pfp
+                followers: 100
+                cakeDay: "2024-03-25T15:37:33.339+00:00"
         "201":
-          description: User created successfully
+          description: Created new user since no user with the same google ID exists
           content:
             application/json:
               example:
                 message: User created successfully
+                username: theUser
+                displayName: theUser
+                about: Hello to my page
+                email: john@email.com
+                profilePicture: drive.creddit.com/pfp
+                banner: drive.creddit.com/pfp
+                followers: 100
+                cakeDay: "2024-03-25T15:37:33.339+00:00"
         "400":
           description: Error creating user
           content:
@@ -161,7 +234,7 @@ paths:
               example:
                 message: Error creating user
         "401":
-          description: "Invalid token"
+          description: Invalid Google access token
           content:
             application/json:
               example:
@@ -170,9 +243,10 @@ paths:
   /user/logout:
     get:
       tags:
-      - user
+        - user
       summary: Logs out current logged in user session
-      security: 
+      description: Delete user tokens by setting the cookies expiration date to the past
+      security:
         - cookie_auth: []
       operationId: logout
       responses:
@@ -184,14 +258,14 @@ paths:
                 message: User logged out successfully
         "400":
           description: Error logging out
-  /user/refreshToken:
+  /user/refresh-token:
     get:
       tags:
-      - user
+        - user
       summary: Refreshes the user token
-      security: 
+      description: Generates a new access token and returns it in an HTTPONLY cookie if the refresh token is valid
+      security:
         - cookie_auth: []
-      description: Refreshes the user token
       operationId: refresh
       responses:
         "200":
@@ -199,36 +273,36 @@ paths:
           content:
             application/json:
               example:
-                message: 'Token refreshed successfully'
+                message: "Token refreshed successfully"
         "401":
           description: "Unauthorized"
           content:
             application/json:
               example:
-                message: 'Unauthorized'
+                message: "Unauthorized"
         "404":
           description: "Invalid credentials"
           content:
             application/json:
               example:
-                message: 'User not found'
+                message: "User not found"
         "500":
           description: Internal Server Error
-  /user/verify/{verificationToken}:
+  /user/verify/{token}:
     get:
       tags:
-      - user
+        - user
       summary: Email Verification
       description: Verify user email
       operationId: verifyUser
       parameters:
-      - name: verificationToken
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: token
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: User verified successfully
@@ -238,21 +312,21 @@ paths:
                 message: User verified successfully
         "400":
           description: "Error verifying user"
-  /user/u/{username}:
+  /user/{username}:
     get:
       tags:
-      - user
+        - user
       summary: Get user data
       description: Retrieve information about a specific user.
       operationId: getUserView
       parameters:
-      - name: username
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: username
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: User data retrieved successfully
@@ -266,123 +340,101 @@ paths:
                 profilePicture: drive.creddit.com/pfp
                 banner: drive.creddit.com/pfp
                 followers: 100
-                cakeDay: 29/08/2023
+                cakeDay: "2024-03-25T15:37:33.339+00:00"
+                isFollowed: "false"
+                isBlocked: "false"
         "401":
           description: "Unauthorized, user must be logged in"
-        "404":
-          description: User not found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: User
-  /user/{username}/overview:
-    get:
-      tags:
-      - user
-      summary: Get user data
-      description: Retrieve information about a specific user.
-      operationId: getUserOverview
-      parameters:
-      - name: username
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: User overview retreived successfully
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Overview'
-        "401":
-          description: "Unauthorized, user must be logged in"
+              example:
+                message: Unauthorized, user must be logged in
         "404":
           description: User not found
+          content:
+            application/json:
+              example:
+                message: User not found
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Internal Server Error
       x-swagger-router-controller: User
-  /user/{username}/upvoted:
+  /user/upvoted:
     get:
       tags:
-      - user
+        - user
       summary: Get user upvoted posts
-      description: Retrieve user's upvoted posts.
-      operationId: getUserUpvotes
+      security:
+        - cookie_auth: []
+      description: Retrieve paginated user's upvoted posts using the almighty getPosts aggregation pipeline (sorted by the time of upvote).
+      operationId: getUpvotedPosts
       parameters:
-      - name: username
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
       responses:
         "200":
-          description: User upvotes retreived successfully
+          description: User upvoted posts retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                $ref: "#/components/schemas/Feed"
+        "400":
+          description: Error getting upvoted posts
         "401":
           description: "Unauthorized, user must be logged in"
         "404":
           description: User not found
-        "500":
-          description: Internal Server Error
       x-swagger-router-controller: User
-  /user/{username}/downvoted:
+  /user/downvoted:
     get:
       tags:
-      - user
+        - user
       summary: Get user downvoted posts
-      description: Retrieve user's downvoted posts.
-      operationId: getUserDownvotes
+      description: Retrieve user's downvoted posts using the almighty getPosts aggregation pipeline (sorted by the time of downvote).
+      operationId: getDownvotedPosts
+      security:
+        - cookie_auth: []
       parameters:
-      - name: username
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
       responses:
         "200":
           description: User downvotes retreived successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
-        "401":
-          description: "Unauthorized, user must be logged in"
-        "404":
-          description: User not found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: User
-  /user/submitted/{username}:
-    get:
-      tags:
-      - user
-      summary: Get user submitted posts
-      description: Retrieve user's submitted posts.
-      operationId: getUserSubmitted
-      parameters:
-      - name: username
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      responses:
-        "200":
-          description: User submitted posts retreived successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Post'
+                $ref: "#/components/schemas/Feed"
         "401":
           description: "Unauthorized, user must be logged in"
         "404":
@@ -393,11 +445,11 @@ paths:
   /user/settings:
     get:
       tags:
-      - user
+        - user
       summary: Get user settings
-      security: 
+      security:
         - cookie_auth: []
-      description: Retrieve user settings to display
+      description: Retrieve logged-in user settings
       operationId: getUserSettings
       responses:
         "200":
@@ -405,26 +457,28 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserSettings'
+                $ref: "#/components/schemas/UserSettings"
+        "400":
+          description: Error updating user settings
         "401":
-          description: "Unauthorized, user must be logged in"
-        "500":
-          description: Internal Server Error
+          description: Unauthorized, user must be logged in
+        "404":
+          description: User not found
       x-swagger-router-controller: User
     put:
       tags:
-      - user
+        - user
       summary: Edit user settings
-      security: 
+      security:
         - cookie_auth: []
-      description: Update user settings.
+      description: Update user settings by including the changed field in the request body.
       operationId: editUserSettings
       requestBody:
         description: User settings object
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserSettingsPut'
+              $ref: "#/components/schemas/UpdateUserSettings"
         required: true
       responses:
         "200":
@@ -432,7 +486,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserSettings'
+                $ref: "#/components/schemas/UserSettings"
         "401":
           description: "Unauthorized, user must be logged in"
         "500":
@@ -441,7 +495,7 @@ paths:
   /user/forgot-password:
     post:
       tags:
-      - user
+        - user
       summary: Send an email to the user to reset password
       operationId: forgotPassword
       requestBody:
@@ -449,7 +503,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ForgotPassword'
+              $ref: "#/components/schemas/ForgotPassword"
         required: true
       responses:
         "200":
@@ -480,16 +534,16 @@ paths:
   /user/change-password:
     patch:
       tags:
-      - user
+        - user
       summary: Change password for the user when he is logged in
-      security: 
+      security:
         - cookie_auth: []
       operationId: changePassword
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ChangePassword'
+              $ref: "#/components/schemas/ChangePassword"
         required: true
       responses:
         "200":
@@ -521,7 +575,7 @@ paths:
   /user/reset-password/{token}:
     patch:
       tags:
-      - user
+        - user
       summary: Take user's new password providing the token created from forgot-password
       operationId: resetPassword
       requestBody:
@@ -529,16 +583,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ResetPassword'
+              $ref: "#/components/schemas/ResetPassword"
         required: true
       parameters:
-      - name: token
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: token
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: Password reset email sent successfully
@@ -572,7 +626,7 @@ paths:
   /user/forgot-username:
     post:
       tags:
-      - user
+        - user
       summary: Send an email to the user to remind user of username
       operationId: forgotUsername
       requestBody:
@@ -580,7 +634,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ForgotUsername'
+              $ref: "#/components/schemas/ForgotUsername"
         required: true
       responses:
         "200":
@@ -600,24 +654,24 @@ paths:
           content:
             application/json:
               example:
-                message: Email does not exist
+                message: Email not found
         "500":
           description: Internal Server Error
       x-swagger-router-controller: User
   /user/change-email:
     patch:
       tags:
-      - user
+        - user
       summary: Allows user to change email
       description: Change user email address.
       operationId: changeEmail
-      security: 
+      security:
         - cookie_auth: []
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ChangeEmail'
+              $ref: "#/components/schemas/ChangeEmail"
         required: true
       responses:
         "200":
@@ -641,28 +695,27 @@ paths:
                   value:
                     message: Email is invalid
 
-        
         "500":
           description: Internal Server Error
       x-swagger-router-controller: User
   /user/block/{username}:
     post:
       tags:
-      - user
+        - user
       summary: Block User
-      security: 
+      security:
         - cookie_auth: []
       description: Block a specific user.
       operationId: block
       parameters:
-      - name: username
-        in: path
-        description: Username of the user to block
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: username
+          in: path
+          description: Username of the user to block
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: User blocked successfully
@@ -704,19 +757,19 @@ paths:
       x-swagger-router-controller: User
     delete:
       tags:
-      - user
+        - user
       summary: Unblock user
       description: Unblock a specific user.
       operationId: unblock
       parameters:
-      - name: username
-        in: path
-        description: Username of the user to unblock
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: username
+          in: path
+          description: Username of the user to unblock
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: User unblocked successfully
@@ -756,21 +809,21 @@ paths:
   /user/follow/{username}:
     post:
       tags:
-      - user
+        - user
       summary: Follow User
       description: Follow a specific user.
       operationId: follow
-      security: 
+      security:
         - cookie_auth: []
       parameters:
-      - name: username
-        in: path
-        description: Username of the user to follow
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: username
+          in: path
+          description: Username of the user to follow
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: User followed successfully
@@ -815,18 +868,18 @@ paths:
       x-swagger-router-controller: User
     delete:
       tags:
-      - user
+        - user
       summary: Unfollow
       operationId: unfollow
       parameters:
-      - name: username
-        in: path
-        description: Username of the user to unfollow
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: username
+          in: path
+          description: Username of the user to unfollow
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: User unfollowed successfully
@@ -864,21 +917,21 @@ paths:
               example:
                 message: An error occurred while unfollowing the user
       x-swagger-router-controller: User
-  /user/is-available/{username}:
+  /user/is-username-available/{username}:
     get:
       tags:
-      - user
+        - user
       summary: Check if username is available
       description: Check if a username is available for registration.
       operationId: isUsernameAvailable
       parameters:
-      - name: username
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: username
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: Username is available
@@ -910,9 +963,9 @@ paths:
   /user/generate-username:
     get:
       tags:
-      - user
-      summary: Generate a random valid username
-      description: Generate a random valid username for registration.
+        - user
+      summary: Generate a random valid username to ease the sign up process for the user.
+      description: Generate a random valid username using faker.js package.
       operationId: generateUsername
       responses:
         "200":
@@ -931,9 +984,9 @@ paths:
   /user/clear-history:
     delete:
       tags:
-      - user
+        - user
       summary: Clear user history
-      security: 
+      security:
         - cookie_auth: []
       description: Clear user browsing history.
       operationId: clearHistory
@@ -952,21 +1005,21 @@ paths:
   /user/{subredditName}/block-community:
     post:
       tags:
-      - user
+        - user
       summary: Block Community
       description: Block a specific community.
-      security: 
+      security:
         - cookie_auth: []
       operationId: blockCommunity
       parameters:
-      - name: subredditName
-        in: path
-        description: Name of the community to block
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          description: Name of the community to block
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: Community blocked successfully
@@ -983,18 +1036,18 @@ paths:
       x-swagger-router-controller: User
     delete:
       tags:
-      - user
+        - user
       summary: Unblock
       operationId: unblockCommunity
       parameters:
-      - name: subredditName
-        in: path
-        description: Name of the community to Unblock
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          description: Name of the community to Unblock
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: Community unblocked successfully
@@ -1009,15 +1062,168 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: User
+  /user/{username}/posts:
+    get:
+      tags:
+        - user
+      summary: Get posts created by the user with the given username
+      security:
+        - cookie_auth: []
+      description: Retrieve paginated user posts.
+      operationId: getPosts
+      parameters:
+        - name: sort
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "hot or top or new"
+        - name: time
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "now or today or week or month or year or all"
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
+      responses:
+        "200":
+          description: User posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                message: User posts retrieved successfully
+                $ref: "#/components/schemas/Feed"
+        "400":
+          description: Error getting user posts
+          content:
+            application/json:
+              example:
+                message: Error getting user posts
+        "404":
+          description: User not found
+          content:
+            application/json:
+              examples:
+                UserNotFound:
+                  value:
+                    message: User not found
+                VisitorNotFound:
+                  value:
+                    message: Visitor not found
+      x-swagger-router-controller: User
+  /user/{username}/comments:
+    get:
+      tags:
+        - user
+      summary: Same as /user/{username}/posts but for comments
+      security:
+        - cookie_auth: []
+      description: Retrieve paginated user comments.
+      operationId: getComments
+      parameters:
+        - name: sort
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "hot or top or new"
+        - name: time
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "now or today or week or month or year or all"
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
+      responses:
+        "200":
+          description: User comments retrieved successfully
+          content:
+            application/json:
+              schema:
+                message: User comments retrieved successfully
+                $ref: "#/components/schemas/Feed"
+        "400":
+          description: Error getting user comments
+          content:
+            application/json:
+              example:
+                message: Error getting user comments
+        "404":
+          description: User not found
+          content:
+            application/json:
+              examples:
+                UserNotFound:
+                  value:
+                    message: User not found
+                VisitorNotFound:
+                  value:
+                    message: Visitor not found
+      x-swagger-router-controller: User
   /user/history:
     get:
       tags:
-      - user
-      summary: Get user history
-      security: 
+        - user
+      summary: Get the posts that the user has recently interacted to.
+      security:
         - cookie_auth: []
-      description: Retrieve user history.
+      description: Returns a paginated feed of posts.
       operationId: getHistory
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 2
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
       responses:
         "200":
           description: User history retrieved successfully
@@ -1025,28 +1231,67 @@ paths:
             application/json:
               schema:
                 message: User history retrieved successfully
-                $ref: '#/components/schemas/Post'
+                $ref: "#/components/schemas/Feed"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              example:
+                message: Error getting history
         "401":
           description: Unauthorized, user must be logged in
           content:
             application/json:
               example:
                 message: User must be logged in
-        "500":
-          description: Internal Server Error
+      x-swagger-router-controller: User
+    delete:
+      tags:
+        - user
+      summary: Clear user history
+      security:
+        - cookie_auth: []
+      description: Clear user browsing history.
+      operationId: clearHistory
+      responses:
+        "200":
+          description: User history cleared successfully
           content:
             application/json:
               example:
-                message: An error occurred while retrieving the user history
+                message: User history cleared successfully
+        "400":
+          description: "Error clearing history"
+        "401":
+          description: "Unauthorized, user must be logged in"
+        "404":
+          description: User not found
       x-swagger-router-controller: User
   /user/saved:
     get:
       tags:
-      - user
+        - user
       summary: Get user saved posts and comments
       description: Retrieve user's saved posts and comments.
       operationId: getSaved
-      security: 
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
+      security:
         - cookie_auth: []
       responses:
         "200":
@@ -1055,7 +1300,101 @@ paths:
             application/json:
               schema:
                 message: User saved posts retrieved successfully
-                $ref: '#/components/schemas/Post'
+                $ref: "#/components/schemas/Feed"
+        "404":
+          description: user not found
+          content:
+            application/json:
+              example:
+                message: user not found
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while retrieving the user saved posts
+      x-swagger-router-controller: User
+  /user/saved-posts:
+    get:
+      tags:
+        - user
+      summary: Get user saved posts and comments
+      description: Retrieve user's saved posts and comments.
+      operationId: getSavedPosts
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
+      security:
+        - cookie_auth: []
+      responses:
+        "200":
+          description: User saved posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                message: User saved posts retrieved successfully
+                $ref: "#/components/schemas/Feed"
+        "404":
+          description: user not found
+          content:
+            application/json:
+              example:
+                message: user not found
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while retrieving the user saved posts
+      x-swagger-router-controller: User
+  /user/saved-comments:
+    get:
+      tags:
+        - user
+      summary: Get user saved posts and comments
+      description: Retrieve user's saved posts and comments.
+      operationId: getSavedComments
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
+      security:
+        - cookie_auth: []
+      responses:
+        "200":
+          description: User saved posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                message: User saved posts retrieved successfully
+                $ref: "#/components/schemas/Feed"
         "404":
           description: user not found
           content:
@@ -1070,12 +1409,29 @@ paths:
                 message: An error occurred while retrieving the user saved posts
       x-swagger-router-controller: User
   /user/hidden-posts:
-   get:
+    get:
       tags:
-      - user
+        - user
       summary: Get user hidden posts
       description: Retrieve user's hidden posts.
       operationId: getHiddenPosts
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
       responses:
         "200":
           description: User hidden posts retrieved successfully
@@ -1083,7 +1439,7 @@ paths:
             application/json:
               schema:
                 message: User saved posts retrieved successfully
-                $ref: '#/components/schemas/Post'
+                $ref: "#/components/schemas/Feed"
         "404":
           description: user not found
           content:
@@ -1097,12 +1453,59 @@ paths:
               example:
                 message: An error occurred while retrieving the user saved posts
       x-swagger-router-controller: User
+  /user/joined-communities:
+    get:
+      tags:
+        - user
+      summary: Get user joined communities
+      description: Retrieve paginated user's joined communities.
+      operationId: getJoinedCommunities
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
+      security:
+        - cookie_auth: []
+      responses:
+        "200":
+          description: User joined communities retrieved successfully
+          content:
+            application/json:
+              schema:
+                message: User joined communities retrieved successfully
+                $ref: "#/components/schemas/JoinedCommunities"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              example:
+                message: Error getting joined communities
+        "404":
+          description: User not found
+          content:
+            application/json:
+              example:
+                message: User not found
+      x-swagger-router-controller: User
   /user/moderator-in:
     get:
       tags:
-      - user
+        - user
       summary: Retrieve subreddits that user is a moderator
-      security: 
+      security:
         - cookie_auth: []
       description: Retrieve subreddits that user is a moderator
       operationId: getSubredditMod
@@ -1125,17 +1528,58 @@ paths:
       tags:
         - post
       summary: Create post
-      security: 
-        - cookie_auth: []
+      description: Creates a post of type Post, Link, Images & Video, or Poll. It ignores additional fields other than those required by the post type as shown in the examples.
       operationId: createPost
       requestBody:
         description: post to be created
         content:
-          application/json:
+          multipart/form-data:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/CreatePost"
+                - $ref: "#/components/schemas/CreateLink"
+                - $ref: "#/components/schemas/CreateImage"
+                - $ref: "#/components/schemas/CreatePoll"
             examples:
-              CreatePost:
+              PostExample:
                 value:
-                  $ref: '#/components/schemas/CreatePost'
+                  type: "Post"
+                  communityName: "funny"
+                  title: "Text Post Example"
+                  content: "This is a text post example."
+                  isSpoiler: false
+                  isNSFW: false
+              LinkExample:
+                value:
+                  type: "Links"
+                  communityName: "funny"
+                  title: "Text Post Example"
+                  content: "This is a text post example."
+                  isSpoiler: false
+                  isNSFW: false
+              ImagesExample:
+                value:
+                  type: "Images & Video"
+                  communityName: "funny"
+                  title: "Text Post Example"
+                  images:
+                    - file: <image_file_1>
+                    - file: <image_file_2>
+                  isSpoiler: false
+                  isNSFW: false
+              PollExample:
+                value:
+                  type: "Poll"
+                  communityName: "funny"
+                  title: "Text Post Example"
+                  content: "This is a text post example."
+                  pollOptions: ["option1", "option2"]
+                  expirationDate: "2024-03-25T15:37:33.339+00:00"
+                  isSpoiler: false
+                  isNSFW: false
+            encoding:
+              file:
+                contentType: "multipart/form-data"
         required: true
       responses:
         "200":
@@ -1144,6 +1588,7 @@ paths:
             application/json:
               example:
                 message: Post created successfully (while ignoring additional fields)
+                postId: 350651awd651awd
         "400":
           description: Missing required fields
           content:
@@ -1186,18 +1631,18 @@ paths:
   /post/{postId}:
     get:
       tags:
-      - post
+        - post
       summary: Get post details
       description: Retrieve information about a specific post.
       operationId: getPost
       parameters:
-      - name: postId
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: Post data retrieved successfully
@@ -1206,43 +1651,51 @@ paths:
               schema:
                 status: OK
                 message: Post data retrieved successfully
-                $ref: '#/components/schemas/Post'
+                $ref: "#/components/schemas/Post"
         "401":
-          description: "Unauthorized, user must be logged in"
+          description: User trying to view NSFW content
           content:
             application/json:
               example:
-                status: Unauthorized
-                message: User must be logged in
+                message: Unable to view NSFW content
         "404":
-          description: Post not found
+          description: Not found
+          content:
+            application/json:
+              examples:
+                PostNotFound:
+                  value:
+                    message: Post does not exist
+                UserNotFound:
+                  value:
+                    message: User does not exist
+        "400":
+          description: Invalid post ID that cannot be queried as it is not in the same format as a typical ObjedtID
           content:
             application/json:
               example:
-                status: Not Found
-                message: Post not found
+                message: Post ID is wrong
         "500":
           description: Internal Server Error
           content:
             application/json:
               example:
-                status: Internal server error
-                message: An error occurred while retrieving the post
+                message: An error occurred while getting post
       x-swagger-router-controller: Post
     delete:
       tags:
-      - post
+        - post
       summary: Delete Post
       operationId: deletePost
       parameters:
-      - name: postId
-        in: path
-        description: ID of post to be deleted
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: postId
+          in: path
+          description: ID of post to be deleted
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: Post deleted Successfully
@@ -1276,23 +1729,24 @@ paths:
       x-swagger-router-controller: Post
     patch:
       tags:
-      - post
+        - post
       summary: Edit post
+      description: change the content of a Post or Poll type post
       operationId: editPost
       parameters:
-      - name: postId
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: ONLY PERMITTED FOR POST & POLL TYPES
         content:
           application/json:
             schema:
-                $ref: '#/components/schemas/EditPost'
+              $ref: "#/components/schemas/EditPost"
         required: true
       responses:
         "200":
@@ -1331,60 +1785,261 @@ paths:
               example:
                 message: Error editing post
       x-swagger-router-controller: Post
+  /post/home-feed:
+    get:
+      tags:
+        - post
+      summary: Get home feed
+      description: Retrieve the home feed for a user or guest sorted and paginated. For a guest, sorting will always be by best (random)
+      operationId: getHomeFeed
+      parameters:
+        - name: sort
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "hot or top or new or best or rising"
+        - name: time
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "now or today or week or month or year or all"
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
+      responses:
+        "200":
+          description: Home feed retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feed"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              example:
+                message: User does not exist
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while getting home feed
+      x-swagger-router-controller: Post
   /post/{postId}/comments:
     get:
       tags:
-      - post
-      summary: Gets comments under a single post
-      operationId: getPostComments
+        - post
+      summary: Get comments for a specific post
+      description: Gets comments under a single post sorted by sort parameter if given or by community suggested sort if sort parameter is not given and paginated
+      operationId: getComments
       parameters:
-      - name: postId
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      - name: sort
-        in: query
-        required: false
-        style: form
-        explode: false
-        schema:
-          type: string
-          example: new
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: sort
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "best or top or new"
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
       responses:
         "200":
           description: Comments retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Feed'
+                $ref: "#/components/schemas/Feed"
+        "400":
+          description: Invalid post ID that cannot be queried as it is not in the same format as a typical ObjedtID 
+          content:
+            application/json:
+              example:
+                message: Post ID is wrong
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              examples:
+                PostNotFound:
+                  value:
+                    message: Post does not exist
+                UserNotFound:
+                  value:
+                    message: User does not exist
+                CommunityNotFound:
+                  value:
+                    message: Community does not exist
+        "401":
+          description: User trying to view NSFW content
+          content:
+            application/json:
+              example:
+                message: Unable to view NSFW content
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while getting comments of post
       x-swagger-router-controller: Post
-  /post/{postId}/vote:
+  /post/{postId}/upvote:
     patch:
       tags:
-      - post
-      summary: Vote on a poll
-      security: 
-        - cookie_auth: []
-      operationId: votePost
+        - post
+      summary: upvote a specific post
+      description: specify a post to upvote. Already handles the logic if the user has already an interaction with the post
+      operationId: upvotePost
       parameters:
-      - name: postId
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Post
+          content:
+            application/json:
+              example:
+                message: Post voted successfully
+        "400":
+          description: Post not found
+          content:
+            application/json:
+              examples:
+                InvalidPostId:
+                  value:
+                    message: Invalid post ID
+                PostNotFound:
+                  value:
+                    message: Post does not exist
+        "401":
+          description: "Unauthorized, user must be logged in"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while upvoting the post
+      x-swagger-router-controller: Post
+  /post/{postId}/downvote:
+    patch:
+      tags:
+        - post
+      summary: downvote a specific post
+      description: specify a post to downvote. Already handles the logic if the user has already an interaction with the post
+      operationId: downvotePost
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Post
+          content:
+            application/json:
+              example:
+                message: Post voted successfully
+        "400":
+          description: Post not found
+          content:
+            application/json:
+              examples:
+                InvalidPostId:
+                  value:
+                    message: Invalid post ID
+                PostNotFound:
+                  value:
+                    message: Post does not exist
+        "401":
+          description: "Unauthorized, user must be logged in"
+          content:
+            application/json:
+              example:
+                status: Unauthorized
+                message: User must be logged in
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                status: Internal server error
+                message: An error occurred while upvoting the post
+      x-swagger-router-controller: Post
+  /post/{postId}/vote-poll:
+    patch:
+      tags:
+        - post
+      summary: Vote on a poll
+      security:
+        - cookie_auth: []
+      operationId: votePoll
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
-        description: vote on a post object
+        description: vote on a poll option
         content:
           application/json:
-            example:
-              votedOption: Option 1
+            schema:
+              $ref: "#/components/schemas/VotePoll"
         required: true
       responses:
         "200":
@@ -1393,50 +2048,74 @@ paths:
             application/json:
               example:
                 message: Post voted successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                NotAPoll:
+                  value:
+                    message: Post is not a poll
+                PollAlreadyVoted:
+                  value:
+                    message: User has already voted
+                invalidPollOption:
+                  value:
+                    message: invalid poll option
+                expiredPoll:
+                  value:
+                    message: poll has expired
+                PostNotFound:
+                  value:
+                    message: Post does not exist
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while voting on the poll
       x-swagger-router-controller: Post
   /post/{postId}/save:
     patch:
       tags:
-      - post
-      summary: Save/unsave post
-      security: 
+        - post
+      summary: Save/unsave post/comment
+      description: Save/unsave a post or comment by specifying the desired state in isSaved field
+      security:
         - cookie_auth: []
       operationId: savePost
       parameters:
-      - name: postId
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: action to save/unsave post
         content:
           application/json:
             schema:
-                $ref: '#/components/schemas/SavePost'
+              $ref: "#/components/schemas/SavePost"
       responses:
         "200":
-          description: Post saved/unsaved successfully
+          description: Post/comment saved/unsaved successfully
           content:
             application/json:
               example:
-                message: Post saved/unsaved successfully
+                message: Post/comment saved/unsaved successfully
         "400":
           description: Post not found
           content:
             application/json:
               examples:
-                MissingRequiredField:
-                  value:
-                    message: isSaved field is required
                 InvalidPostId:
                   value:
                     message: Invalid post ID
                 PostNotFound:
                   value:
-                    message: Post is not found
+                    message: Post does not
                 UserNotFound:
                   value:
                     message: User is not found
@@ -1456,25 +2135,26 @@ paths:
   /post/{postId}/lock:
     patch:
       tags:
-      - post
-      summary: Lock post
-      security: 
+        - post
+      summary: Lock post 
+      description: Lock/unlock a post by specifying the desired state in isLocked field
+      security:
         - cookie_auth: []
       operationId: lockPost
       parameters:
-      - name: postId
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: Created post object
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LockPost'
+              $ref: "#/components/schemas/LockPost"
       responses:
         "200":
           description: Post lock/unlocked successfully
@@ -1509,25 +2189,26 @@ paths:
   /post/{postId}/hide:
     patch:
       tags:
-      - post
+        - post
       summary: Hide post
-      security: 
+      description: Hide/unhide a post by specifying the desired state in isHidden field
+      security:
         - cookie_auth: []
       operationId: hidePost
       parameters:
-      - name: postId
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: Hides post object
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/HidePost'
+              $ref: "#/components/schemas/HidePost"
       responses:
         "200":
           description: Post visibility changed successfully
@@ -1568,19 +2249,19 @@ paths:
   /post/{postId}/follow:
     patch:
       tags:
-      - post
+        - post
       summary: Follow post
       operationId: followPost
-      security: 
+      security:
         - cookie_auth: []
       parameters:
-      - name: postId
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: Follows post object
         content:
@@ -1600,19 +2281,19 @@ paths:
   /post/{postId}/report:
     post:
       tags:
-      - post
+        - post
       summary: Report post
       operationId: reportPost
-      security: 
+      security:
         - cookie_auth: []
       parameters:
-      - name: postId
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: Reports post object
         content:
@@ -1629,89 +2310,384 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Post
+  /comment:
+    post:
+      tags:
+        - comment
+      summary: comment on a specific post
+      description: comment on a specific post with text or image
+      operationId: createComment
+      security:
+        - cookie_auth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: reference to post object and new content
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/CreateTextComment"
+                - $ref: "#/components/schemas/CreateImageComment"
+            examples:
+              TextCommentExample:
+                value:
+                  postId: "661333b8f5b9ff88aa7ef5a0"
+                  content: "text content"
+              ImageCommentExample:
+                value:
+                  postId: "661333b8f5b9ff88aa7ef5a0"
+                  images: "<image_file>"
+      responses:
+        "200":
+          description: Comment created successfully
+          content:
+            application/json:
+              example:
+                message: Comment created successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                MissingRequiredFields:
+                  value:
+                    message: Post ID is required
+                MissingContent:
+                  value:
+                    message: Comment must have content or image
+                MultipleContent:
+                  value:
+                    message: Comment cannot have content & image at the same time
+                MultipleImages:
+                  value:
+                    message: Comment can only have one image
+                PostNotFound:
+                  value:
+                    message: Cannot comment on a non-existing post
+        "500":
+          description: Internal Server Error
+      x-swagger-router-controller: Post
+  /comment/{commentId}:
+    get:
+      tags: 
+        - comment
+      summary: Get comment details for one comment
+      operationId: getComment
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Comment data retrieved successfully
+          content:
+            application/json:
+              schema:
+                status: OK
+                message: Post data retrieved successfully
+                $ref: "#/components/schemas/Comment"
+        "401":
+          description: User trying to view NSFW content
+          content:
+            application/json:
+              example:
+                message: Unable to view NSFW content
+        "404":
+          description: Not found
+          content:
+            application/json:
+              examples:
+                PostNotFound:
+                  value:
+                    message: Post does not exist
+                UserNotFound:
+                  value:
+                    message: User does not exist
+                CommentNotFound:
+                  value:
+                    message: Comment does not exist
+        "400":
+          description: Invalid comment ID that cannot be queried as it is not in the same format as a typical ObjedtID
+          content:
+            application/json:
+              example:
+                message: Comment ID is wrong
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while getting comment
+    x-swagger-router-controller: Post
+    patch:
+      tags:
+        - comment
+      summary: edit a specific comment'
+      description: edit a specific comment with text or image (must be the same type as original comment)
+      operationId: editComment
+      security:
+        - cookie_auth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: reference to post object and new content
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/EditTextComment"
+                - $ref: "#/components/schemas/EditImageComment"
+            examples:
+              TextCommentExample:
+                value:
+                  content: "text content"
+              ImageCommentExample:
+                value:
+                  images: "<image_file>"
+      responses:
+        "200":
+          description: Comment edited successfully
+          content:
+            application/json:
+              example:
+                message: Comment edited successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                MissingImage:
+                  value:
+                    message: No image provided (for image comment)
+                MissingText:
+                  value:
+                    message: No text provided (for text comment)
+                MultipleImages:
+                  value:
+                    message: Comment can only have one image
+                CommentNotFound:
+                  value:
+                    message: Cannot edit a non-existing comment
+                CommentNotYours:
+                  value:
+                    message: You are not authorized to edit this comment
+        "500":
+          description: Internal Server Error
+      x-swagger-router-controller: Post
+    delete:
+      tags:
+        - comment
+      summary: delete a specific comment
+      operationId: deleteComment
+      security:
+        - cookie_auth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Comment deleted successfully
+          content:
+            application/json:
+              example:
+                message: Comment deleted successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                CommentNotFound:
+                  value:
+                    message: Cannot delete a non-existing comment
+                InvalidCommentId:
+                  value:
+                    message: Comment ID is invalid
+                CommentNotYours:
+                  value:
+                    message: You are not authorized to delete this comment
+        "500":
+          description: Internal Server Error
+      x-swagger-router-controller: Post
   /subreddit:
     post:
       tags:
-      - subreddit
+        - subreddit
       summary: Create community
       operationId: createSubreddit
       requestBody:
         description: Created community object
         content:
           application/json:
-            example:
-              name: btengan
-              isNSFW: false
+            schema:
+              $ref: "#/components/schemas/CreateSubreddit"
         required: true
       responses:
-        "200":
+        "201":
           description: Community created successfully
           content:
             application/json:
               example:
                 message: Community created successfully
+                owner: Baroudy1452
+                name: theSubreddit
+                isNSFW: false
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                MissingFields:
+                  value:
+                    message: Name and isNSFW are required
+                DuplicateName:
+                  value:
+                    message: Community already exists
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Error creating community
       x-swagger-router-controller: Subreddit
   /subreddit/{subredditName}:
     get:
       tags:
-      - subreddit
+        - subreddit
       summary: Get subreddit details
       description: Called when user navigates to subreddit
       operationId: getSubreddit
       parameters:
-      - name: subredditName
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      - name: sort
-        in: query
-        required: false
-        style: form
-        explode: false
-        schema:
-          type: string
-          example: new
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
-          description: list of posts sorted by HOT method
+          description: Retreived subreddit details successfully
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Community'
-        "401":
-          description: No such subreddit is found
+              example:
+                name: theSubreddit
+                icon: drive.creddit.com/pfp
+                banner: drive.creddit.com/banner
+                members: 100
+                rules:
+                  [
+                    {
+                      text: "No harassment",
+                      appliesTo: "Comments only",
+                      _id: "1",
+                    },
+                    { text: "No bala7", appliesTo: "Comments only", _id: "2" },
+                  ]
+                moderators: ["Baroudy1452", "Baroudy1453"]
+                isModerator: false
+                isMember: true
+        "400":
+          description: "Error getting subreddit view: Subreddit name is required"
+          content:
+            application/json:
+              example:
+                message: Subreddit not found
+        "404":
+          description: Subreddit not found
+          content:
+            application/json:
+              example:
+                message: Subreddit not found
+      x-swagger-router-controller: Subreddit
+  /subreddit/is-name-available/{name}:
+    get:
+      tags:
+        - subreddit
+      summary: Check if subreddit name is available
+      description: Check if a subreddit name is available for registration.
+      operationId: isNameAvailable
+      parameters:
+        - name: name
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Name is available
+          content:
+            application/json:
+              example:
+                message: Name is available
+                available: true
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              example:
+                message: Name is required
+        "409":
+          description: "Name is not available"
+          content:
+            application/json:
+              example:
+                message: Subreddit name is not available
+                available: false
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while checking if the name is available
       x-swagger-router-controller: Subreddit
   /subreddit/{subredditName}/settings:
     get:
       tags:
-      - subreddit
+        - subreddit
       summary: Get subreddit settings
-      security: 
+      security:
         - cookie_auth: []
       description: Retrieve subreddit settings to display
       operationId: getSubredditSettings
       parameters:
-      - name: subredditName
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: Subreddit settings retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SubredditSettings'
+                $ref: "#/components/schemas/SubredditSettings"
         "401":
           description: "Unauthorized, user must be logged in"
         "500":
@@ -1719,24 +2695,24 @@ paths:
       x-swagger-router-controller: Subreddit
     put:
       tags:
-      - subreddit
+        - subreddit
       summary: Edit subreddit settings
       description: Update subreddit settings.
       operationId: editSubredditSettings
       parameters:
-      - name: subredditName
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: User subreddit object
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SubredditSettings'
+              $ref: "#/components/schemas/SubredditSettings"
         required: true
       responses:
         "200":
@@ -1744,7 +2720,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SubredditSettings'
+                $ref: "#/components/schemas/SubredditSettings"
         "401":
           description: "Unauthorized, user must be logged in"
         "500":
@@ -1753,27 +2729,27 @@ paths:
   /subreddit/{subredditName}/edited:
     get:
       tags:
-      - subreddit
+        - subreddit
       summary: Retrieve edited posts for a subreddit
       description: Retrieve the edited posts in this subreddit
-      security: 
+      security:
         - cookie_auth: []
       operationId: getEditedPosts
       parameters:
-      - name: subredditName
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: list of edited posts
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                $ref: "#/components/schemas/Feed"
         "404":
           description: No such subreddit is found
         "500":
@@ -1782,20 +2758,20 @@ paths:
   /subreddit/{subredditName}/banned:
     get:
       tags:
-      - subreddit
+        - subreddit
       summary: Retrieve banned users
-      security: 
+      security:
         - cookie_auth: []
       description: Retrieve banned users
       operationId: getBanned
       parameters:
-      - name: subredditName
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: list of Banned Subreddits
@@ -1811,23 +2787,110 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
+  /subreddit/{subredditName}/posts:
+    get:
+      tags:
+        - subreddit
+      summary: Retrieve sorted posts in a subreddit
+      description: Retrieve the posts in this subreddit sorted by query parameter and paginated by limit and page parameters 
+      operationId: getSortedCommunityPosts
+      parameters:
+        - name: subreddit
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: sort
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            enum: [new, hot, top, rising]
+        - name: time
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            enum: [now, today, week, month, year, all]
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 10
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: list of posts sorted by selected method
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feed'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              example:
+                message: Subreddit is required
+        "404":
+          description: Subreddit not found
+          content:
+            application/json:
+              examples:
+                CommunityDoesNotExist:
+                  value:
+                    message: Community does not exist
+                UserDoesNotExist:
+                  value:
+                    message: User does not exist
+                NoPostsFound:
+                  value:
+                    message: No posts found for the community
+        "401":
+          description: Unable to view NSFW content
+          content:
+            application/json:
+              example:
+                message: Unable to view NSFW content
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred while getting posts for the community
+      x-swagger-router-controller: Subreddit
   /subreddit/{subredditName}/muted:
     get:
       tags:
-      - subreddit
+        - subreddit
       summary: Retrieve muted users
-      security: 
+      security:
         - cookie_auth: []
       description: Retrieve muted users
       operationId: getMuted
       parameters:
-      - name: subredditName
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: list of Muted Users
@@ -1846,20 +2909,20 @@ paths:
   /subreddit/{subredditName}/moderators:
     get:
       tags:
-      - subreddit
+        - subreddit
       summary: Retrieve moderator users
-      security: 
+      security:
         - cookie_auth: []
       description: Retrieve moderator users
       operationId: getModerators
       parameters:
-      - name: subredditName
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: list of moderator Subreddits
@@ -1878,27 +2941,27 @@ paths:
   /subreddit/{subredditName}/reports:
     get:
       tags:
-      - subreddit
+        - subreddit
       summary: Retrieve reported posts
-      security: 
+      security:
         - cookie_auth: []
       description: Retrieve reported posts
       operationId: getReportedPosts
       parameters:
-      - name: subredditName
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: list of Reported Posts
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Feed'
+                $ref: "#/components/schemas/Feed"
         "401":
           description: No such subreddit is found
         "500":
@@ -1907,27 +2970,27 @@ paths:
   /subreddit/{subredditName}/spam:
     get:
       tags:
-      - subreddit
+        - subreddit
       summary: Retrieve spam posts
-      security: 
+      security:
         - cookie_auth: []
       description: Retrieve spam posts
       operationId: getSpammedPosts
       parameters:
-      - name: subredditName
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: list of Spam posts
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Feed'
+                $ref: "#/components/schemas/Feed"
         "401":
           description: No such subreddit is found
         "500":
@@ -1936,27 +2999,27 @@ paths:
   /subreddit/{subredditName}/modqueue:
     get:
       tags:
-      - subreddit
+        - subreddit
       summary: Retrieve modqueue posts
-      security: 
+      security:
         - cookie_auth: []
       description: Retrieve modqueue posts
       operationId: getModQueuePosts
       parameters:
-      - name: subredditName
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: list of pending posts
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Feed'
+                $ref: "#/components/schemas/Feed"
         "401":
           description: No such subreddit is found
         "500":
@@ -1965,27 +3028,27 @@ paths:
   /subreddit/{subreddit}/unmoderated:
     get:
       tags:
-      - subreddit
+        - subreddit
       summary: Retrieve unmoderated posts
-      security: 
+      security:
         - cookie_auth: []
       description: Retrieve unmoderated posts
       operationId: getUnmoderatedPosts
       parameters:
-      - name: subredditName
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: list of unmoderated posts
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Feed'
+                $ref: "#/components/schemas/Feed"
         "401":
           description: No such subreddit is found
         "500":
@@ -1994,7 +3057,7 @@ paths:
   /subreddit/top:
     get:
       tags:
-      - subreddit
+        - subreddit
       summary: Get top subreddits
       description: Retrieve top subreddits to display
       operationId: getTopCommunities
@@ -2005,7 +3068,7 @@ paths:
             application/json:
               schema:
                 message: Top Subreddits retrieved successfully
-                $ref: '#/components/schemas/Community'
+                $ref: "#/components/schemas/Community"
         "500":
           description: Internal Server Error
           content:
@@ -2016,9 +3079,9 @@ paths:
   /notification/all:
     get:
       tags:
-      - notification
+        - notification
       summary: Get all notifications for a user
-      security: 
+      security:
         - cookie_auth: []
       description: Get all notifications for a user
       operationId: getAllNotifications
@@ -2028,16 +3091,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Notification'
+                $ref: "#/components/schemas/Notification"
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Notification
   /notification/mark-all-as-read:
     patch:
       tags:
-      - notification
+        - notification
       summary: Mark all notifications as read
-      security: 
+      security:
         - cookie_auth: []
       description: Mark all notifications as read
       operationId: markAllNotificationsAsRead
@@ -2054,9 +3117,9 @@ paths:
   /notification:
     get:
       tags:
-      - notification
+        - notification
       summary: Get 5 recent notifications
-      security: 
+      security:
         - cookie_auth: []
       description: Get 5 recent notifications
       operationId: getRecentNotifications
@@ -2072,7 +3135,7 @@ paths:
       x-swagger-router-controller: Notification
     post:
       tags:
-      - notification
+        - notification
       summary: Create notification
       description: Create notification
       operationId: createNotification
@@ -2098,9 +3161,9 @@ paths:
   /message/compose:
     post:
       tags:
-      - message
+        - message
       summary: Create a message
-      security: 
+      security:
         - cookie_auth: []
       description: Create message.
       operationId: createMessage
@@ -2108,7 +3171,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Message'
+              $ref: "#/components/schemas/Message"
         required: true
       responses:
         "200":
@@ -2125,21 +3188,21 @@ paths:
   /message/{messageId}:
     delete:
       tags:
-      - message
+        - message
       summary: Delete a message
-      security: 
+      security:
         - cookie_auth: []
       description: Delete message.
       operationId: deleteMessage
       parameters:
-      - name: messageId
-        in: path
-        description: ID of the message to be deleted
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: messageId
+          in: path
+          description: ID of the message to be deleted
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: Message has been Deleted successfully
@@ -2157,9 +3220,9 @@ paths:
   /message/sent:
     get:
       tags:
-      - message
+        - message
       summary: Get user sent messages
-      security: 
+      security:
         - cookie_auth: []
       description: Retrieve user messages that he has sent to display
       operationId: getUserSentMessages
@@ -2169,7 +3232,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Message'
+                $ref: "#/components/schemas/Message"
         "401":
           description: "Unauthorized, user must be logged in"
         "500":
@@ -2178,9 +3241,9 @@ paths:
   /message/inbox:
     get:
       tags:
-      - message
+        - message
       summary: Get user messages
-      security: 
+      security:
         - cookie_auth: []
       description: Retrieve user messages to display
       operationId: getUserMessages
@@ -2190,7 +3253,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Inbox'
+                $ref: "#/components/schemas/Inbox"
         "401":
           description: "Unauthorized, user must be logged in"
         "500":
@@ -2199,9 +3262,9 @@ paths:
   /message/unread:
     get:
       tags:
-      - message
+        - message
       summary: Get user unread messages
-      security: 
+      security:
         - cookie_auth: []
       description: Retrieve user unread messages to display
       operationId: getUserUnreadMessages
@@ -2211,7 +3274,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Inbox'
+                $ref: "#/components/schemas/Inbox"
         "401":
           description: "Unauthorized, user must be logged in"
         "500":
@@ -2219,7 +3282,7 @@ paths:
       x-swagger-router-controller: Message
     post:
       tags:
-      - message
+        - message
       summary: Unread a specific message
       description: Unread a specific message.
       operationId: unreadMessage
@@ -2227,7 +3290,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/message_unread_body'
+              $ref: "#/components/schemas/message_unread_body"
         required: true
       responses:
         "200":
@@ -2244,9 +3307,9 @@ paths:
   /message/read-all-messages:
     post:
       tags:
-      - message
+        - message
       summary: Read all messages
-      security: 
+      security:
         - cookie_auth: []
       description: Read all messages.
       operationId: messageRead_all_messagesPOST
@@ -2267,26 +3330,26 @@ paths:
   /message/{messageId}/report:
     post:
       tags:
-      - message
+        - message
       summary: Report a messages
-      security: 
+      security:
         - cookie_auth: []
       description: Report a messages.
       operationId: reportMessage
       parameters:
-      - name: messageId
-        in: path
-        description: ID of the message to be reported
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: messageId
+          in: path
+          description: ID of the message to be reported
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/messageId_report_body'
+              $ref: "#/components/schemas/messageId_report_body"
         required: true
       responses:
         "200":
@@ -2305,21 +3368,21 @@ paths:
   /mod/approve-post/{postId}:
     patch:
       tags:
-      - mod
+        - mod
       summary: Approve a post
-      security: 
+      security:
         - cookie_auth: []
       description: Approve a post.
       operationId: approvePost
       parameters:
-      - name: postId
-        in: path
-        description: ID of the post to be approved
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: postId
+          in: path
+          description: ID of the post to be approved
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: Approve post object
         content:
@@ -2340,21 +3403,21 @@ paths:
   /mod/invite/{subredditName}:
     post:
       tags:
-      - mod
+        - mod
       summary: invite a moderator
-      security: 
+      security:
         - cookie_auth: []
       description: invite a moderator
       operationId: inviteMod
       parameters:
-      - name: subredditName
-        in: path
-        description: ID of the subreddit to be moderated
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          description: ID of the subreddit to be moderated
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: Add moderator object
         content:
@@ -2376,9 +3439,9 @@ paths:
   /mod/accept-invite:
     patch:
       tags:
-      - mod
+        - mod
       summary: Accept moderation invite
-      security: 
+      security:
         - cookie_auth: []
       description: Accept moderation invite
       operationId: acceptModInvite
@@ -2402,9 +3465,9 @@ paths:
   /mod/reject-invite:
     delete:
       tags:
-      - mod
+        - mod
       summary: reject moderation invite
-      security: 
+      security:
         - cookie_auth: []
       description: reject moderation invite
       operationId: rejectModInvite
@@ -2421,20 +3484,20 @@ paths:
   /mod/leave/{subredditName}:
     delete:
       tags:
-      - mod
+        - mod
       summary: Leave community moderation
-      security: 
+      security:
         - cookie_auth: []
       description: Leave community moderation
       operationId: leaveCommunityMod
       parameters:
-      - name: subredditName
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
           description: Mod invite rejected successfully
@@ -2448,21 +3511,21 @@ paths:
   /mod/mute/{subredditName}:
     patch:
       tags:
-      - mod
+        - mod
       summary: mute user in community
-      security: 
+      security:
         - cookie_auth: []
       description: mute user in community
       operationId: muteUser
       parameters:
-      - name: subredditName
-        in: path
-        description: ID of the subreddit which the user should be muted
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          description: ID of the subreddit which the user should be muted
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: community & user to be muted
         content:
@@ -2484,21 +3547,21 @@ paths:
   /mod/unmute/{subredditName}:
     patch:
       tags:
-      - mod
+        - mod
       summary: unmute user in community
-      security: 
+      security:
         - cookie_auth: []
       description: unmute user in community
       operationId: unmuteUser
       parameters:
-      - name: subredditName
-        in: path
-        description: ID of the subreddit which the user should be unmuted
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: subredditName
+          in: path
+          description: ID of the subreddit which the user should be unmuted
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       requestBody:
         description: community & user to be unmuted
         content:
@@ -2520,9 +3583,9 @@ paths:
   /chat:
     post:
       tags:
-      - chat
+        - chat
       summary: create chat group
-      security: 
+      security:
         - cookie_auth: []
       description: create chat group
       operationId: createGroup
@@ -2533,9 +3596,9 @@ paths:
             example:
               name: ElGroup
               participantIDs:
-              - user1
-              - user2
-              - user3
+                - user1
+                - user2
+                - user3
         required: true
       responses:
         "200":
@@ -2550,9 +3613,9 @@ paths:
   /chat/invite:
     post:
       tags:
-      - chat
+        - chat
       summary: invite users to chat group
-      security: 
+      security:
         - cookie_auth: []
       description: invite users to chat group
       operationId: inviteUsers
@@ -2563,9 +3626,9 @@ paths:
             example:
               roomID: 4
               invitedIDs:
-              - user1
-              - user2
-              - user3
+                - user1
+                - user2
+                - user3
         required: true
       responses:
         "200":
@@ -2580,9 +3643,9 @@ paths:
   /chat/leave:
     patch:
       tags:
-      - chat
+        - chat
       summary: leave chat group
-      security: 
+      security:
         - cookie_auth: []
       description: leave chat group
       operationId: leaveGroup
@@ -2606,19 +3669,19 @@ paths:
   /search/comments:
     get:
       tags:
-      - search
+        - search
       summary: Search comments
       description: Search comments
       operationId: searchComments
       parameters:
-      - name: query
-        in: query
-        required: true
-        style: form
-        explode: false
-        schema:
-          type: string
-          example: "Hello"
+        - name: query
+          in: query
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "Hello"
       responses:
         "200":
           description: list of comments
@@ -2626,7 +3689,7 @@ paths:
             application/json:
               schema:
                 message: list of comments
-                $ref: '#/components/schemas/Feed'
+                $ref: "#/components/schemas/Feed"
         "500":
           description: Internal Server Error
           content:
@@ -2637,19 +3700,19 @@ paths:
   /search/posts:
     get:
       tags:
-      - search
+        - search
       summary: Search posts
       description: Search posts
       operationId: searchPosts
       parameters:
-      - name: query
-        in: query
-        required: true
-        style: form
-        explode: false
-        schema:
-          type: string
-          example: "Hello"
+        - name: query
+          in: query
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "Hello"
       responses:
         "200":
           description: list of posts
@@ -2657,7 +3720,7 @@ paths:
             application/json:
               schema:
                 message: list of posts
-                $ref: '#/components/schemas/Feed'
+                $ref: "#/components/schemas/Feed"
         "500":
           description: Internal Server Error
           content:
@@ -2668,19 +3731,19 @@ paths:
   /search/subreddits:
     get:
       tags:
-      - search
+        - search
       summary: Search subreddits
       description: Search subreddits
       operationId: searchSubreddits
       parameters:
-      - name: query
-        in: query
-        required: true
-        style: form
-        explode: false
-        schema:
-          type: string
-          example: "Egypt"
+        - name: query
+          in: query
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "Egypt"
       responses:
         "200":
           description: list of subreddits
@@ -2688,7 +3751,7 @@ paths:
             application/json:
               schema:
                 message: list of subreddits
-                $ref: '#/components/schemas/Community'
+                $ref: "#/components/schemas/Community"
         "500":
           description: Internal Server Error
           content:
@@ -2699,19 +3762,19 @@ paths:
   /search/users:
     get:
       tags:
-      - search
+        - search
       summary: Search users
       description: Search users
       operationId: searchUsers
       parameters:
-      - name: query
-        in: query
-        required: true
-        style: form
-        explode: false
-        schema:
-          type: string
-          example: "John"
+        - name: query
+          in: query
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "John"
       responses:
         "200":
           description: list of users
@@ -2719,7 +3782,7 @@ paths:
             application/json:
               schema:
                 message: list of users
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
         "500":
           description: Internal Server Error
           content:
@@ -2730,19 +3793,19 @@ paths:
   /search/hashtags:
     get:
       tags:
-      - search
+        - search
       summary: Search hashtags
       description: Search hashtags
       operationId: searchHashtags
       parameters:
-      - name: query
-        in: query
-        required: true
-        style: form
-        explode: false
-        schema:
-          type: string
-          example: "#lol"
+        - name: query
+          in: query
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "#lol"
       responses:
         "200":
           description: list of hashtags
@@ -2750,7 +3813,7 @@ paths:
             application/json:
               schema:
                 message: list of hashtags
-                $ref: '#/components/schemas/Feed'
+                $ref: "#/components/schemas/Feed"
         "500":
           description: Internal Server Error
           content:
@@ -2774,7 +3837,7 @@ components:
           example: "12345"
         gender:
           type: string
-          example: Man
+          example: ["Man", "Woman", "I Prefer Not To Say", "None"]
     Overview:
       type: object
       properties:
@@ -2783,18 +3846,18 @@ components:
           items:
             type: object
             oneOf:
-            - $ref: '#/components/schemas/Post'
+              - $ref: "#/components/schemas/Feed"
       example:
         posts:
-        - ""
-        - ""
+          - ""
+          - ""
     Feed:
       type: array
       items:
         oneOf:
-        - $ref: '#/components/schemas/Post'
-        - $ref: '#/components/schemas/Post'
-        - $ref: '#/components/schemas/Post'
+          - $ref: "#/components/schemas/Post"
+          - $ref: "#/components/schemas/Post"
+          - $ref: "#/components/schemas/Post"
     UserLoginGoogle:
       type: object
       properties:
@@ -2828,7 +3891,7 @@ components:
             socialLinks:
               type: array
               items:
-                $ref: '#/components/schemas/UserSettings_preferences_socialLinks'
+                $ref: "#/components/schemas/UserSettings_preferences_socialLinks"
             avatar:
               type: string
               example: drive.creddit.com/test
@@ -2872,16 +3935,16 @@ components:
             communityContentSort:
               type: string
               enum:
-              - top
-              - rising
-              - hot
-              - new
+                - top
+                - rising
+                - hot
+                - new
             globalContentView:
               type: string
               enum:
-              - card
-              - classic
-              - compact
+                - card
+                - classic
+                - compact
             openNewTab:
               type: boolean
               example: true
@@ -2929,66 +3992,134 @@ components:
             chatEmail:
               type: boolean
               example: true
-    UserSettingsPut:
+    UpdateUserSettings:
       type: object
       properties:
-        displayName:
-          type: string
-          example: theUser
+        account:
+          type: object
+          properties:
+            email:
+              type: string
+              example: user@gmail.com
+            gender:
+              type: string
+              example: Man
+            google:
+              type: boolean
+              example: true
+        profile:
+          type: object
+          properties:
+            displayName:
+              type: string
+              example: "John Doe"
+            about:
+              type: string
+              example: "I am a developer"
+            socialLinks:
+              type: array
+              items:
+                $ref: "#/components/schemas/UserSettings_preferences_socialLinks"
+            isNSFW:
+              type: boolean
+              example: true
+            allowFollow:
+              type: boolean
+              example: true
+            isContentVisible:
+              type: boolean
+              example: true
+        safetyAndPrivacy:
+          type: object
+          properties:
+            blockedUsers:
+              type: array
+              items:
+                type: string
+                example: "user1"
+            mutedCommunities:
+              type: array
+              items:
+                type: string
+                example: "community1"
+        feedSettings:
+          type: object
+          properties:
+            showAdultContent:
+              type: boolean
+              example: true
+            autoPlayMedia:
+              type: boolean
+              example: true
+            communityThemes:
+              type: boolean
+              example: true
+            communityContentSort:
+              type: string
+              enum:
+                - top
+                - rising
+                - hot
+                - new
+            globalContentView:
+              type: string
+              enum:
+                - card
+                - classic
+                - compact
+            openNewTab:
+              type: boolean
+              example: true
+        notifications:
+          type: object
+          properties:
+            mentionsNotifs:
+              type: boolean
+              example: true
+            commentsNotifs:
+              type: boolean
+              example: true
+            postsUpvotesNotifs:
+              type: boolean
+              example: true
+            repliesNotifs:
+              type: boolean
+              example: true
+            newFollowersNotifs:
+              type: boolean
+              example: true
+            postNotifs:
+              type: boolean
+              example: true
+            cakeDayNotifs:
+              type: boolean
+              example: true
+            modNotifs:
+              type: boolean
+              example: true
+            moderatorInCommunities:
+              type: array
+              items:
+                type: string
+                example: "community1"
+            invitationNotifs:
+              type: boolean
+              example: true
         email:
+          type: object
+          properties:
+            followEmail:
+              type: boolean
+              example: true
+            chatEmail:
+              type: boolean
+              example: true
+        avatar:
           type: string
-          example: jondoe@gmail.com
-        about:
+          example: drive.creddit.com/test
+        banner:
           type: string
-          example: Hello world
-        gender:
-          type: string
-          example: Man
-        country:
-          type: string
-          example: Egypt
-        preferences:
-          $ref: '#/components/schemas/UserSettings_preferences'
-      example:
-        country: Egypt
-        preferences:
-          socialLinks:
-          - displayName: El twitter bta3y
-            platform: twitter
-            url: https://twitter.com/faUwUsa
-          - displayName: El twitter bta3y
-            platform: twitter
-            url: https://twitter.com/faUwUsa
-          inboxMessagesNotif: true
-          repliesNotif: true
-          communityContentSort: top
-          apple: apple id
-          openNewTab: true
-          twitter: twitter handle
-          followEmail: true
-          modNotif: true
-          upvotesNotif: true
-          cakeDayNotif: true
-          isActiveCommunityVisible: true
-          communityThemes: true
-          chatMessagesNotif: true
-          globalContentView: card
-          chatRequests: true
-          showAdultContent: true
-          isContentVisible: true
-          google: jondoe@gmail.com
-          mentionsNotif: true
-          newFollowerNotif: true
-          invitationNotif: true
-          commentsNotif: true
-          autoPlayMedia: true
-          allowFollow: true
-          darkMode: true
-          chatEmail: true
-        gender: Man
-        displayName: theUser
-        about: Hello world
-        email: jondoe@gmail.com
+          example: drive.creddit.com/test
     ForgotPassword:
       type: object
       properties:
@@ -3071,16 +4202,16 @@ components:
         communityContentSort:
           type: string
           enum:
-          - top
-          - rising
-          - hot
-          - new
+            - top
+            - rising
+            - hot
+            - new
         globalContentView:
           type: string
           enum:
-          - card
-          - classic
-          - compact
+            - card
+            - classic
+            - compact
         darkMode:
           type: boolean
           example: true
@@ -3099,7 +4230,7 @@ components:
         socialLinks:
           type: array
           items:
-            $ref: '#/components/schemas/UserSettings_preferences_socialLinks'
+            $ref: "#/components/schemas/UserSettings_preferences_socialLinks"
         inboxMessagesNotif:
           type: boolean
           example: true
@@ -3150,12 +4281,12 @@ components:
           example: true
       example:
         socialLinks:
-        - displayName: El twitter bta3y
-          platform: twitter
-          url: https://twitter.com/faUwUsa
-        - displayName: El twitter bta3y
-          platform: twitter
-          url: https://twitter.com/faUwUsa
+          - displayName: El twitter bta3y
+            platform: twitter
+            url: https://twitter.com/faUwUsa
+          - displayName: El twitter bta3y
+            platform: twitter
+            url: https://twitter.com/faUwUsa
         inboxMessagesNotif: true
         repliesNotif: true
         communityContentSort: top
@@ -3182,6 +4313,20 @@ components:
         allowFollow: true
         darkMode: true
         chatEmail: true
+    JoinedCommunities:
+      type: array
+      items:
+        type: object
+        properties:
+          communityName:
+            type: string
+            example: cReddit_SW_Project
+          profilePicture:
+            type: string
+            example: drive.creddit.com/test
+          members:
+            type: integer
+            example: 100
     SinglePost:
       type: object
       properties:
@@ -3202,7 +4347,7 @@ components:
           example: drive.creddit.com/test
         uploadDate:
           type: string
-          example: 06/03/2024 22:10:03
+          example: "2024-03-25T15:37:33.339+00:00"
         title:
           type: string
           example: Hello World
@@ -3238,7 +4383,7 @@ components:
         type:
           type: string
           example: Post
-        commumityName:
+        communityName:
           type: string
           example: cReddit_SW_Project
         title:
@@ -3259,12 +4404,15 @@ components:
         type:
           type: string
           example: Post
-        commumityName:
+        communityName:
           type: string
           example: cReddit_SW_Project
         title:
           type: string
           example: Hello World
+        images:
+          type: string
+          format: binary
         isSpoiler:
           type: boolean
           example: false
@@ -3277,7 +4425,7 @@ components:
         type:
           type: string
           example: Post
-        commumityName:
+        communityName:
           type: string
           example: cReddit_SW_Project
         title:
@@ -3298,7 +4446,7 @@ components:
         type:
           type: string
           example: Post
-        commumityName:
+        communityName:
           type: string
           example: cReddit_SW_Project
         title:
@@ -3314,19 +4462,13 @@ components:
             example: Option 1, Option 2, Option 3
         expirationDate:
           type: string
-          example: 06/03/2024 22:10:03
+          example: "2024-03-25T15:37:33.339+00:00"
         isSpoiler:
           type: boolean
           example: false
         isNSFW:
           type: boolean
           example: false
-    # EditPost:
-    #   type: object
-    #   properties:
-    #     content:
-    #       type: string
-    #       example: This is my content
     SavePost:
       type: object
       properties:
@@ -3346,64 +4488,219 @@ components:
           type: boolean
           example: true
     Post:
-      type: array
-      items:
-        type: object
-        properties:
-          postId:
-            type: string
-            example: 350651awd651awd
-          username:
-            type: string
-            example: Sayed
-          communityName:
-            type: string
-            example: Watermelon
-          uploadDate:
-            type: string
-            example: 06/03/2024 22:10:03
-          title:
-            type: string
-            example: Hello World
-          content:
-            type: string
-            example: This is my content
-          comments:
-            type: integer
-            example: 50
-          upvotes:
-            type: integer
-            example: 1500
-          downvotes:
-            type: integer
-            example: 100
-          isNSFW:
-            type: boolean
-            example: false
-          isSpoiler:
-            type: boolean
-            example: false
-          isLocked:
-            type: boolean
-            example: true
-          isEdited:
-            type: boolean
-            example: false
-          followers:
-            type: array
-            items: 
-              type: object
-              properties:
-                username: 
-                  type: string
-                  example: Mosaad
-          pollVotes:
-            $ref: '#/components/schemas/Post_pollVotes'
-          children:
-            type: array
-            items:
-              oneOf:
-              - $ref: '#/components/schemas/SinglePost'
+
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 350651awd651awd
+        postID:
+          type: string
+          example: 350651awd651awd (in case of Comment)
+        type:
+          type: string
+          example: "(Images & Video) or (Post) or (Poll) or (Links)"
+        isImage:
+          type: string
+          example: true (only if type is Comment)
+        username:
+          type: string
+          example: Sayed
+        communityName:
+          type: string
+          example: Watermelon
+        profilePicture:
+          type: string
+          example: drive.creddit.com/subreddit_or_user_pfpe
+        netVote:
+          type: integer
+          example: 1500
+        commentCount:
+          type: integer
+          example: 50
+        isSpoiler:
+          type: boolean
+          example: false
+        isNSFW:
+          type: boolean
+          example: false
+        isApproved:
+          type: boolean
+          example: false
+        isLocked:
+          type: boolean
+          example: false
+        isEdited:
+          type: boolean
+          example: false
+        title:
+          type: string
+          example: Hello World
+        content:
+          type: string
+          example: This is my content
+        pollOptions:
+          type: array
+          items:
+            type: object
+            properties:
+              option:
+                type: string
+                example: Option 1
+              isVoted:
+                type: boolean
+                example: false
+              votes:
+                type: integer
+                example: 10
+        reports:
+          type: array
+          items: 
+            type: object
+            properties:
+              username:
+                type: string
+                example: Sayed
+              profilePicture:
+                type: string
+                example: drive.creddit.com/user_pfp
+              reason:
+                type: string
+                example: Spam
+        isDeletedUser:
+          type: boolean
+          example: false
+        isBlocked:
+          type: boolean
+          example: false
+        expirationDate:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        createdAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        updatedAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        isUpvoted:
+          type: boolean
+          example: false
+        isDownvoted:
+          type: boolean
+          example: false
+        isSaved:
+          type: boolean
+          example: false
+        isHidden:
+          type: boolean
+          example: false
+        isJoined:
+          type: boolean
+          example: false (not for posts in a subreddit)
+        isModerator:
+          type: boolean
+          example: false (not for posts in a subreddit)
+        child:
+          type: object
+          example: like any post (in case of a cross post)
+    Comment:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 350651awd651awd
+        postID:
+          type: string
+          example: 350651awd651awd
+        type:
+          type: string
+          example: "Comment"
+        isImage:
+          type: string
+          example: true
+        username:
+          type: string
+          example: Sayed
+        communityName:
+          type: string
+          example: Watermelon
+        profilePicture:
+          type: string
+          example: drive.creddit.com/subreddit_or_user_pfpe
+        netVote:
+          type: integer
+          example: 1500
+        isSpoiler:
+          type: boolean
+          example: false
+        isNSFW:
+          type: boolean
+          example: false
+        isApproved:
+          type: boolean
+          example: false
+        isLocked:
+          type: boolean
+          example: false
+        isEdited:
+          type: boolean
+          example: false
+        title:
+          type: string
+          example: Hello World
+        content:
+          type: string
+          example: This is my content
+        reports:
+          type: array
+          items: 
+            type: object
+            properties:
+              username:
+                type: string
+                example: Sayed
+              profilePicture:
+                type: string
+                example: drive.creddit.com/user_pfp
+              reason:
+                type: string
+                example: Spam
+        isDeletedUser:
+          type: boolean
+          example: false
+        isBlocked:
+          type: boolean
+          example: false
+        expirationDate:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        createdAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        updatedAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        isUpvoted:
+          type: boolean
+          example: false
+        isDownvoted:
+          type: boolean
+          example: false
+        isSaved:
+          type: boolean
+          example: false
+        isHidden:
+          type: boolean
+          example: false
+        isJoined:
+          type: boolean
+          example: false (not for posts in a subreddit)
+        isModerator:
+          type: boolean
+          example: false (not for posts in a subreddit)
+        child:
+          type: object
+          example: like any post (in case of a cross post)
     EditPost:
       type: object
       properties:
@@ -3447,23 +4744,22 @@ components:
           type: array
           items:
             type: string
-            example: "[\"user 1\",\"user 2\",\"user 3\"]"
+            example: '["user 1","user 2","user 3"]'
         mutedUsers:
           type: array
           items:
             type: string
-            example: "[\"user 1\",\"user 2\",\"user 3\"]"
+            example: '["user 1","user 2","user 3"]'
         rules:
           type: array
           items:
             type: string
-            example: "[\"Rule 1\",\"Rule 2\",\"Rule 3\"]"
+            example: '["Rule 1","Rule 2","Rule 3"]'
         moderators:
           type: array
           items:
             type: string
-            example: "[\"SlaxSplash\",\"Baroudy 14\",\"No_Animator_8210\"]"
-      
+            example: '["SlaxSplash","Baroudy 14","No_Animator_8210"]'
     SubredditSettings:
       type: object
       properties:
@@ -3476,15 +4772,15 @@ components:
         rules:
           type: array
           items:
-            $ref: '#/components/schemas/SubredditSettings_rules'
+            $ref: "#/components/schemas/SubredditSettings_rules"
       example:
         name: theUser
         description: Community description
         rules:
-        - rule: Mahmoud
-          appliesTo: Posts & comments
-        - rule: Mahmoud
-          appliesTo: Posts & comments
+          - rule: Mahmoud
+            appliesTo: Posts & comments
+          - rule: Mahmoud
+            appliesTo: Posts & comments
     Notification:
       type: object
       properties:
@@ -3500,9 +4796,9 @@ components:
         type:
           type: string
           enum:
-          - message
-          - post
-          - user
+            - message
+            - post
+            - user
         isRead:
           type: boolean
           example: true
@@ -3546,7 +4842,7 @@ components:
         text: El API sha8al :)
     message_unread_body:
       required:
-      - messageID
+        - messageID
       type: object
       properties:
         messageID:
@@ -3554,7 +4850,7 @@ components:
           description: The ID of the message to be marked as unread
     messageId_report_body:
       required:
-      - messageID
+        - messageID
       type: object
       properties:
         messageID:
@@ -3568,7 +4864,7 @@ components:
           example: 10
         option2:
           type: integer
-          example: 20
+          example: 10
         option3:
           type: integer
           example: 40
@@ -3588,6 +4884,51 @@ components:
       example:
         rule: Mahmoud
         appliesTo: Posts & comments
+    CreateSubreddit:
+      type: object
+      properties:
+        name:
+          type: string
+          example: theSubreddit
+        isNSFW:
+          type: boolean
+          example: false
+    VotePoll:
+      type: object
+      properties:
+        pollOption:
+          type: string
+          example: option 1
+    CreateTextComment:
+      type: object
+      properties:
+        postId:
+          type: string
+          example: 661333b8f5b9ff88aa7ef5a0
+        content:
+          type: string
+          example: "text content"
+    CreateImageComment:
+      type: object
+      properties:
+        postId:
+          type: string
+          example: 661333b8f5b9ff88aa7ef5a0
+        images:
+          type: string
+          example: "<image_file>"
+    EditTextComment:
+      type: object
+      properties:
+        content:
+          type: string
+          example: "text content"
+    EditImageComment:
+      type: object
+      properties:
+        images:
+          type: string
+          example: "<image_file>"
   securitySchemes:
     cookie_auth:
       type: apiKey
