@@ -189,7 +189,7 @@ paths:
     post:
       tags:
         - user
-      summary: Logs user into the system using Google services 
+      summary: Logs user into the system using Google services
       description: Log in with Google OAuth token. If no user exists with the same google ID, a new user is created
       operationId: loginGoogle
       requestBody:
@@ -1892,7 +1892,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Feed"
         "400":
-          description: Invalid post ID that cannot be queried as it is not in the same format as a typical ObjedtID 
+          description: Invalid post ID that cannot be queried as it is not in the same format as a typical ObjedtID
           content:
             application/json:
               example:
@@ -2136,7 +2136,7 @@ paths:
     patch:
       tags:
         - post
-      summary: Lock post 
+      summary: Lock post
       description: Lock/unlock a post by specifying the desired state in isLocked field
       security:
         - cookie_auth: []
@@ -2312,12 +2312,12 @@ paths:
           content:
             application/json:
               examples:
-               Post:
-                value:
-                 message: Post not found
-               Community:
-                value:
-                 message: Community not found
+                Post:
+                  value:
+                    message: Post not found
+                Community:
+                  value:
+                    message: Community not found
         "400":
           description: Bad Request
           content:
@@ -2401,7 +2401,7 @@ paths:
       x-swagger-router-controller: Post
   /comment/{commentId}:
     get:
-      tags: 
+      tags:
         - comment
       summary: Get comment details for one comment
       operationId: getComment
@@ -2751,6 +2751,140 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
+  /subreddit/{subredditName}/join:
+    post:
+      tags:
+        - subreddit
+      summary: Join subreddit
+      description: Join a subreddit
+      operationId: joinCommunity
+      parameters:
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User joined the community successfully
+          content:
+            application/json:
+              example:
+                message: User joined the community successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              example:
+                message: User is already a member
+        "404":
+          description: Subreddit not found
+          content:
+            application/json:
+              example:
+                message: Community not found
+        "500":
+          description: Error joining community
+      x-swagger-router-controller: Subreddit
+    delete:
+      tags:
+        - subreddit
+      summary: Leave subreddit
+      description: Leave a subreddit
+      operationId: leaveCommunity
+      parameters:
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User left the community successfully
+          content:
+            application/json:
+              example:
+                message: User left the community successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              example:
+                message: User is not a member
+        "404":
+          description: Subreddit not found
+          content:
+            application/json:
+              example:
+                message: Community not found
+        "500":
+          description: Error leaving community
+      x-swagger-router-controller: Subreddit
+  /subreddit/{subredditName}/mute:
+    post:
+      tags:
+        - subreddit
+      summary: Mute subreddit
+      description: Mute a subreddit
+      operationId: muteCommunity
+      parameters:
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User muted the community successfully
+          content:
+            application/json:
+              example:
+                message: Community muted successfully
+        "404":
+          description: Subreddit not found
+          content:
+            application/json:
+              example:
+                message: Community not found
+        "500":
+          description: Error muting community
+      x-swagger-router-controller: Subreddit
+    delete:
+      tags:
+        - subreddit
+      summary: Unmute subreddit
+      description: Unmute a subreddit
+      operationId: muteCommunity
+      parameters:
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User unmuted the community successfully
+          content:
+            application/json:
+              example:
+                message: Community unmuted successfully
+        "404":
+          description: Subreddit not found
+          content:
+            application/json:
+              example:
+                message: Community not found
+        "500":
+          description: Error unmuting community
+      x-swagger-router-controller: Subreddit
   /subreddit/{subredditName}/edited:
     get:
       tags:
@@ -2781,14 +2915,13 @@ paths:
             application/json:
               example:
                 message: Community not found
-            
+
         "403":
           description: Bad Request
           content:
             application/json:
               example:
                 message: Sorry! you are not a moderator
-        
 
         "500":
           description: Internal Server Error
@@ -2830,7 +2963,7 @@ paths:
       tags:
         - subreddit
       summary: Retrieve sorted posts in a subreddit
-      description: Retrieve the posts in this subreddit sorted by query parameter and paginated by limit and page parameters 
+      description: Retrieve the posts in this subreddit sorted by query parameter and paginated by limit and page parameters
       operationId: getSortedCommunityPosts
       parameters:
         - name: subreddit
@@ -2878,7 +3011,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Feed'
+                $ref: "#/components/schemas/Feed"
         "400":
           description: Bad request
           content:
@@ -4543,7 +4676,6 @@ components:
           type: boolean
           example: true
     Post:
-
       type: object
       properties:
         _id:
@@ -4610,7 +4742,7 @@ components:
                 example: 10
         reports:
           type: array
-          items: 
+          items:
             type: object
             properties:
               username:
@@ -4708,7 +4840,7 @@ components:
           example: This is my content
         reports:
           type: array
-          items: 
+          items:
             type: object
             properties:
               username:
