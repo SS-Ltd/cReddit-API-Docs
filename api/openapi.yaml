@@ -3674,6 +3674,22 @@ paths:
       description: Search comments
       operationId: searchComments
       parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
         - name: query
           in: query
           required: true
@@ -3682,6 +3698,30 @@ paths:
           schema:
             type: string
             example: "Hello"
+        - name: safeSearch
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "true or false"
+        - name: sort
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "hot or top or new"
+        - name: time
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "now or today or week or month or year or all"
       responses:
         "200":
           description: list of comments
@@ -3689,7 +3729,7 @@ paths:
             application/json:
               schema:
                 message: list of comments
-                $ref: "#/components/schemas/Feed"
+                $ref: "#/components/schemas/SearchComment"
         "500":
           description: Internal Server Error
           content:
@@ -3705,6 +3745,22 @@ paths:
       description: Search posts
       operationId: searchPosts
       parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
         - name: query
           in: query
           required: true
@@ -3713,6 +3769,30 @@ paths:
           schema:
             type: string
             example: "Hello"
+        - name: safeSearch
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "true or false"
+        - name: sort
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "hot or top or new"
+        - name: time
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "now or today or week or month or year or all"
       responses:
         "200":
           description: list of posts
@@ -3720,7 +3800,7 @@ paths:
             application/json:
               schema:
                 message: list of posts
-                $ref: "#/components/schemas/Feed"
+                $ref: "#/components/schemas/SearchPost"
         "500":
           description: Internal Server Error
           content:
@@ -3728,14 +3808,30 @@ paths:
               example:
                 message: An error occurred while retrieving posts
       x-swagger-router-controller: Search
-  /search/subreddits:
+  /search/communities:
     get:
       tags:
         - search
-      summary: Search subreddits
-      description: Search subreddits
-      operationId: searchSubreddits
+      summary: Search communities
+      description: Search communities
+      operationId: searchCommunities
       parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
         - name: query
           in: query
           required: true
@@ -3743,7 +3839,15 @@ paths:
           explode: false
           schema:
             type: string
-            example: "Egypt"
+            example: "Hello"
+        - name: safeSearch
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "true or false"
       responses:
         "200":
           description: list of subreddits
@@ -3751,7 +3855,7 @@ paths:
             application/json:
               schema:
                 message: list of subreddits
-                $ref: "#/components/schemas/Community"
+                $ref: "#/components/schemas/SearchCommunity"
         "500":
           description: Internal Server Error
           content:
@@ -3767,6 +3871,22 @@ paths:
       description: Search users
       operationId: searchUsers
       parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
         - name: query
           in: query
           required: true
@@ -3774,7 +3894,15 @@ paths:
           explode: false
           schema:
             type: string
-            example: "John"
+            example: "Hello"
+        - name: safeSearch
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "true or false"
       responses:
         "200":
           description: list of users
@@ -3782,7 +3910,7 @@ paths:
             application/json:
               schema:
                 message: list of users
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/SearchUser"
         "500":
           description: Internal Server Error
           content:
@@ -3798,6 +3926,22 @@ paths:
       description: Search hashtags
       operationId: searchHashtags
       parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
         - name: query
           in: query
           required: true
@@ -3805,7 +3949,23 @@ paths:
           explode: false
           schema:
             type: string
-            example: "#lol"
+            example: "Hello"
+        - name: safeSearch
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "true or false"
+        - name: sort
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "hot or top or new"
       responses:
         "200":
           description: list of hashtags
@@ -3813,7 +3973,7 @@ paths:
             application/json:
               schema:
                 message: list of hashtags
-                $ref: "#/components/schemas/Feed"
+                $ref: "#/components/schemas/SearchPost"
         "500":
           description: Internal Server Error
           content:
@@ -4488,7 +4648,6 @@ components:
           type: boolean
           example: true
     Post:
-
       type: object
       properties:
         _id:
@@ -4929,6 +5088,134 @@ components:
         images:
           type: string
           example: "<image_file>"
+    SearchPost:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 350651awd651awd
+        type:
+          type: string
+          example: "(Images & Video) or (Post) or (Poll) or (Link)"
+        username:
+          type: string
+          example: Sayed
+        communityName:
+          type: string
+          example: Watermelon
+        profilePicture:
+          type: string
+          example: drive.creddit.com/subreddit_or_user_pfpe
+        netVote:
+          type: integer
+          example: 1500
+        commentCount:
+          type: integer
+          example: 50
+        title:
+          type: string
+          example: Hello World
+        content:
+          type: string
+          example: This is my content
+        createdAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        isNSFW:
+          type: boolean
+          example: false
+        isSpoiler:
+          type: boolean
+          example: false
+    SearchComment:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 350651awd651awd
+        postID:
+          type: string
+          example: 350651awd651awd
+        postTitle:
+          type: string
+          example: Hello World
+        postUsername:
+          type: string
+          example: Sayed
+        postVotes:
+          type: integer
+          example: 1500
+        postPicture: 
+          type: string
+          example: drive.creddit.com/subreddit_or_user_pfpe
+        postCreatedAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        isPostNSFW:
+          type: boolean
+          example: false
+        isPostSpoiler:
+          type: boolean
+          example: false
+        username:
+          type: string
+          example: Sayed
+        communityName:
+          type: string
+          example: Watermelon
+        commentPicture:
+          type: string
+          example: drive.creddit.com/subreddit_or_user_pfpe
+        netVote:
+          type: integer
+          example: 1500
+        commentCount:
+          type: integer
+          example: 50
+        content:
+          type: string
+          example: This is my content
+        createdAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+    SearchCommunitiy:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 350651awd651awd
+        name:
+          type: string
+          example: Watermelon
+        description:
+          type: string
+          example: Lorem ipsum
+        icon:
+          type: string
+          example: drive.creddit.com/test
+        isNSFW:
+          type: boolean
+          example: false
+        members:
+          type: integer
+          example: 1000
+    SearchUser:
+      properties:
+        _id: 
+          type: string
+          example: 350651awd651awd
+        username:
+          type: string
+          example: Sayed
+        about:
+          type: string
+          example: This is my content
+        profilePicture:
+          type: string
+          example: drive.creddit.com/user_pfpe
+        isNSFW:
+          type: boolean
+          example: false
   securitySchemes:
     cookie_auth:
       type: apiKey
