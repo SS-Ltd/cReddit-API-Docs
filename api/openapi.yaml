@@ -3894,6 +3894,22 @@ paths:
           schema:
             type: string
             example: "true or false"
+        - name: user
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "Baroudy14"
+        - name: community
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "Creddit_SW_Project"
         - name: sort
           in: query
           required: false
@@ -3965,6 +3981,22 @@ paths:
           schema:
             type: string
             example: "true or false"
+        - name: user
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "Baroudy14"
+        - name: community
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "Creddit_SW_Project"
         - name: sort
           in: query
           required: false
