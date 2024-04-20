@@ -4068,6 +4068,14 @@ paths:
           schema:
             type: string
             example: "true or false"
+        - name: autocomplete
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "true or false"
       responses:
         "200":
           description: list of subreddits
@@ -4116,6 +4124,14 @@ paths:
             type: string
             example: "Hello"
         - name: safeSearch
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "true or false"
+        - name: autocomplete
           in: query
           required: false
           style: form
