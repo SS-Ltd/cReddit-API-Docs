@@ -4202,6 +4202,22 @@ paths:
           schema:
             type: string
             example: "hot or top or new"
+        - name: user
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "Baroudy14"
+        - name: community
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "Creddit_SW_Project"
       responses:
         "200":
           description: list of hashtags
@@ -4209,7 +4225,7 @@ paths:
             application/json:
               schema:
                 message: list of hashtags
-                $ref: "#/components/schemas/SearchPost"
+                $ref: "#/components/schemas/SearchComment"
         "500":
           description: Internal Server Error
           content:
