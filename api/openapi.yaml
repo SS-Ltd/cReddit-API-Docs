@@ -5376,31 +5376,31 @@ components:
         type:
           type: string
           example: "(Images & Video) or (Post) or (Poll) or (Link)"
+        title:
+          type: string
+          example: Hello World
         username:
           type: string
           example: Sayed
-        communityName:
-          type: string
-          example: Watermelon
         profilePicture:
           type: string
           example: drive.creddit.com/subreddit_or_user_pfpe
+        communityName:
+          type: string
+          example: Watermelon
+        createdAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
         netVote:
           type: integer
           example: 1500
         commentCount:
           type: integer
           example: 50
-        title:
-          type: string
-          example: Hello World
         content:
           type: string
           example: This is my content
-        createdAt:
-          type: string
-          example: "2024-03-25T15:37:33.339+00:00"
-        isNSFW:
+        isNsfw:
           type: boolean
           example: false
         isSpoiler:
@@ -5430,33 +5430,33 @@ components:
         postCreatedAt:
           type: string
           example: "2024-03-25T15:37:33.339+00:00"
-        isPostNSFW:
+        isPostNsfw:
           type: boolean
           example: false
         isPostSpoiler:
           type: boolean
           example: false
-        username:
-          type: string
-          example: Sayed
         communityName:
           type: string
           example: Watermelon
-        commentPicture:
+        createdAt:
           type: string
-          example: drive.creddit.com/subreddit_or_user_pfpe
+          example: "2024-03-25T15:37:33.339+00:00"
+        username:
+          type: string
+          example: Sayed
         netVote:
           type: integer
           example: 1500
         commentCount:
           type: integer
           example: 50
+        commentPicture:
+          type: string
+          example: drive.creddit.com/subreddit_or_user_pfpe
         content:
           type: string
           example: This is my content
-        createdAt:
-          type: string
-          example: "2024-03-25T15:37:33.339+00:00"
     SearchCommunity:
       type: object
       properties:
