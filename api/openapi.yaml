@@ -3588,98 +3588,165 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Mod
-  /mod/invite/{subredditName}:
+  /mod/invite/{communityName}:
     post:
       tags:
         - mod
       summary: invite a moderator
       security:
         - cookie_auth: []
-      description: invite a moderator
-      operationId: inviteMod
+      description: Send a moderator invitation to a user to moderate a community by adding user to the invited list and sending a message to the user
+      operationId: inviteModerator
       parameters:
-        - name: subredditName
+        - name: communityName
           in: path
-          description: ID of the subreddit to be moderated
+          description: name of the community to be moderated
           required: true
           style: simple
           explode: false
           schema:
             type: string
       requestBody:
-        description: Add moderator object
+        description: username to be invited
         content:
           application/json:
-            example:
-              communityID: "1"
-              userID: "1"
+            schema:
+              $ref: "#/components/schemas/Username"
         required: true
       responses:
         "200":
-          description: Mod invited successfully
+          description: Moderator invitation sent
           content:
             application/json:
               example:
-                message: Mod invited successfully
+                message: Moderator invitation sent
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                UserNotFound:
+                  value:
+                    message: User not found
+                CommunityNotFound:
+                  value:
+                    message: Community not found
+                UserAlreadyModerator:
+                  value:
+                    message: User is already a moderator
+                UserAlreadyInvited:
+                  value:
+                    message: User has already been invited
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred
       x-swagger-router-controller: Mod
-  /mod/accept-invite:
+  /mod/accept-invite/{communityName}:
     patch:
       tags:
         - mod
-      summary: Accept moderation invite
+      summary: Accept moderation invite by adding user to the moderators list and removing user from the invited list
       security:
         - cookie_auth: []
       description: Accept moderation invite
-      operationId: acceptModInvite
-      requestBody:
-        description: Accept moderator object
-        content:
-          application/json:
-            example:
-              communityID: "1"
-        required: true
+      operationId: acceptInvitation
+      parameters:
+        - name: communityName
+          in: path
+          description: name of the community to be moderated
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
-          description: Mod invite accepted successfully
+          description: Moderator invitation accepted
           content:
             application/json:
               example:
-                message: Mod invite accepted successfully
+                message: Moderator invitation accepted
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                UserNotFound:
+                  value:
+                    message: User not found
+                CommunityNotFound:
+                  value:
+                    message: Community not found
+                UserNotInvited:
+                  value:
+                    message: You have not been invited to moderate this community
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred
       x-swagger-router-controller: Mod
-  /mod/reject-invite:
-    delete:
+  /mod/reject-invite/{communityName}:
+    patch:
       tags:
         - mod
-      summary: reject moderation invite
+      summary: reject moderation invite by removing user from the invited list
       security:
         - cookie_auth: []
       description: reject moderation invite
-      operationId: rejectModInvite
+      operationId: rejectInvitation
+      parameters:
+        - name: communityName
+          in: path
+          description: name of the community to be moderated
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
-          description: Mod invite rejected successfully
+          description: Moderator invitation rejected
           content:
             application/json:
               example:
-                message: Mod invite rejected successfully
+                message: Moderator invitation rejected
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                UserNotFound:
+                  value:
+                    message: User not found
+                CommunityNotFound:
+                  value:
+                    message: Community not found
+                UserNotInvited:
+                  value:
+                    message: You have not been invited to moderate this community
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred
       x-swagger-router-controller: Mod
-  /mod/leave/{subredditName}:
-    delete:
+  /mod/leave/{communityName}:
+    patch:
       tags:
         - mod
       summary: Leave community moderation
       security:
         - cookie_auth: []
-      description: Leave community moderation
-      operationId: leaveCommunityMod
+      description: Leave community moderation by removing user from the moderators list
+      operationId: leaveModeration
       parameters:
-        - name: subredditName
+        - name: communityName
           in: path
           required: true
           style: simple
@@ -3688,13 +3755,83 @@ paths:
             type: string
       responses:
         "200":
-          description: Mod invite rejected successfully
+          description: Moderator left
           content:
             application/json:
               example:
-                message: Mod invite rejected successfully
+                message: Moderator left
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                UserNotFound:
+                  value:
+                    message: User not found
+                CommunityNotFound:
+                  value:
+                    message: Community not found
+                UserNotModerator:
+                  value:
+                    message: You are not a moderator of this community
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred
+      x-swagger-router-controller: Mod
+  /mod/remove/{communityName}:
+    patch:
+      tags:
+        - mod
+      summary: Remove community moderator
+      security:
+        - cookie_auth: []
+      description: remove moderator by removing user from the moderators list
+      operationId: removeModerator
+      parameters:
+        - name: communityName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: username to be removed from moderators
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Username"
+        required: true
+      responses:
+        "200":
+          description: Moderator removed
+          content:
+            application/json:
+              example:
+                message: Moderator left
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                UserNotFound:
+                  value:
+                    message: User not found
+                CommunityNotFound:
+                  value:
+                    message: Community not found
+                UserNotModerator:
+                  value:
+                    message: User is already not a moderator
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: An error occurred
       x-swagger-router-controller: Mod
   /mod/mute/{subredditName}:
     patch:
@@ -5495,6 +5632,12 @@ components:
         isNSFW:
           type: boolean
           example: false
+    Username:
+      type: object
+      properties:
+        username:
+          type: string
+          example: theUser
   securitySchemes:
     cookie_auth:
       type: apiKey
