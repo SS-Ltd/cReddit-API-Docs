@@ -241,7 +241,7 @@ paths:
                 message: Invalid token
       x-swagger-router-controller: User
   /user/logout:
-    get:
+    post:
       tags:
         - user
       summary: Logs out current logged in user session
@@ -249,6 +249,12 @@ paths:
       security:
         - cookie_auth: []
       operationId: logout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Logout"
+        required: false
       responses:
         "200":
           description: User logged out successfully
@@ -981,88 +987,7 @@ paths:
             application/json:
               example:
                 message: An error occurred while generating the username
-  /user/clear-history:
-    delete:
-      tags:
-        - user
-      summary: Clear user history
-      security:
-        - cookie_auth: []
-      description: Clear user browsing history.
-      operationId: clearHistory
-      responses:
-        "200":
-          description: User history cleared successfully
-          content:
-            application/json:
-              example:
-                message: User history cleared successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: User
-  /user/{subredditName}/block-community:
-    post:
-      tags:
-        - user
-      summary: Block Community
-      description: Block a specific community.
-      security:
-        - cookie_auth: []
-      operationId: blockCommunity
-      parameters:
-        - name: subredditName
-          in: path
-          description: Name of the community to block
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Community blocked successfully
-          content:
-            application/json:
-              example:
-                message: Community blocked successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
-        "404":
-          description: Community not found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: User
-    delete:
-      tags:
-        - user
-      summary: Unblock
-      operationId: unblockCommunity
-      parameters:
-        - name: subredditName
-          in: path
-          description: Name of the community to Unblock
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Community unblocked successfully
-          content:
-            application/json:
-              example:
-                message: Community unblocked successfully
-        "401":
-          description: "Unauthorized, user must be logged in"
-        "404":
-          description: Community not found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: User
-  /user/{username}/posts:
+  0/user/{username}/posts:
     get:
       tags:
         - user
@@ -2805,7 +2730,7 @@ paths:
           content:
             application/json:
               example:
-                message: "Error getting settings: {error}" 
+                message: "Error getting settings: {error}"
       x-swagger-router-controller: Subreddit
     put:
       tags:
@@ -2912,7 +2837,7 @@ paths:
           content:
             application/json:
               example:
-                message: "Error getting rules: {error}" 
+                message: "Error getting rules: {error}"
       x-swagger-router-controller: Subreddit
     put:
       tags:
@@ -3046,17 +2971,17 @@ paths:
             application/json:
               examples:
                 CommunityNotFound:
-                  value: 
+                  value:
                     message: Community not found
                 UserNotFound:
-                  value: 
+                  value:
                     message: User does not exist
         "500":
           description: Internal Server Error
           content:
             application/json:
               example:
-                message: "An error occurred while getting reported posts for the community" 
+                message: "An error occurred while getting reported posts for the community"
       x-swagger-router-controller: Subreddit
   /subreddit/{subredditName}/scheduled-posts:
     get:
@@ -3114,17 +3039,17 @@ paths:
             application/json:
               examples:
                 CommunityNotFound:
-                  value: 
+                  value:
                     message: Community not found
                 UserNotFound:
-                  value: 
+                  value:
                     message: User does not exist
         "500":
           description: Internal Server Error
           content:
             application/json:
               example:
-                message: "An error occurred while getting scheduled posts" 
+                message: "An error occurred while getting scheduled posts"
       x-swagger-router-controller: Subreddit
   /subreddit/{subredditName}/unmoderated-posts:
     get:
@@ -3190,17 +3115,17 @@ paths:
             application/json:
               examples:
                 CommunityNotFound:
-                  value: 
+                  value:
                     message: Community not found
                 UserNotFound:
-                  value: 
+                  value:
                     message: User does not exist
         "500":
           description: Internal Server Error
           content:
             application/json:
               example:
-                message: "An error occurred while getting unmoderated posts" 
+                message: "An error occurred while getting unmoderated posts"
       x-swagger-router-controller: Subreddit
   /subreddit/{subredditName}/join:
     post:
@@ -4387,7 +4312,7 @@ paths:
           content:
             application/json:
               example:
-                message: User approved 
+                message: User approved
         "400":
           description: Bad Request
           content:
@@ -4419,7 +4344,7 @@ paths:
           content:
             application/json:
               example:
-                message: "An error occurred" 
+                message: "An error occurred"
       x-swagger-router-controller: Mod
   /mod/unapprove/{subredditName}:
     patch:
@@ -4452,7 +4377,7 @@ paths:
           content:
             application/json:
               example:
-                message: User unapproved 
+                message: User unapproved
         "400":
           description: Bad Request
           content:
@@ -4484,7 +4409,7 @@ paths:
           content:
             application/json:
               example:
-                message: "An error occurred" 
+                message: "An error occurred"
       x-swagger-router-controller: Mod
   /mod/get-approved-users/{subredditName}:
     get:
@@ -5023,6 +4948,9 @@ components:
         gender:
           type: string
           example: ["Man", "Woman", "I Prefer Not To Say", "None"]
+        fcmToken:
+          type: string
+          example: "654wad1284awd6584685"
     Overview:
       type: object
       properties:
@@ -5043,6 +4971,12 @@ components:
           - $ref: "#/components/schemas/Post"
           - $ref: "#/components/schemas/Post"
           - $ref: "#/components/schemas/Post"
+    Logout:
+      type: object
+      properties:
+        fcmToken:
+          type: string
+          example: "654wad1284awd6584685"
     UserLoginGoogle:
       type: object
       properties:
@@ -5356,6 +5290,9 @@ components:
         password:
           type: string
           example: "12345"
+        fcmToken:
+          type: string
+          example: "654wad1284awd6584685"
     UserSettings_preferences_socialLinks:
       type: object
       properties:
@@ -5800,7 +5737,7 @@ components:
           type: object
           example: like any post (in case of a cross post)
         views:
-          type: integer 
+          type: integer
           example: 100 (integer) used for user overview only
         upvotes:
           type: integer
@@ -6246,7 +6183,7 @@ components:
         postVotes:
           type: integer
           example: 1500
-        postPicture: 
+        postPicture:
           type: string
           example: drive.creddit.com/subreddit_or_user_pfpe
         postCreatedAt:
@@ -6302,7 +6239,7 @@ components:
           example: 1000
     SearchUser:
       properties:
-        _id: 
+        _id:
           type: string
           example: 350651awd651awd
         username:
