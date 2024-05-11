@@ -4560,17 +4560,12 @@ paths:
       security:
         - cookie_auth: []
       description: create chat group
-      operationId: createGroup
+      operationId: createChatRoom
       requestBody:
-        description: name & invited users
         content:
           application/json:
-            example:
-              name: ElGroup
-              participantIDs:
-                - user1
-                - user2
-                - user3
+            schema:
+              $ref: "#/components/schemas/ChatRoom"
         required: true
       responses:
         "200":
@@ -4582,61 +4577,155 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Chat
-  /chat/invite:
-    post:
+    get:
       tags:
         - chat
-      summary: invite users to chat group
+      summary: get chat groups
       security:
         - cookie_auth: []
-      description: invite users to chat group
-      operationId: inviteUsers
-      requestBody:
-        description: invite users
-        content:
-          application/json:
-            example:
-              roomID: 4
-              invitedIDs:
-                - user1
-                - user2
-                - user3
-        required: true
+      description: get chat groups
+      operationId: getRooms
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 10
       responses:
         "200":
-          description: users invited successfully
+          description: list of chat groups
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatRooms"
+        "500":
+          description: Internal Server Error
           content:
             application/json:
               example:
-                message: users invited successfully
+                message: Error getting chat rooms
+      x-swagger-router-controller: Chat
+  /chat/{roomId}/mark-as-read:
+    patch:
+      tags:
+        - chat
+      summary: mark chat as read
+      security:
+        - cookie_auth: []
+      description: mark chat as read
+      operationId: markAllMessagesAsRead
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: chat marked as read successfully
+          content:
+            application/json:
+              example:
+                message: All messages marked as read
+        "404":
+          description: Chat room not found
+          content:
+            application/json:
+              example:
+                message: Chat room not found
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Error marking all messages as read
       x-swagger-router-controller: Chat
-  /chat/leave:
-    patch:
+  /chat/{roomId}:
+    get:
+      tags:
+        - chat
+      summary: get chat messages
+      security:
+        - cookie_auth: []
+      description: get chat messages
+      operationId: getRoomChat
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: list of chat messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessages"
+        "404":
+          description: Chat room not found
+          content:
+            application/json:
+              example:
+                message: Chat room not found
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Error getting chat messages
+      x-swagger-router-controller: Chat
+  /chat/leaveChat/{roomId}:
+    delete:
       tags:
         - chat
       summary: leave chat group
       security:
         - cookie_auth: []
       description: leave chat group
-      operationId: leaveGroup
-      requestBody:
-        description: group to exit
-        content:
-          application/json:
-            example:
-              roomID: 4
-        required: true
+      operationId: leaveChatRoom
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
       responses:
         "200":
-          description: users left successfully
+          description: User left successfully
           content:
             application/json:
               example:
-                message: users left successfully
+                message: Left chat room successfully
+        "403":
+          description: User is not in the chat room
+          content:
+            application/json:
+              example:
+                message: User is not a member of this chat room
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: Error leaving chat room
       x-swagger-router-controller: Chat
   /search/comments:
     get:
@@ -6366,6 +6455,126 @@ components:
         username:
           type: string
           example: theUser
+    ChatRoom:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Test (in case of group chat only)
+        members:
+          type: array
+          items:
+            type: string
+            example: '["user1","user2","user3"]'
+    ChatRooms:
+      type: array
+      items:
+        type: object
+        properties:
+          _id:
+            type: string
+            example: 350651awd651awd
+          name:
+            type: string
+            example: Test (in case of group chat only)
+          members:
+            type: array
+            items:
+              type: string
+              example: '["user1","user2","user3"]'
+          host:
+            type: string
+            example: user1 (null if private chat)
+          isDeleted:
+            type: boolean
+            example: false
+          createdAt:
+            type: string
+            example: "2024-03-25T15:37:33.339+00:00"
+          updatedAt:
+            type: string
+            example: "2024-03-25T15:37:33.339+00:00"
+          lastSentMessage:
+            type: object
+            properties:
+              _id:
+                type: string
+                example: 350651awd651awd
+              user:
+                type: string
+                example: user1
+              room:
+                type: string
+                example: 350651awd651awd
+              content:
+                type: string
+                example: Hello World
+              isRead:
+                type: boolean
+                example: true
+              isDeleted:
+                type: boolean
+                example: false
+              reactions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user:
+                      type: string
+                      example: user1
+                    reaction:
+                      type: string
+                      example: 😂
+              createdAt:
+                type: string
+                example: "2024-03-25T15:37:33.339+00:00"
+              updatedAt:
+                type: string
+                example: "2024-03-25T15:37:33.339+00:00"
+    ChatMessages:
+      type: array
+      items:
+        type: object
+        properties:
+          _id:
+            type: string
+            example: 350651awd651awd
+          username:
+            type: string
+            example: user1
+          profilePicture:
+            type: string
+            example: drive.creddit.com/user_pfpe
+          room:
+            type: string
+            example: 350651awd651awd
+          content:
+            type: string
+            example: Hello World
+          isRead:
+            type: boolean
+            example: true
+          isDeleted:
+            type: boolean
+            example: false
+          reactions:
+            type: array
+            items:
+              type: object
+              properties:
+                user:
+                  type: string
+                  example: user1
+                reaction:
+                  type: string
+                  example: 😂
+          createdAt:
+            type: string
+            example: "2024-03-25T15:37:33.339+00:00"
+          updatedAt:
+            type: string
+            example: "2024-03-25T15:37:33.339+00:00"
   securitySchemes:
     cookie_auth:
       type: apiKey
