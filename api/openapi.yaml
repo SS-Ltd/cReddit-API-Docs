@@ -2180,7 +2180,7 @@ paths:
               example:
                 message: Error saving post
       x-swagger-router-controller: Post
-  /post/{postId}/hide:
+  /post/{postId}/hidden:
     patch:
       tags:
         - post
@@ -2239,38 +2239,6 @@ paths:
             application/json:
               example:
                 message: Error hiding post
-      x-swagger-router-controller: Post
-  /post/{postId}/follow:
-    patch:
-      tags:
-        - post
-      summary: Follow post
-      operationId: followPost
-      security:
-        - cookie_auth: []
-      parameters:
-        - name: postId
-          in: path
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-      requestBody:
-        description: Follows post object
-        content:
-          application/json:
-            example:
-              isFollowed: true
-      responses:
-        "200":
-          description: Post followed successfully
-          content:
-            application/json:
-              example:
-                message: Post followed successfully
-        "500":
-          description: Internal Server Error
       x-swagger-router-controller: Post
   /post/{postId}/report:
     post:
