@@ -2792,6 +2792,122 @@ paths:
               example:
                 message: "Error updating settings: {error}"
       x-swagger-router-controller: Subreddit
+  /subreddit/{subredditName}/update-community-banner:
+    post:
+      tags:
+        - subreddit
+      summary: Update subreddit banner by deleting the previous one if self-hosted and uploading a new one
+      security:
+        - cookie_auth: []
+      description: Update subreddit banner.
+      operationId: updateCommunityBanner
+      parameters:
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: image to be uploaded
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Image"
+        required: true
+      responses:
+        "200":
+          description: Subreddit settings updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Link"
+        "400":
+          description: Missing required fields
+          content:
+            application/json:
+              examples:
+                BannerIsRequired:
+                  value:
+                    message: Banner is required
+                CommunityNotFound:
+                  value:
+                    message: Community not found
+                CommunityisRequired:
+                  value:
+                    message: Community is required
+        "401":
+          description: "Unauthorized, user must be logged in and a moderator"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: "Error updating settings: {error}"
+      x-swagger-router-controller: Subreddit
+  /subreddit/{subredditName}/update-community-icon:
+    post:
+      tags:
+        - subreddit
+      summary: Update subreddit icon by deleting the previous one if self-hosted and uploading a new one
+      security:
+        - cookie_auth: []
+      description: Update subreddit icon.
+      operationId: updateCommunityIcon
+      parameters:
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: image to be uploaded
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Image"
+        required: true
+      responses:
+        "200":
+          description: Subreddit settings updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Link"
+        "400":
+          description: Missing required fields
+          content:
+            application/json:
+              examples:
+                BannerIsRequired:
+                  value:
+                    message: Banner is required
+                CommunityNotFound:
+                  value:
+                    message: Community not found
+                CommunityisRequired:
+                  value:
+                    message: Community is required
+        "401":
+          description: "Unauthorized, user must be logged in and a moderator"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: "Error updating settings: {error}"
+      x-swagger-router-controller: Subreddit
   /subreddit/{subredditName}/rules:
     get:
       tags:
@@ -3261,7 +3377,7 @@ paths:
         "500":
           description: Error unmuting community
       x-swagger-router-controller: Subreddit
-  /subreddit/{subredditName}/edited:
+  /subreddit/about/edited/{subredditName}:
     get:
       tags:
         - subreddit
@@ -3388,186 +3504,6 @@ paths:
             application/json:
               example:
                 message: An error occurred while getting posts for the community
-      x-swagger-router-controller: Subreddit
-  /subreddit/{subredditName}/muted:
-    get:
-      tags:
-        - subreddit
-      summary: Retrieve muted users
-      security:
-        - cookie_auth: []
-      description: Retrieve muted users
-      operationId: getMuted
-      parameters:
-        - name: subredditName
-          in: path
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-      responses:
-        "200":
-          description: list of Muted Users
-          content:
-            application/json:
-              example:
-                id: "1"
-                pic: pic URL
-                name: Baroudy1452
-                moderatorSince: 1/1/2001
-        "401":
-          description: No such subreddit is found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Subreddit
-  /subreddit/{subredditName}/moderators:
-    get:
-      tags:
-        - subreddit
-      summary: Retrieve moderator users
-      security:
-        - cookie_auth: []
-      description: Retrieve moderator users
-      operationId: getModerators
-      parameters:
-        - name: subredditName
-          in: path
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-      responses:
-        "200":
-          description: list of moderator Subreddits
-          content:
-            application/json:
-              example:
-                id: "1"
-                pic: pic URL
-                name: Baroudy1452
-                moderatorSince: 1/1/2001
-        "401":
-          description: No such subreddit is found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Subreddit
-  /subreddit/{subredditName}/reports:
-    get:
-      tags:
-        - subreddit
-      summary: Retrieve reported posts
-      security:
-        - cookie_auth: []
-      description: Retrieve reported posts
-      operationId: getReportedPosts
-      parameters:
-        - name: subredditName
-          in: path
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-      responses:
-        "200":
-          description: list of Reported Posts
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Feed"
-        "401":
-          description: No such subreddit is found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Subreddit
-  /subreddit/{subredditName}/spam:
-    get:
-      tags:
-        - subreddit
-      summary: Retrieve spam posts
-      security:
-        - cookie_auth: []
-      description: Retrieve spam posts
-      operationId: getSpammedPosts
-      parameters:
-        - name: subredditName
-          in: path
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-      responses:
-        "200":
-          description: list of Spam posts
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Feed"
-        "401":
-          description: No such subreddit is found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Subreddit
-  /subreddit/{subredditName}/modqueue:
-    get:
-      tags:
-        - subreddit
-      summary: Retrieve modqueue posts
-      security:
-        - cookie_auth: []
-      description: Retrieve modqueue posts
-      operationId: getModQueuePosts
-      parameters:
-        - name: subredditName
-          in: path
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-      responses:
-        "200":
-          description: list of pending posts
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Feed"
-        "401":
-          description: No such subreddit is found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Subreddit
-  /subreddit/{subreddit}/unmoderated:
-    get:
-      tags:
-        - subreddit
-      summary: Retrieve unmoderated posts
-      security:
-        - cookie_auth: []
-      description: Retrieve unmoderated posts
-      operationId: getUnmoderatedPosts
-      parameters:
-        - name: subredditName
-          in: path
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-      responses:
-        "200":
-          description: list of unmoderated posts
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Feed"
-        "401":
-          description: No such subreddit is found
-        "500":
-          description: Internal Server Error
       x-swagger-router-controller: Subreddit
   /subreddit/top:
     get:
@@ -4059,41 +3995,7 @@ paths:
               example:
                 message: Error marking messages as read
       x-swagger-router-controller: Message
-  /mod/approve-post/{postId}:
-    patch:
-      tags:
-        - mod
-      summary: Approve a post
-      security:
-        - cookie_auth: []
-      description: Approve a post.
-      operationId: approvePost
-      parameters:
-        - name: postId
-          in: path
-          description: ID of the post to be approved
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-      requestBody:
-        description: Approve post object
-        content:
-          application/json:
-            example:
-              postId: "1"
-        required: true
-      responses:
-        "200":
-          description: post approved successfully
-          content:
-            application/json:
-              example:
-                message: post approved successfully
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Mod
+  
   /mod/invite/{communityName}:
     post:
       tags:
@@ -6810,6 +6712,19 @@ components:
         total:
           type: integer
           example: 10
+    Image:
+      type: object
+      properties:
+        image:
+          type: string
+          format: binary
+          example: "<image_file>"
+    Link:
+      type: object
+      properties:
+        link:
+          type: string
+          example: "http://res.cloudinary.com/..."
   securitySchemes:
     cookie_auth:
       type: apiKey
