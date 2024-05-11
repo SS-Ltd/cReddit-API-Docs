@@ -1198,6 +1198,71 @@ paths:
                   value:
                     message: Visitor not found
       x-swagger-router-controller: User
+  /user/{username}/overview:
+    get:
+      tags:
+        - user
+      summary: Retrieve user overview.
+      description: Get user overview showing posts and comments posted/commented by the user
+      operationId: getUserOverview
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
+        - name: sort
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "hot or top or new"
+        - name: time
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "now or today or week or month or year or all"
+      responses:
+        "200":
+          description: User overview retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feed"
+        "404":
+          description: Users not found
+          content:
+            application/json:
+              examples:
+                UserNotFound:
+                  value:
+                    message: User not found
+                VisitorNotFound:
+                  value:
+                    message: Visitor not found
+        "400":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: "Error getting user overview: {error}"
+      x-swagger-router-controller: User
   /user/history:
     get:
       tags:
@@ -1549,6 +1614,7 @@ paths:
                   content: "This is a text post example."
                   isSpoiler: false
                   isNSFW: false
+                  date: "2024-03-25T15:37:33.339+00:00 for scheduled posts only"
               LinkExample:
                 value:
                   type: "Links"
@@ -1557,6 +1623,7 @@ paths:
                   content: "This is a text post example."
                   isSpoiler: false
                   isNSFW: false
+                  date: "2024-03-25T15:37:33.339+00:00 for scheduled posts only"
               ImagesExample:
                 value:
                   type: "Images & Video"
@@ -1567,6 +1634,7 @@ paths:
                     - file: <image_file_2>
                   isSpoiler: false
                   isNSFW: false
+                  date: "2024-03-25T15:37:33.339+00:00 for scheduled posts only"
               PollExample:
                 value:
                   type: "Poll"
@@ -1577,6 +1645,7 @@ paths:
                   expirationDate: "2024-03-25T15:37:33.339+00:00"
                   isSpoiler: false
                   isNSFW: false
+                  date: "2024-03-25T15:37:33.339+00:00 for scheduled posts only"
             encoding:
               file:
                 contentType: "multipart/form-data"
@@ -2697,7 +2766,7 @@ paths:
       security:
         - cookie_auth: []
       description: Retrieve subreddit settings to display
-      operationId: getSubredditSettings
+      operationId: getCommunitySettings
       parameters:
         - name: subredditName
           in: path
@@ -2713,17 +2782,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SubredditSettings"
+        "400":
+          description: "Error getting subreddit settings: Subreddit name is required"
+          content:
+            application/json:
+              example:
+                message: Subreddit is required
         "401":
-          description: "Unauthorized, user must be logged in"
+          description: "Unauthorized, user must be logged in and a moderator"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "404":
+          description: Subreddit not found in database
+          content:
+            application/json:
+              example:
+                message: Community not found
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: "Error getting settings: {error}" 
       x-swagger-router-controller: Subreddit
     put:
       tags:
         - subreddit
       summary: Edit subreddit settings
+      security:
+        - cookie_auth: []
       description: Update subreddit settings.
-      operationId: editSubredditSettings
+      operationId: updateCommunitySettings
       parameters:
         - name: subredditName
           in: path
@@ -2733,7 +2824,7 @@ paths:
           schema:
             type: string
       requestBody:
-        description: User subreddit object
+        description: User subreddit object containing new settings
         content:
           application/json:
             schema:
@@ -2746,10 +2837,370 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SubredditSettings"
+        "400":
+          description: Missing required fields
+          content:
+            application/json:
+              examples:
+                SubredditIsRequired:
+                  value:
+                    message: Subreddit is required
+                SettingsAreRequired:
+                  value:
+                    message: Settings are required
         "401":
-          description: "Unauthorized, user must be logged in"
+          description: "Unauthorized, user must be logged in and a moderator"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "404":
+          description: Subreddit not found in database
+          content:
+            application/json:
+              example:
+                message: Community not found
         "500":
           description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: "Error updating settings: {error}"
+      x-swagger-router-controller: Subreddit
+  /subreddit/{subredditName}/rules:
+    get:
+      tags:
+        - subreddit
+      summary: Get subreddit rules
+      description: Retrieve subreddit rules to display
+      operationId: getCommunityRules
+      parameters:
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Subreddit rules retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubredditRules"
+        "400":
+          description: "Error getting subreddit rules: Subreddit name is required"
+          content:
+            application/json:
+              example:
+                message: Subreddit is required
+        "401":
+          description: "Unauthorized, user must be logged in and a moderator"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "404":
+          description: Subreddit not found in database
+          content:
+            application/json:
+              example:
+                message: Community not found
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: "Error getting rules: {error}" 
+      x-swagger-router-controller: Subreddit
+    put:
+      tags:
+        - subreddit
+      summary: Edit subreddit rules
+      security:
+        - cookie_auth: []
+      description: Update subreddit rules.
+      operationId: updateCommunityRules
+      parameters:
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: User rules array containing all rules and in the order they should be displayed
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubredditRules"
+        required: true
+      responses:
+        "200":
+          description: Subreddit rules updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubredditRules"
+        "400":
+          description: Missing required fields
+          content:
+            application/json:
+              examples:
+                SubredditIsRequired:
+                  value:
+                    message: Subreddit is required
+                SettingsAreRequired:
+                  value:
+                    message: Rules are required
+        "401":
+          description: "Unauthorized, user must be logged in and a moderator"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "404":
+          description: Subreddit not found in database
+          content:
+            application/json:
+              example:
+                message: Community not found
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: "Error updating settings: {error}"
+      x-swagger-router-controller: Subreddit
+  /subreddit/{subredditName}/reported-posts:
+    get:
+      tags:
+        - subreddit
+      summary: Get reported posts
+      description: Retrieve reported posts to display
+      operationId: getReportedPosts
+      parameters:
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: sort
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "hot or top or new or best or rising"
+        - name: type
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "All or Comment or Post"
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
+      responses:
+        "200":
+          description: Reported posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feed"
+        "400":
+          description: "Error getting reported posts: Subreddit name is required"
+          content:
+            application/json:
+              example:
+                message: Subreddit is required
+        "401":
+          description: "Unauthorized, user must be logged in and a moderator"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "404":
+          description: Community or user not found
+          content:
+            application/json:
+              examples:
+                CommunityNotFound:
+                  value: 
+                    message: Community not found
+                UserNotFound:
+                  value: 
+                    message: User does not exist
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: "An error occurred while getting reported posts for the community" 
+      x-swagger-router-controller: Subreddit
+  /subreddit/{subredditName}/scheduled-posts:
+    get:
+      tags:
+        - subreddit
+      summary: Get scheduled posts
+      description: Retrieve scheduled posts of a community
+      operationId: getScheduledPosts
+      parameters:
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
+      responses:
+        "200":
+          description: Scheduled posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feed"
+        "400":
+          description: "Error getting scheduled posts: Subreddit name is required"
+          content:
+            application/json:
+              example:
+                message: Subreddit is required
+        "401":
+          description: "Unauthorized, user must be logged in and a moderator"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "404":
+          description: Community or user not found
+          content:
+            application/json:
+              examples:
+                CommunityNotFound:
+                  value: 
+                    message: Community not found
+                UserNotFound:
+                  value: 
+                    message: User does not exist
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: "An error occurred while getting scheduled posts" 
+      x-swagger-router-controller: Subreddit
+  /subreddit/{subredditName}/unmoderated-posts:
+    get:
+      tags:
+        - subreddit
+      summary: Get unmoderated posts
+      description: Retrieve unmoderated posts to display
+      operationId: getUnmoderatedPosts
+      parameters:
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: sort
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+            example: "new or old"
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 5
+      responses:
+        "200":
+          description: Unmoderated posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feed"
+        "400":
+          description: "Error getting unmoderated posts: Subreddit name is required"
+          content:
+            application/json:
+              example:
+                message: Subreddit is required
+        "401":
+          description: "Unauthorized, user must be logged in and a moderator"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "404":
+          description: Community or user not found
+          content:
+            application/json:
+              examples:
+                CommunityNotFound:
+                  value: 
+                    message: Community not found
+                UserNotFound:
+                  value: 
+                    message: User does not exist
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: "An error occurred while getting unmoderated posts" 
       x-swagger-router-controller: Subreddit
   /subreddit/{subredditName}/join:
     post:
@@ -3905,6 +4356,191 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Mod
+  /mod/approve/{subredditName}:
+    patch:
+      tags:
+        - mod
+      summary: approve user in community
+      security:
+        - cookie_auth: []
+      description: approve user in community
+      operationId: approveUser
+      parameters:
+        - name: subredditName
+          in: path
+          description: ID of the subreddit which the user should be approved in
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: username of user to be approved
+        content:
+          application/json:
+            example:
+              username: "SlaxSplash"
+        required: true
+      responses:
+        "200":
+          description: User approved successfully
+          content:
+            application/json:
+              example:
+                message: User approved 
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                CommunityNotFound:
+                  value:
+                    message: Community does not exist
+                ModeratorNotFound:
+                  value:
+                    message: Moderator does not exist
+                NotModertaorOfCommunity:
+                  value:
+                    message: You are not a moderator of this community
+                UserNotFound:
+                  value:
+                    message: User does not exist
+                UserAlreadyApproved:
+                  value:
+                    message: User is already approved
+        "401":
+          description: "Unauthorized, user must be logged in and a moderator"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: "An error occurred" 
+      x-swagger-router-controller: Mod
+  /mod/unapprove/{subredditName}:
+    patch:
+      tags:
+        - mod
+      summary: unapprove user in community
+      security:
+        - cookie_auth: []
+      description: approve user in community
+      operationId: approveUser
+      parameters:
+        - name: subredditName
+          in: path
+          description: ID of the subreddit which the user should be unapproved in
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: username of user to be unapproved
+        content:
+          application/json:
+            example:
+              username: "SlaxSplash"
+        required: true
+      responses:
+        "200":
+          description: User unapproved successfully
+          content:
+            application/json:
+              example:
+                message: User unapproved 
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                CommunityNotFound:
+                  value:
+                    message: Community does not exist
+                ModeratorNotFound:
+                  value:
+                    message: Moderator does not exist
+                NotModertaorOfCommunity:
+                  value:
+                    message: You are not a moderator of this community
+                UserNotFound:
+                  value:
+                    message: User does not exist
+                UserAlreadyApproved:
+                  value:
+                    message: User is not approved
+        "401":
+          description: "Unauthorized, user must be logged in and a moderator"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: "An error occurred" 
+      x-swagger-router-controller: Mod
+  /mod/get-approved-users/{subredditName}:
+    get:
+      tags:
+        - mod
+      summary: Get approved users in community
+      security:
+        - cookie_auth: []
+      description: Get approved users in community
+      operationId: getApprovedUsers
+      parameters:
+        - name: subredditName
+          in: path
+          description: Name of the subreddit which the approved users should be retrieved from
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: list of approved users
+          content:
+            application/json:
+              example:
+                id: "1"
+                pic: pic URL
+                name: Baroudy1452
+                moderatorSince: 1/1/2001
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                CommunityNotFound:
+                  value:
+                    message: Community does not exist
+                ModeratorNotFound:
+                  value:
+                    message: Moderator does not exist
+                NotModertaorOfCommunity:
+                  value:
+                    message: You are not a moderator of this community
+        "401":
+          description: "Unauthorized, user must be logged in and a moderator"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: "An error occurred"
+      x-swagger-router-controller: Mod
   /chat:
     post:
       tags:
@@ -4947,6 +5583,9 @@ components:
         isNSFW:
           type: boolean
           example: false
+        date:
+          type: string
+          example: 2024-03-25T15:37:33.339+00:00 (in case of a scheduled post)
     CreateImage:
       type: object
       properties:
@@ -4968,6 +5607,9 @@ components:
         isNSFW:
           type: boolean
           example: false
+        date:
+          type: string
+          example: 2024-03-25T15:37:33.339+00:00 (in case of a scheduled post)
     CreateLink:
       type: object
       properties:
@@ -4989,6 +5631,9 @@ components:
         isNSFW:
           type: boolean
           example: false
+        date:
+          type: string
+          example: 2024-03-25T15:37:33.339+00:00 (in case of a scheduled post)
     CreatePoll:
       type: object
       properties:
@@ -5018,6 +5663,9 @@ components:
         isNSFW:
           type: boolean
           example: false
+        date:
+          type: string
+          example: 2024-03-25T15:37:33.339+00:00 (in case of a scheduled post)
     SavePost:
       type: object
       properties:
@@ -5151,6 +5799,15 @@ components:
         child:
           type: object
           example: like any post (in case of a cross post)
+        views:
+          type: integer 
+          example: 100 (integer) used for user overview only
+        upvotes:
+          type: integer
+          example: 1500 (integer) used for user overview only
+        downvotes:
+          type: integer
+          example: 100 (integer) used for user overview only
     Comment:
       type: object
       properties:
@@ -5261,6 +5918,9 @@ components:
         isSpoiler:
           type: boolean
           example: false
+        date:
+          type: string
+          example: 2024-03-25T15:37:33.339+00:00 (in case of a scheduled post)
     Community:
       type: object
       properties:
@@ -5338,24 +5998,49 @@ components:
     SubredditSettings:
       type: object
       properties:
-        name:
+        allowedPostTypes:
           type: string
-          example: theUser
-        description:
+          enum:
+            - Any
+            - Posts
+            - Links
+          example: Posts
+        allowCrossPosting:
+          type: boolean
+          example: true
+        allowSpoiler:
+          type: boolean
+          example: true
+        allowImages:
+          type: boolean
+          example: true
+        allowPolls:
+          type: boolean
+          example: true
+        suggestedSort:
           type: string
-          example: Community description
-        rules:
-          type: array
-          items:
-            $ref: "#/components/schemas/SubredditSettings_rules"
-      example:
-        name: theUser
-        description: Community description
-        rules:
-          - rule: Mahmoud
-            appliesTo: Posts & comments
-          - rule: Mahmoud
-            appliesTo: Posts & comments
+          enum:
+            - best
+            - old
+            - new
+            - top
+          example: best
+        allowImageComments:
+          type: boolean
+          example: true
+    SubredditRules:
+      type: object
+      properties:
+        text:
+          type: string
+          example: Curse words are not allowed
+        appliesTo:
+          type: string
+          enum:
+            - Posts & comments
+            - Posts only
+            - Comments only
+          example: Posts & comments
     Notification:
       type: object
       properties:
