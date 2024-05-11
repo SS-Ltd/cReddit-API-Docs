@@ -3608,7 +3608,8 @@ paths:
               example:
                 message: An error occurred while retrieving top subreddits
       x-swagger-router-controller: Subreddit
-  /notification/all:
+    
+  /notification:
     get:
       tags:
         - notification
@@ -3616,19 +3617,91 @@ paths:
       security:
         - cookie_auth: []
       description: Get all notifications for a user
-      operationId: getAllNotifications
+      operationId: getNotifications
+      parameters:
+        - name: page
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+            example: 10
       responses:
         "200":
           description: list of all notifications
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Notification"
+                $ref: "#/components/schemas/Notifications"
+        "500":
+          description: Internal Server Error
+      x-swagger-router-controller: Notification
+  /subscribe:
+    post:
+      tags:
+        - notification
+      summary: Subscribe to FCM notifications
+      security:
+        - cookie_auth: []
+      description: Subscribe to FCM notifications
+      operationId: subscribe
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FCMToken"
+        required: true
+      responses:
+        "200":
+          description: success message
+          content:
+            application/json:
+              example:
+                message: Subscribed successfully
+        "500":
+          description: Internal Server Error
+      x-swagger-router-controller: Notification
+    delete:
+      tags:
+        - notification
+      summary: Unsubscribe from FCM notifications
+      security:
+        - cookie_auth: []
+      description: Unsubscribe from FCM notifications
+      operationId: unsubscribe
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FCMToken"
+        required: true
+      responses:
+        "200":
+          description: success message
+          content:
+            application/json:
+              example:
+                message: Unsubscribed successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              example:
+                message: Already unsubscribed
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Notification
   /notification/mark-all-as-read:
-    patch:
+    put:
       tags:
         - notification
       summary: Mark all notifications as read
@@ -3642,54 +3715,57 @@ paths:
           content:
             application/json:
               example:
-                message: All notifications marked as read successfully
+                message: Notification marked as read
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Notification
-  /notification:
+  /notification/{notificationId}/mark-as-read:
+    put:
+      tags:
+        - notification
+      summary: Mark a specific notifications as read
+      security:
+        - cookie_auth: []
+      description: Mark a specific notifications as read
+      operationId: markAsRead
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Notification marked as read
+          content:
+            application/json:
+              example:
+                message: Notification marked as read
+        "500":
+          description: Internal Server Error
+      x-swagger-router-controller: Notification
+  /notification/unread-count:
     get:
       tags:
         - notification
-      summary: Get 5 recent notifications
+      summary: Get number of unread notifications and messages
       security:
         - cookie_auth: []
-      description: Get 5 recent notifications
-      operationId: getRecentNotifications
+      description: Get number of unread notifications and messages
+      operationId: getUnreadCount
       responses:
         "200":
-          description: Recent notifications
+          description: Unread count retrieved successfully
           content:
             application/json:
-              example:
-                message: Recent notifications
+              schema:
+                $ref: "#/components/schemas/Unread"
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Notification
-    post:
-      tags:
-        - notification
-      summary: Create notification
-      description: Create notification
-      operationId: createNotification
-      requestBody:
-        description: Follow resource
-        content:
-          application/json:
-            example:
-              resourceId: awunioawd3ui5378y34iu
-              userId: awunioawd3ui5378y34iu
-              type: post
-        required: true
-      responses:
-        "200":
-          description: Notification created successfully
-          content:
-            application/json:
-              example:
-                message: Notification created successfully
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Notification
+  
   /message:
     post:
       tags:
@@ -6229,33 +6305,63 @@ components:
             - Posts only
             - Comments only
           example: Posts & comments
+    Notifications:
+      type: object
+      properties:
+        notifications:
+          type: array
+          items:
+            type: object
+            oneOf:
+              - $ref: "#/components/schemas/Notification"
     Notification:
       type: object
       properties:
-        id:
+        _id:
           type: string
-          example: sjdshfjsVNJNSDJv
-        userId:
+          example: 663a3e999387a0ba713725a8
+        user:
           type: string
-          example: asnfjsvjknsdjkvnjdsnvj
+          example: Vella_Hoppe
+        notificationFrom:
+          type: string
+          example: Alysha59
         resourceId:
           type: string
-          example: asnfjsvjknsdjkvnjdsnvj
+          example: 6beef0bae3c033bbd5ec19fd
         type:
           type: string
           enum:
+            - cakeDay
+            - upvotedPost
+            - comment
+            - upvotedComment
+            - upvotedPost
+            - mention
+            - followedPost
+            - chatRequest
+            - chatMessage
+            - follow
             - message
-            - post
-            - user
+          example: upvotedPost
+        title:
+          type: string
+          example: "You have a new message"
+        content:
+          type: string
+          example: "Hello there"
         isRead:
           type: boolean
-          example: true
-      example:
-        resourceId: asnfjsvjknsdjkvnjdsnvj
-        isRead: true
-        id: sjdshfjsVNJNSDJv
-        type: message
-        userId: asnfjsvjknsdjkvnjdsnvj
+          example: false
+        createdAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        updatedAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        profilePicture:
+          type: string
+          example: drive.creddit.com/user_pfp
     Message:
       type: object
       properties:
@@ -6686,6 +6792,24 @@ components:
         days:
           type: integer
           example: 7
+    FCMToken:
+      type: object
+      properties:
+        fcmToken:
+          type: string
+          example: "654wad1284awd6584685"
+    Unread:
+      type: object
+      properties:
+        unreadNotificationsCount:
+          type: integer
+          example: 5
+        unreadMessagesCount:
+          type: integer
+          example: 5
+        total:
+          type: integer
+          example: 10
   securitySchemes:
     cookie_auth:
       type: apiKey
