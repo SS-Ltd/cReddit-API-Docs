@@ -3722,11 +3722,11 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Notification
-  /message/compose:
+  /message:
     post:
       tags:
         - message
-      summary: Create a message
+      summary: Create an email like message to a user or to the moderators of a certain subreddit
       security:
         - cookie_auth: []
       description: Create message.
@@ -3742,12 +3742,223 @@ paths:
           description: Message has been sent successfully
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/MessageSent"
+        "400":
+          description: "Error sending message"
+          content:
+            application/json:
               example:
-                Message: Message has been sent successfully
+                message: Error sending message
+        "404":
+          description: "Receiver not found"
+          content:
+            application/json:
+              example:
+                message: Receiver not found
+      x-swagger-router-controller: Message
+    get:
+      tags:
+        - message
+      summary: Get all messages
+      security:
+        - cookie_auth: []
+      description: Retrieve all messages from or to the user excluding post replies and mentions
+      operationId: getMessages
+      responses:
+        "200":
+          description: All Messsages retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inbox"
+        "400":
+          description: Error getting messages
+          content:
+            application/json:
+              example:
+                message: Error getting messages
+        "404":
+          description: "No messages found"
+          content:
+            application/json:
+              example:
+                message: No messages found
+      x-swagger-router-controller: Message
+  /message/inbox:
+    get:
+      tags:
+        - message
+      summary: Get messsages to the user including post replies and mentions
+      security:
+        - cookie_auth: []
+      description: Retrieve user messages to display
+      operationId: getInbox
+      responses:
+        "200":
+          description: User Messsages retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inbox"
+        "400":
+          description: Error getting messages
+          content:
+            application/json:
+              example:
+                message: Error getting messages
+        "404":
+          description: "No messages found"
+          content:
+            application/json:
+              example:
+                message: No messages found
+      x-swagger-router-controller: Message
+  /message/sent:
+    get:
+      tags:
+        - message
+      summary: Get messsages from the user excluding post replies and mentions
+      security:
+        - cookie_auth: []
+      description: Retrieve user messages to display
+      operationId: getSentMessages
+      responses:
+        "200":
+          description: User Messages retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inbox"
+        "400":
+          description: Error getting messages
+          content:
+            application/json:
+              example:
+                message: Error getting messages
+        "404":
+          description: "No messages found"
+          content:
+            application/json:
+              example:
+                message: No messages found
+      x-swagger-router-controller: Message
+  /message/post-replies:
+    get:
+      tags:
+        - message
+      summary: Get post replies to the user
+      security:
+        - cookie_auth: []
+      description: Retrieve user messages to display
+      operationId: getPostReplies
+      responses:
+        "200":
+          description: User Messages retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inbox"
+        "400":
+          description: Error getting messages
+          content:
+            application/json:
+              example:
+                message: Error getting messages
+        "404":
+          description: "No messages found"
+          content:
+            application/json:
+              example:
+                message: No messages found
+      x-swagger-router-controller: Message
+  /message/username-mentions:
+    get:
+      tags:
+        - message
+      summary: Get mentions to the user
+      security:
+        - cookie_auth: []
+      description: Retrieve user messages to display
+      operationId: getUsernameMentions
+      responses:
+        "200":
+          description: User Messages retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inbox"
+        "400":
+          description: Error getting messages
+          content:
+            application/json:
+              example:
+                message: Error getting messages
+        "404":
+          description: "No messages found"
+          content:
+            application/json:
+              example:
+                message: No messages found
+      x-swagger-router-controller: Message
+  /message/unread:
+    get:
+      tags:
+        - message
+      summary: Get user unread messages
+      security:
+        - cookie_auth: []
+      description: Retrieve user unread messages to display
+      operationId: getUnreadMessages
+      responses:
+        "200":
+          description: User unread Messages retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inbox"
         "401":
-          description: "Unauthorized, invalid credentials"
+          description: "Unauthorized, user must be logged in"
         "500":
           description: Internal Server Error
+      x-swagger-router-controller: Message
+  /message/{messageId}/mark-as-read:
+    patch:
+      tags:
+        - message
+      summary: Mark a message as read
+      security:
+        - cookie_auth: []
+      description: Mark a message as read.
+      operationId: markAsRead
+      parameters:
+        - name: messageId
+          in: path
+          description: ID of the message to be marked as read
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Message has been marked as read successfully
+          content:
+            application/json:
+              example:
+                Message: Message has been marked as read successfully
+        "400":
+          description: Error marking message as read
+          content:
+            application/json:
+              example:
+                message: Error marking message as read
+        "404":
+          description: "Message not found"
+          content:
+            application/json:
+              example:
+                message: Message not found
       x-swagger-router-controller: Message
   /message/{messageId}:
     delete:
@@ -3773,102 +3984,15 @@ paths:
           content:
             application/json:
               example:
-                Message: Message has been sent successfully
+                message: Message deleted successfully
         "400":
-          description: Message is not found
-        "401":
-          description: "Unauthorized, invalid credentials"
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Message
-  /message/sent:
-    get:
-      tags:
-        - message
-      summary: Get user sent messages
-      security:
-        - cookie_auth: []
-      description: Retrieve user messages that he has sent to display
-      operationId: getUserSentMessages
-      responses:
-        "200":
-          description: User Sent Messsages retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Message"
-        "401":
-          description: "Unauthorized, user must be logged in"
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Message
-  /message/inbox:
-    get:
-      tags:
-        - message
-      summary: Get user messages
-      security:
-        - cookie_auth: []
-      description: Retrieve user messages to display
-      operationId: getUserMessages
-      responses:
-        "200":
-          description: User Messsages retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Inbox"
-        "401":
-          description: "Unauthorized, user must be logged in"
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Message
-  /message/unread:
-    get:
-      tags:
-        - message
-      summary: Get user unread messages
-      security:
-        - cookie_auth: []
-      description: Retrieve user unread messages to display
-      operationId: getUserUnreadMessages
-      responses:
-        "200":
-          description: User unread Messsages retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Inbox"
-        "401":
-          description: "Unauthorized, user must be logged in"
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Message
-    post:
-      tags:
-        - message
-      summary: Unread a specific message
-      description: Unread a specific message.
-      operationId: unreadMessage
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/message_unread_body"
-        required: true
-      responses:
-        "200":
-          description: Message has been unread successfully
+          description: Error deleting Message
           content:
             application/json:
               example:
-                Message: Message has been unread successfully
-        "401":
-          description: "Unauthorized, invalid credentials"
-        "500":
-          description: Internal Server Error
+                message: Error deleting Message
       x-swagger-router-controller: Message
-  /message/read-all-messages:
+  /message/mark-all-as-read:
     post:
       tags:
         - message
@@ -3876,58 +4000,20 @@ paths:
       security:
         - cookie_auth: []
       description: Read all messages.
-      operationId: messageRead_all_messagesPOST
+      operationId: markAllAsREad
       responses:
         "200":
           description: All messages have been read successfully
           content:
             application/json:
               example:
-                Message: Messages have been read successfully
+                message: All messages marked as read
         "400":
-          description: You don't have unread messages
-        "401":
-          description: "Unauthorized, invalid credentials"
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Message
-  /message/{messageId}/report:
-    post:
-      tags:
-        - message
-      summary: Report a messages
-      security:
-        - cookie_auth: []
-      description: Report a messages.
-      operationId: reportMessage
-      parameters:
-        - name: messageId
-          in: path
-          description: ID of the message to be reported
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/messageId_report_body"
-        required: true
-      responses:
-        "200":
-          description: All messages have been read successfully
+          description: Error marking messages as read
           content:
             application/json:
               example:
-                Message: Messages have been read successfully
-        "400":
-          description: You don't have unread messages
-        "401":
-          description: "Unauthorized, invalid credentials"
-        "500":
-          description: Internal Server Error
+                message: Error marking messages as read
       x-swagger-router-controller: Message
   /mod/approve-post/{postId}:
     patch:
@@ -6021,22 +6107,42 @@ components:
         subject: LIFE
         to: Silver_Flamingo
         text: Everything is gonna be great :)
+    MessageSent:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Message sent
+        messageID:
+          type: string
+          example: 661333b8f5b9ff88aa7ef5a0
     Inbox:
       type: object
       properties:
         from:
           type: string
           example: Team Backend
+        to:
+          type: string
+          example: Silver_Flamingo
         subject:
           type: string
           example: LIFE
         text:
           type: string
           example: El API sha8al :)
-      example:
-        subject: LIFE
-        from: Team Backend
-        text: El API sha8al :)
+        isRead:
+          type: boolean
+          example: true
+        isDeleted:
+          type: boolean
+          example: false
+        createdAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
+        updatedAt:
+          type: string
+          example: "2024-03-25T15:37:33.339+00:00"
     message_unread_body:
       required:
         - messageID
