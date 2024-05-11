@@ -3302,38 +3302,6 @@ paths:
         "500":
           description: Internal Server Error
       x-swagger-router-controller: Subreddit
-  /subreddit/{subredditName}/banned:
-    get:
-      tags:
-        - subreddit
-      summary: Retrieve banned users
-      security:
-        - cookie_auth: []
-      description: Retrieve banned users
-      operationId: getBanned
-      parameters:
-        - name: subredditName
-          in: path
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-      responses:
-        "200":
-          description: list of Banned Subreddits
-          content:
-            application/json:
-              example:
-                id: "1"
-                pic: pic URL
-                name: Baroudy1452
-                moderatorSince: 1/1/2001
-        "401":
-          description: No such subreddit is found
-        "500":
-          description: Internal Server Error
-      x-swagger-router-controller: Subreddit
   /subreddit/{subredditName}/posts:
     get:
       tags:
@@ -4551,6 +4519,186 @@ paths:
             application/json:
               example:
                 message: "An error occurred"
+      x-swagger-router-controller: Mod
+  /mod/ban/{subredditName}:
+    patch:
+      tags:
+        - mod
+      summary: Ban user in a community temporarily for a spcific number of days or permenantly if number of days is not specified (moderator only) 
+      security:
+        - cookie_auth: []
+      description: Ban user in community
+      operationId: banUser
+      parameters:
+        - name: subredditName
+          in: path
+          description: name of the subreddit which the user should be banned in
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: username, rule broken, moderator note, number of days to ban
+        content:
+          application/json:
+              schema:
+                $ref: "#/components/schemas/Ban"
+        required: true
+      responses:
+        "200":
+          description: User banned successfully
+          content:
+            application/json:
+              example:
+                message: User banned
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                InvalidDays:
+                  value:
+                    message: That number is not in the right range (1 to 999)
+                CommunityNotFound:
+                  value:
+                    message: Community does not exist
+                ModeratorNotFound:
+                  value:
+                    message: Moderator does not exist
+                NotModertaorOfCommunity:
+                  value:
+                    message: You are not a moderator of this community
+                UserNotFound:
+                  value:
+                    message: User does not exist
+                ModeratorBanned:
+                  value:
+                    message: You cannot ban a moderator
+        "401":
+          description: "Unauthorized, user must be logged in and a moderator"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: "An error occurred"
+      x-swagger-router-controller: Mod
+  /mod/unban/{subredditName}:
+    patch:
+      tags:
+        - mod
+      summary: unban user in community
+      security:
+        - cookie_auth: []
+      description: unban user in community
+      operationId: unbanUser
+      parameters:
+        - name: subredditName
+          in: path
+          description: name of the subreddit which the user should be unbanned in
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        description: username, rule broken, moderator note, number of days to ban
+        content:
+          application/json:
+              schema:
+                $ref: "#/components/schemas/Username"
+        required: true
+      responses:
+        "200":
+          description: User unbanned successfully
+          content:
+            application/json:
+              example:
+                message: User unbanned
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                CommunityNotFound:
+                  value:
+                    message: Community does not exist
+                ModeratorNotFound:
+                  value:
+                    message: Moderator does not exist
+                NotModertaorOfCommunity:
+                  value:
+                    message: You are not a moderator of this community
+                UserNotFound:
+                  value:
+                    message: User does not exist
+                UserAlreadyNotBanned:
+                  value:
+                    message: User is not banned
+        "401":
+          description: "Unauthorized, user must be logged in and a moderator"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              example:
+                message: "An error occurred"
+      x-swagger-router-controller: Mod
+  /mod/get-banned-users/{subredditName}:
+    get:
+      tags:
+        - mod
+      summary: Get list of banned users of a specific subreddit (moderator only)
+      security:
+        - cookie_auth: []
+      description: Retrieve banned users
+      operationId: getBannedUsers
+      parameters:
+        - name: subredditName
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: list of Banned Users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BannedUsers"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                CommunityNotFound:
+                  value:
+                    message: Community does not exist
+                ModeratorNotFound:
+                  value:
+                    message: Moderator does not exist
+                NotModertaorOfCommunity:
+                  value:
+                    message: You are not a moderator of this community
+        "401":
+          description: "Unauthorized, user must be logged in and a moderator"
+          content:
+            application/json:
+              example:
+                message: Unauthorized
+        "500":
+          description: Internal Server Error
       x-swagger-router-controller: Mod
   /chat:
     post:
@@ -6366,6 +6514,41 @@ components:
         username:
           type: string
           example: theUser
+    BannedUsers:
+      type: object
+      properties:
+        bannedUsers:
+          type: array
+          items:
+            type: object
+            properties:
+              username:
+                type: string
+                example: theUser
+              profilePicture:
+                type: string
+                example: drive.creddit.com/user_pfpe
+              reasonToBan:
+                type: string
+                example: rule 1
+              modNote:
+                type: string
+                example: This user is a spammer
+    Ban:
+      type: object
+      properties:
+        username:
+          type: string
+          example: theUser
+        reason:
+          type: string
+          example: rule 1
+        modNote:
+          type: string
+          example: This user is a spammer
+        days:
+          type: integer
+          example: 7
   securitySchemes:
     cookie_auth:
       type: apiKey
