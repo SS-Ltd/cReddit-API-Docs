@@ -987,7 +987,7 @@ paths:
             application/json:
               example:
                 message: An error occurred while generating the username
-  0/user/{username}/posts:
+  /user/{username}/posts:
     get:
       tags:
         - user
