@@ -4354,11 +4354,11 @@ paths:
           schema:
             type: string
       requestBody:
-        description: username of user to be approved
+        description: username to be approved
         content:
           application/json:
-            example:
-              username: "SlaxSplash"
+            schema:
+              $ref: "#/components/schemas/Username"
         required: true
       responses:
         "200":
@@ -4419,11 +4419,11 @@ paths:
           schema:
             type: string
       requestBody:
-        description: username of user to be unapproved
+        description: username to be unapproved
         content:
           application/json:
-            example:
-              username: "SlaxSplash"
+            schema:
+              $ref: "#/components/schemas/Username"
         required: true
       responses:
         "200":
